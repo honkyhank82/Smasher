@@ -1,0 +1,25 @@
+﻿# General
+.DS_Store
+Thumbs.db
+*.log
+node_modules/
+.env
+.env.*
+
+# Flutter
+app/build/
+app/.dart_tool/
+app/.packages
+app/ios/
+app/android/app/release/
+app/coverage/
+
+# Server
+server/dist/
+server/node_modules/
+server/.cache/
+
+# IDE
+.vscode/
+.idea/
+*.iml

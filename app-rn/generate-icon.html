@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMASHER Icon Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: #1a1a1a;
+            color: white;
+            padding: 20px;
+        }
+        .container {
+            text-align: center;
+        }
+        canvas {
+            border: 2px solid #444;
+            margin: 20px 0;
+            display: block;
+        }
+        button {
+            background: #ff0000;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 10px;
+        }
+        button:hover {
+            background: #cc0000;
+        }
+        .info {
+            margin: 20px 0;
+            padding: 15px;
+            background: #2a2a2a;
+            border-radius: 5px;
+            max-width: 600px;
+        }
+        h1 {
+            color: #ff0000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SMASHER Icon Generator</h1>
+        
+        <div class="info">
+            <h3>App Icon (1024x1024)</h3>
+            <p>Black background with red "S" in Curlz MT font, outlined in silver</p>
+        </div>
+        
+        <canvas id="icon" width="1024" height="1024"></canvas>
+        <button onclick="downloadIcon()">Download icon.png</button>
+        
+        <div class="info">
+            <h3>Adaptive Icon (1024x1024)</h3>
+            <p>For Android - foreground layer</p>
+        </div>
+        
+        <canvas id="adaptiveIcon" width="1024" height="1024"></canvas>
+        <button onclick="downloadAdaptiveIcon()">Download adaptive-icon.png</button>
+        
+        <div class="info">
+            <h3>Instructions</h3>
+            <ol style="text-align: left;">
+                <li>Click the download buttons to save both icons</li>
+                <li>Replace the files in the <code>assets</code> folder</li>
+                <li>The icons are ready for Expo build</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        function drawIcon(canvas, isAdaptive = false) {
+            const ctx = canvas.getContext('2d');
+            const size = 1024;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, size, size);
+            
+            // Black background
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, size, size);
+            
+            // Draw the "S"
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // Try to use Curlz MT, fallback to cursive fonts
+            ctx.font = 'bold 700px "Curlz MT", "Brush Script MT", cursive';
+            
+            // Silver outline (multiple layers for thickness)
+            const outlineWidth = 12;
+            ctx.strokeStyle = '#C0C0C0'; // Silver
+            ctx.lineWidth = outlineWidth;
+            ctx.lineJoin = 'round';
+            ctx.miterLimit = 2;
+            
+            // Draw multiple outline layers for better effect
+            for (let i = 0; i < 3; i++) {
+                ctx.strokeText('S', size / 2, size / 2 + 30);
+            }
+            
+            // Red fill
+            ctx.fillStyle = '#FF0000';
+            ctx.fillText('S', size / 2, size / 2 + 30);
+            
+            // Add subtle highlight for depth
+            const gradient = ctx.createLinearGradient(0, 0, 0, size);
+            gradient.addColorStop(0, 'rgba(255, 100, 100, 0.3)');
+            gradient.addColorStop(1, 'rgba(139, 0, 0, 0.3)');
+            ctx.fillStyle = gradient;
+            ctx.fillText('S', size / 2, size / 2 + 30);
+        }
+        
+        function downloadIcon() {
+            const canvas = document.getElementById('icon');
+            const link = document.createElement('a');
+            link.download = 'icon.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        function downloadAdaptiveIcon() {
+            const canvas = document.getElementById('adaptiveIcon');
+            const link = document.createElement('a');
+            link.download = 'adaptive-icon.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        // Draw both icons on page load
+        window.onload = function() {
+            drawIcon(document.getElementById('icon'), false);
+            drawIcon(document.getElementById('adaptiveIcon'), true);
+        };
+    </script>
+</body>
+</html>
