@@ -152,7 +152,8 @@ export const GalleryScreen = ({ navigation }: any) => {
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: type === 'photo' ? ImagePicker.MediaTypeOptions.Images : ImagePicker.MediaTypeOptions.Videos,
-      allowsEditing: false, // We'll use our custom editor
+      allowsEditing: type === 'photo',
+      aspect: type === 'photo' ? [4, 3] : undefined,
       quality: 0.8,
       videoMaxDuration: 60, // Limit video to 60 seconds
       base64: false,
@@ -162,18 +163,7 @@ export const GalleryScreen = ({ navigation }: any) => {
     if (result.assets && result.assets[0]) {
       const asset = result.assets[0];
       if (asset.uri && asset.fileName && asset.type) {
-        // For photos, navigate to editor first
-        if (type === 'photo') {
-          navigation.navigate('PhotoEditor', {
-            imageUri: asset.uri,
-            onSave: (editedUri: string) => {
-              uploadPhoto(editedUri, asset.fileName!, asset.type!, type);
-            },
-          });
-          return;
-        }
-        
-        // For videos, upload directly
+        // Upload directly
         uploadPhoto(asset.uri, asset.fileName, asset.type, type);
       }
     }

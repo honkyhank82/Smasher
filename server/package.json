@@ -23,6 +23,7 @@
     "migration:create": "npm run typeorm -- migration:create",
     "migration:run": "npm run typeorm -- migration:run -d src/data-source.ts",
     "migration:revert": "npm run typeorm -- migration:revert -d src/data-source.ts",
+    "seed": "ts-node src/scripts/seed-test-data.ts",
     "deploy": "npm run build && fly deploy",
     "deploy:prod": "NODE_ENV=production npm run build && fly deploy"
   },

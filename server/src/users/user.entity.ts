@@ -18,28 +18,28 @@ export class User {
   @Column({ default: false, name: 'is_verified' })
   isVerified!: boolean;
 
-  @Column({ name: 'age_consent_at', nullable: true })
+  @Column({ type: 'timestamp', name: 'age_consent_at', nullable: true })
   ageConsentAt!: Date | null;
 
-  @Column({ name: 'tos_consent_at', nullable: true })
+  @Column({ type: 'timestamp', name: 'tos_consent_at', nullable: true })
   tosConsentAt!: Date | null;
 
   @Column({ default: false, name: 'is_premium' })
   isPremium!: boolean;
 
-  @Column({ name: 'premium_expires_at', nullable: true })
+  @Column({ type: 'timestamp', name: 'premium_expires_at', nullable: true })
   premiumExpiresAt!: Date | null;
 
   @Column({ name: 'account_status', default: 'active' })
   accountStatus!: 'active' | 'deactivated' | 'deleted';
 
-  @Column({ name: 'deactivated_at', nullable: true })
+  @Column({ type: 'timestamp', name: 'deactivated_at', nullable: true })
   deactivatedAt!: Date | null;
 
-  @Column({ name: 'deleted_at', nullable: true })
+  @Column({ type: 'timestamp', name: 'deleted_at', nullable: true })
   deletedAt!: Date | null;
 
-  @Column({ name: 'deletion_scheduled_at', nullable: true })
+  @Column({ type: 'timestamp', name: 'deletion_scheduled_at', nullable: true })
   deletionScheduledAt!: Date | null;
 
   @CreateDateColumn({ name: 'created_at' })
