@@ -11,6 +11,7 @@ import { ProfileViewScreen } from '../screens/ProfileViewScreen';
 import { ChatScreen } from '../screens/ChatScreen';
 import { EditProfileScreen } from '../screens/EditProfileScreen';
 import { GalleryScreen } from '../screens/GalleryScreen';
+import { PhotoEditorScreen } from '../screens/PhotoEditorScreen';
 import { ProfileViewersScreen } from '../screens/ProfileViewersScreen';
 import { ChangeEmailScreen } from '../screens/ChangeEmailScreen';
 import { PrivacySettingsScreen } from '../screens/PrivacySettingsScreen';
@@ -124,6 +125,7 @@ export const AppNavigator = () => {
         <Stack.Screen name="Main" component={MainTabs} />
         <Stack.Screen name="EditProfile" component={EditProfileScreen} />
         <Stack.Screen name="Gallery" component={GalleryScreen} />
+        <Stack.Screen name="PhotoEditor" component={PhotoEditorScreen} />
         <Stack.Screen name="Profile" component={ProfileViewScreen} />
         <Stack.Screen name="ProfileViewers" component={ProfileViewersScreen} />
         <Stack.Screen name="Chat" component={ChatScreen} />

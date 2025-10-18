@@ -2,7 +2,7 @@
   "expo": {
     "name": "SMASHER",
     "slug": "smasher-app",
-    "version": "1.0.2",
+    "version": "1.0.4",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -14,7 +14,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.smasher.app",
-      "buildNumber": "3",
+      "buildNumber": "5",
       "infoPlist": {
         "NSCameraUsageDescription": "Smasher needs access to your camera to take profile photos",
         "NSPhotoLibraryUsageDescription": "Smasher needs access to your photo library to upload photos",
@@ -29,7 +29,7 @@
         "backgroundColor": "#000000"
       },
       "package": "com.smasher.app",
-      "versionCode": 3,
+      "versionCode": 5,
       "permissions": [
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",
@@ -46,7 +46,7 @@
     "updates": {
       "url": "https://u.expo.dev/edef8952-a01b-408f-abeb-e3922973df75"
     },
-    "runtimeVersion": "1.0.2",
+    "runtimeVersion": "1.0.3",
     "extra": {
       "eas": {
         "projectId": "edef8952-a01b-408f-abeb-e3922973df75"

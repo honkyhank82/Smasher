@@ -86,6 +86,58 @@ export const GalleryScreen = ({ navigation }: any) => {
     }
   };
 
+  const uploadPhoto = async (uri: string, fileName: string, fileType: string, mediaType: 'photo' | 'video') => {
+    setLoading(true);
+    try {
+      console.log('=== UPLOAD START ===');
+      console.log('File:', fileName);
+      console.log('Type:', fileType);
+      console.log('URI:', uri);
+      
+      // Read file as base64
+      const fileResponse = await fetch(uri);
+      const blob = await fileResponse.blob();
+      const reader = new FileReader();
+      
+      const base64Data = await new Promise<string>((resolve, reject) => {
+        reader.onloadend = () => {
+          const result = reader.result as string;
+          const base64 = result.split(',')[1];
+          resolve(base64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+      
+      console.log('File converted to base64, uploading...');
+      
+      // Upload through backend
+      const uploadResponse = await api.post('/media/upload', {
+        fileName,
+        fileType,
+        mediaType,
+        fileData: base64Data,
+      });
+
+      console.log('✓ Upload successful');
+      console.log('Media ID:', uploadResponse.data.id);
+      console.log('=== UPLOAD COMPLETE ===');
+
+      // Add to local state
+      setMedia([...media, { 
+        id: uploadResponse.data.id,
+        uri: uploadResponse.data.url, 
+        type: mediaType 
+      }]);
+      Alert.alert('Success', `${mediaType === 'photo' ? 'Photo' : 'Video'} added to gallery`);
+    } catch (error: any) {
+      console.error('❌ UPLOAD FAILED ❌', error);
+      Alert.alert('Upload Error', error.message || 'Failed to upload media');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleAddMedia = async (type: 'photo' | 'video', retryCount: number = 0) => {
     if (media.length >= 6) {
       Alert.alert('Limit Reached', 'You can upload up to 6 photos/videos');
@@ -100,9 +152,8 @@ export const GalleryScreen = ({ navigation }: any) => {
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: type === 'photo' ? ImagePicker.MediaTypeOptions.Images : ImagePicker.MediaTypeOptions.Videos,
-      allowsEditing: type === 'photo',
-      aspect: type === 'photo' ? [4, 3] : undefined,
-      quality: 0.6, // Compressed to reduce file size
+      allowsEditing: false, // We'll use our custom editor
+      quality: 0.8,
       videoMaxDuration: 60, // Limit video to 60 seconds
       base64: false,
       exif: false,
@@ -111,160 +162,23 @@ export const GalleryScreen = ({ navigation }: any) => {
     if (result.assets && result.assets[0]) {
       const asset = result.assets[0];
       if (asset.uri && asset.fileName && asset.type) {
-        setLoading(true);
-        try {
-          console.log('=== UPLOAD START ===');
-          console.log('File:', asset.fileName);
-          console.log('Type:', asset.type);
-          console.log('URI:', asset.uri);
-          console.log('File size:', asset.fileSize);
-          
-          // Step 1: Get signed upload URL
-          console.log('Step 1: Requesting signed URL from server...');
-          const signedUrlResponse = await api.post('/media/signed-upload', {
-            fileName: asset.fileName,
-            fileType: asset.type,
-            mediaType: type,
+        // For photos, navigate to editor first
+        if (type === 'photo') {
+          navigation.navigate('PhotoEditor', {
+            imageUri: asset.uri,
+            onSave: (editedUri: string) => {
+              uploadPhoto(editedUri, asset.fileName!, asset.type!, type);
+            },
           });
-
-          console.log('✓ Got upload endpoint');
-
-          // Step 2: Upload file through backend proxy (avoids Android network issues)
-          console.log('Step 2: Uploading file...');
-          
-          // Read file as base64
-          const fileResponse = await fetch(asset.uri);
-          const blob = await fileResponse.blob();
-          const reader = new FileReader();
-          
-          const base64Data = await new Promise<string>((resolve, reject) => {
-            reader.onloadend = () => {
-              const result = reader.result as string;
-              // Remove data URL prefix
-              const base64 = result.split(',')[1];
-              resolve(base64);
-            };
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
-          });
-          
-          console.log('File converted to base64, uploading...');
-          
-          // Upload through backend
-          const uploadResponse = await api.post('/media/upload', {
-            fileName: asset.fileName,
-            fileType: asset.type,
-            mediaType: type,
-            fileData: base64Data,
-          });
-
-          console.log('✓ Upload successful');
-          const confirmResponse = uploadResponse;
-
-          console.log('✓ Upload confirmed, media record created');
-          console.log('Media ID:', confirmResponse.data.id);
-          console.log('=== UPLOAD COMPLETE ===');
-
-          // Add to local state
-          setMedia([...media, { 
-            id: confirmResponse.data.id,
-            uri: confirmResponse.data.url, 
-            type: type 
-          }]);
-          Alert.alert('Success', `${type === 'photo' ? 'Photo' : 'Video'} added to gallery`);
-        } catch (error: any) {
-          console.error('❌ UPLOAD FAILED ❌');
-          console.error('Error:', error);
-          console.error('Error name:', error.name);
-          console.error('Error message:', error.message);
-          console.error('Error stack:', error.stack);
-          console.error('Error details:', {
-            message: error.message,
-            response: error.response?.data,
-            status: error.response?.status,
-            name: error.name,
-            code: error.code,
-          });
-          
-          let errorMessage = `Failed to upload ${type}`;
-          let shouldRetry = false;
-          let errorDetails = '';
-          
-          // Determine which step failed
-          if (error.message?.includes('Failed to prepare file')) {
-            errorDetails = 'Failed at: Step 2 (File conversion)';
-          } else if (error.message?.includes('Upload failed with status')) {
-            errorDetails = 'Failed at: Step 3 (R2 upload)';
-          } else if (error.response?.config?.url?.includes('signed-upload')) {
-            errorDetails = 'Failed at: Step 1 (Get signed URL)';
-          } else if (error.response?.config?.url?.includes('confirm-upload')) {
-            errorDetails = 'Failed at: Step 4 (Confirm upload)';
-          }
-          
-          // Handle specific error cases
-          if (error.message?.includes('Network request failed')) {
-            errorMessage = 'Network connection failed. Please check your internet connection and try again.';
-            shouldRetry = retryCount < 2;
-            if (!errorDetails) errorDetails = 'Network connectivity issue';
-          } else if (error.message?.includes('timeout') || error.message?.includes('Upload timeout')) {
-            errorMessage = 'Upload timed out. The file may be too large or your connection is slow. Try a smaller image.';
-            shouldRetry = retryCount < 1;
-            if (!errorDetails) errorDetails = 'Upload timeout (60s limit exceeded)';
-          } else if (error.response?.status === 403) {
-            errorMessage = 'Upload permission denied. This may be a server configuration issue.';
-            errorDetails = 'HTTP 403 - Check R2 credentials and CORS settings';
-          } else if (error.response?.status === 401) {
-            errorMessage = 'Authentication failed. Please log in again.';
-            errorDetails = 'HTTP 401 - Token expired or invalid';
-          } else if (error.response?.status === 500) {
-            errorMessage = 'Server error occurred. Please try again later.';
-            errorDetails = 'HTTP 500 - Server internal error';
-          } else if (error.response?.data?.message) {
-            errorMessage = error.response.data.message;
-          } else if (error.message) {
-            errorMessage = error.message;
-          }
-          
-          // Show detailed error in development
-          if (__DEV__) {
-            errorMessage += `\n\n${errorDetails}\n\nDebug Info:\n${JSON.stringify({
-              message: error.message,
-              response: error.response?.data,
-              status: error.response?.status,
-              code: error.code,
-            }, null, 2)}`;
-          }
-          
-          console.log('Error summary:', errorDetails);
-          console.log('User message:', errorMessage);
-          console.log('Retry available:', shouldRetry);
-          
-          // Offer retry for network errors
-          if (shouldRetry) {
-            Alert.alert(
-              'Upload Failed',
-              `${errorMessage}\n\nWould you like to retry?`,
-              [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                  text: 'Retry',
-                  onPress: () => {
-                    console.log(`🔄 Retrying upload (attempt ${retryCount + 2})...`);
-                    // Re-trigger the image picker with the same type
-                    handleAddMedia(type, retryCount + 1);
-                  },
-                },
-              ]
-            );
-          } else {
-            Alert.alert('Upload Error', errorMessage);
-          }
-        } finally {
-          setLoading(false);
+          return;
         }
+        
+        // For videos, upload directly
+        uploadPhoto(asset.uri, asset.fileName, asset.type, type);
       }
     }
   };
+
 
   const handleDeleteMedia = (index: number) => {
     const item = media[index];

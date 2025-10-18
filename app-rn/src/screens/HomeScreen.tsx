@@ -154,14 +154,8 @@ export const HomeScreen = ({ navigation }: any) => {
         )}
       </View>
       <View style={styles.userInfo}>
-        <View style={styles.nameRow}>
-          <Text style={styles.userName}>{item.displayName}, {item.age}</Text>
-          {item.isOnline && (
-            <Text style={styles.onlineText}>• Online</Text>
-          )}
-        </View>
-        <Text style={styles.userDistance}>{item.distance} miles away</Text>
-        {item.bio && <Text style={styles.userBio} numberOfLines={2}>{item.bio}</Text>}
+        <Text style={styles.userName} numberOfLines={1}>{item.displayName}, {item.age}</Text>
+        <Text style={styles.userDistance} numberOfLines={1}>{item.distance} mi</Text>
       </View>
     </TouchableOpacity>
   );
@@ -184,7 +178,9 @@ export const HomeScreen = ({ navigation }: any) => {
         data={users}
         renderItem={renderUser}
         keyExtractor={(item) => item.id}
+        numColumns={4}
         contentContainerStyle={styles.list}
+        columnWrapperStyle={styles.row}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>No users nearby</Text>
@@ -224,65 +220,55 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
   },
   list: {
-    padding: theme.spacing.md,
+    padding: theme.spacing.sm,
+  },
+  row: {
+    justifyContent: 'space-between',
   },
   userCard: {
-    flexDirection: 'row',
+    flex: 1,
     backgroundColor: theme.colors.surface,
     borderRadius: theme.borderRadius.md,
-    padding: theme.spacing.md,
-    marginBottom: theme.spacing.md,
+    padding: theme.spacing.xs,
+    margin: theme.spacing.xs,
     borderWidth: 1,
     borderColor: theme.colors.border,
+    maxWidth: '23%',
   },
   imageContainer: {
     position: 'relative',
+    width: '100%',
+    aspectRatio: 3/4,
+    marginBottom: theme.spacing.xs,
   },
   userImage: {
-    width: 80,
-    height: 80,
+    width: '100%',
+    height: '100%',
     borderRadius: theme.borderRadius.md,
     backgroundColor: theme.colors.border,
   },
   onlineIndicator: {
     position: 'absolute',
-    bottom: 4,
-    right: 4,
-    width: 16,
-    height: 16,
-    borderRadius: 8,
+    top: 8,
+    right: 8,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
     backgroundColor: '#4CAF50',
     borderWidth: 2,
     borderColor: theme.colors.surface,
   },
   userInfo: {
-    flex: 1,
-    marginLeft: theme.spacing.md,
-    justifyContent: 'center',
-  },
-  nameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: theme.spacing.xs,
+    width: '100%',
   },
   userName: {
-    fontSize: theme.fontSize.md,
+    fontSize: theme.fontSize.xs,
     fontWeight: 'bold',
     color: theme.colors.text,
-  },
-  onlineText: {
-    fontSize: theme.fontSize.xs,
-    color: '#4CAF50',
-    marginLeft: theme.spacing.xs,
-    fontWeight: '600',
+    marginBottom: 1,
   },
   userDistance: {
-    fontSize: theme.fontSize.sm,
-    color: theme.colors.textSecondary,
-    marginBottom: theme.spacing.xs,
-  },
-  userBio: {
-    fontSize: theme.fontSize.sm,
+    fontSize: 10,
     color: theme.colors.textSecondary,
   },
   emptyContainer: {
