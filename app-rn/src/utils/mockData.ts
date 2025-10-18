@@ -1,7 +1,7 @@
 // Mock data for testing when backend is unavailable
 // Set USE_MOCK_DATA to true in development to test UI without backend
 
-export const USE_MOCK_DATA = true; // Set to true to enable mock data, false to use real backend
+export const USE_MOCK_DATA = false; // Set to true to enable mock data, false to use real backend
 
 export const MOCK_NEARBY_USERS = [
   {
