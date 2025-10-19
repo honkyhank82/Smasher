@@ -107,7 +107,14 @@ export const HomeScreen = ({ navigation }: any) => {
       
       const response = await api.get('/geo/nearby');
       console.log('✅ Nearby users loaded:', response.data.length, 'users');
-      setUsers(response.data);
+      
+      // Filter to show only male profiles
+      const maleUsers = response.data.filter((user: any) => 
+        user.gender === 'male' || user.gender === 'man' || user.gender === 'Male'
+      );
+      console.log('🚹 Filtered to male users:', maleUsers.length, 'users');
+      
+      setUsers(maleUsers);
     } catch (error: any) {
       console.error('❌ Failed to load nearby users:', {
         message: error.message,
