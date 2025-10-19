@@ -211,6 +211,17 @@ export const ProfileViewScreen = ({ route, navigation }: ProfileViewScreenProps)
             <Text style={styles.primaryButtonText}>Message</Text>
           </TouchableOpacity>
 
+          <TouchableOpacity 
+            style={styles.shareLocationButton} 
+            onPress={() => navigation.navigate('LocationShare', {
+              userId: profile.id,
+              userName: profile.displayName
+            })}
+          >
+            <Text style={styles.shareLocationIcon}>📍</Text>
+            <Text style={styles.shareLocationText}>Share Location</Text>
+          </TouchableOpacity>
+
           <View style={styles.secondaryActions}>
             <TouchableOpacity style={styles.secondaryButton} onPress={handleBlock}>
               <Text style={styles.secondaryButtonText}>Block</Text>
@@ -327,6 +338,26 @@ const styles = StyleSheet.create({
   },
   primaryButtonText: {
     color: theme.colors.text,
+    fontSize: theme.fontSize.md,
+    fontWeight: 'bold',
+  },
+  shareLocationButton: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.borderRadius.md,
+    padding: theme.spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: theme.spacing.md,
+    borderWidth: 1,
+    borderColor: theme.colors.primary,
+  },
+  shareLocationIcon: {
+    fontSize: 20,
+    marginRight: theme.spacing.xs,
+  },
+  shareLocationText: {
+    color: theme.colors.primary,
     fontSize: theme.fontSize.md,
     fontWeight: 'bold',
   },
