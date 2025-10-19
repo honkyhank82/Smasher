@@ -18,9 +18,10 @@ function App() {
         try {
           const update = await Updates.checkForUpdateAsync();
           if (update.isAvailable) {
+            // Download update in background
             await Updates.fetchUpdateAsync();
-            // Reload the app to apply the update
-            await Updates.reloadAsync();
+            // Update will be applied on next app restart
+            console.log('✅ Update downloaded, will apply on next restart');
           }
         } catch (error) {
           console.log('Error checking for updates:', error);
