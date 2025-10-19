@@ -18,6 +18,8 @@ import { BlockedUsersScreen } from '../screens/BlockedUsersScreen';
 import { TermsOfServiceScreen } from '../screens/TermsOfServiceScreen';
 import { PrivacyPolicyScreen } from '../screens/PrivacyPolicyScreen';
 import { HelpSupportScreen } from '../screens/HelpSupportScreen';
+import { LocationShareScreen } from '../screens/LocationShareScreen';
+import { SharedLocationMapScreen } from '../screens/SharedLocationMapScreen';
 import { MainTabs } from './MainTabs';
 import { ActivityIndicator, View, StyleSheet, Text } from 'react-native';
 import { theme } from '../config/theme';
@@ -133,6 +135,8 @@ export const AppNavigator = () => {
         <Stack.Screen name="TermsOfService" component={TermsOfServiceScreen} />
         <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
         <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
+        <Stack.Screen name="LocationShare" component={LocationShareScreen} />
+        <Stack.Screen name="SharedLocationMap" component={SharedLocationMapScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

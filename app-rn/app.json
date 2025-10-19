@@ -56,7 +56,7 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Allow SMASHER to use your location to show nearby users."
+          "locationAlwaysAndWhenInUsePermission": "Allow SMASHER to use your location to show nearby users and share your location."
         }
       ],
       [
