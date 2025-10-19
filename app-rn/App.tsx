@@ -6,6 +6,7 @@ import * as SystemUI from 'expo-system-ui';
 import { AuthProvider } from './src/context/AuthContext';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
+import './src/config/i18n'; // Initialize i18n
 
 function App() {
   useEffect(() => {

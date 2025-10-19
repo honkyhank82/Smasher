@@ -1,0 +1,51 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "retry": "Reintentar",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "send": "Enviar"
+  },
+  "home": {
+    "title": "SMASHER",
+    "noUsers": "No hay usuarios cerca",
+    "checkLocation": "Verifica tu configuración de ubicación o intenta más tarde"
+  },
+  "profile": {
+    "age": "{{age}} años",
+    "distance": "{{distance}} mi de distancia",
+    "online": "En línea",
+    "offline": "Desconectado",
+    "bio": "Biografía",
+    "gallery": "Galería",
+    "message": "Mensaje",
+    "block": "Bloquear",
+    "report": "Reportar"
+  },
+  "chat": {
+    "typeMessage": "Escribe un mensaje...",
+    "noMessages": "No hay mensajes aún",
+    "startConversation": "¡Inicia una conversación!"
+  },
+  "settings": {
+    "title": "Configuración",
+    "profile": "Editar Perfil",
+    "privacy": "Privacidad",
+    "notifications": "Notificaciones",
+    "blocked": "Usuarios Bloqueados",
+    "logout": "Cerrar Sesión"
+  },
+  "auth": {
+    "welcome": "Bienvenido a SMASHER",
+    "login": "Iniciar Sesión",
+    "register": "Registrarse",
+    "email": "Correo Electrónico",
+    "password": "Contraseña",
+    "displayName": "Nombre de Usuario",
+    "age": "Edad",
+    "forgotPassword": "¿Olvidaste tu contraseña?"
+  }
+}
