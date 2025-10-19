@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../config/api';
+import NotificationService from '../services/NotificationService';
 
 interface User {
   id: string;
@@ -100,6 +101,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.log('👤 User with hasProfile:', userWithProfile);
       setUser(userWithProfile);
       console.log('✅ Login complete, user state updated');
+      
+      // Register for push notifications
+      await NotificationService.registerForPushNotifications();
     } catch (error: any) {
       console.error('🚫 Login failed:', error);
       console.error('🚫 Error response:', error.response?.data);
@@ -110,6 +114,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = async () => {
+    // Remove push token from backend
+    await NotificationService.removePushToken();
+    
     await AsyncStorage.removeItem('authToken');
     setUser(null);
     console.log(`🚪➡️ ${user?.email || 'User'} bounced`);

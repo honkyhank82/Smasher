@@ -6,6 +6,7 @@ import { AppConfigModule } from './config/config.module';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ScheduleModule } from '@nestjs/schedule';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { ProfilesModule } from './profiles/profiles.module';
@@ -18,6 +19,8 @@ import { BuddiesModule } from './buddies/buddies.module';
 import { BlocksModule } from './blocks/blocks.module';
 import { EmailModule } from './email/email.module';
 import { ProfileViewsModule } from './profile-views/profile-views.module';
+import { LocationShareModule } from './location-share/location-share.module';
+import { NotificationModule } from './notifications/notification.module';
 
 @Module({
   imports: [
@@ -52,6 +55,7 @@ import { ProfileViewsModule } from './profile-views/profile-views.module';
         limit: 60,
       },
     ]),
+    ScheduleModule.forRoot(),
     AppConfigModule,
     UsersModule,
     AuthModule,
@@ -65,6 +69,8 @@ import { ProfileViewsModule } from './profile-views/profile-views.module';
     BlocksModule,
     EmailModule,
     ProfileViewsModule,
+    LocationShareModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [

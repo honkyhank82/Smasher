@@ -204,4 +204,12 @@ export class UsersService {
 
     // TODO: Send verification email
   }
+
+  async savePushToken(userId: string, pushToken: string): Promise<void> {
+    await this.users.update({ id: userId }, { pushToken });
+  }
+
+  async removePushToken(userId: string): Promise<void> {
+    await this.users.update({ id: userId }, { pushToken: null });
+  }
 }

@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Patch, Body, Param, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Put, Delete, Body, Param, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { UsersService } from './users.service';
 import { CurrentUser } from '../auth/current-user.decorator';
@@ -111,5 +111,24 @@ export class UsersController {
   ) {
     await this.usersService.changeEmail(user.userId, body.newEmail, body.password);
     return { message: 'Email change requested. Please verify your new email address.' };
+  }
+
+  @Put('push-token')
+  @UseGuards(AuthGuard('jwt'))
+  @HttpCode(HttpStatus.OK)
+  async savePushToken(
+    @CurrentUser() user: { userId: string },
+    @Body() body: { pushToken: string },
+  ) {
+    await this.usersService.savePushToken(user.userId, body.pushToken);
+    return { message: 'Push token saved successfully' };
+  }
+
+  @Delete('push-token')
+  @UseGuards(AuthGuard('jwt'))
+  @HttpCode(HttpStatus.OK)
+  async removePushToken(@CurrentUser() user: { userId: string }) {
+    await this.usersService.removePushToken(user.userId);
+    return { message: 'Push token removed successfully' };
   }
 }

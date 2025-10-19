@@ -42,6 +42,9 @@ export class User {
   @Column({ type: 'timestamp', name: 'deletion_scheduled_at', nullable: true })
   deletionScheduledAt!: Date | null;
 
+  @Column({ type: 'varchar', length: 255, nullable: true, name: 'push_token' })
+  pushToken!: string | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
