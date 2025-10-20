@@ -1,0 +1,2 @@
+# Exclude old app directory - only app-rn should be built
+app/

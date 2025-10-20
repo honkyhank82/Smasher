@@ -40,9 +40,18 @@ export class GeoService {
       if (!currentUser) return [];
       const userLat = currentUser.lat;
       const userLng = currentUser.lng;
+      
+      // If current user doesn't have location, return empty
+      if (userLat === null || userLng === null) {
+        console.log('Current user has no location set');
+        return [];
+      }
+      
       const nearbyUsers = await this.profileRepository
         .createQueryBuilder('profile')
         .where('profile.userId != :userId', { userId })
+        .andWhere('profile.lat IS NOT NULL')
+        .andWhere('profile.lng IS NOT NULL')
         .addSelect(
           `(
             3959 * acos(

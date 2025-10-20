@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { theme } from '../config/theme';
 import { useAuth } from '../context/AuthContext';
@@ -32,6 +33,7 @@ export const ChatsListScreen = ({ navigation }: any) => {
   const { user } = useAuth();
   const [chats, setChats] = useState<Chat[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     loadChats();
@@ -70,7 +72,13 @@ export const ChatsListScreen = ({ navigation }: any) => {
       setChats([]);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  };
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    loadChats();
   };
 
   const handleChatPress = (chat: Chat) => {
@@ -158,6 +166,13 @@ export const ChatsListScreen = ({ navigation }: any) => {
         renderItem={renderChat}
         keyExtractor={(item) => item.id}
         contentContainerStyle={chats.length === 0 ? styles.emptyContainer : undefined}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={theme.colors.primary}
+          />
+        }
         ListEmptyComponent={
           <View style={styles.empty}>
             <Text style={styles.emptyIcon}>💬</Text>

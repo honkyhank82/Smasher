@@ -9,6 +9,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
+import * as Updates from 'expo-updates';
 import { theme } from '../config/theme';
 import { useAuth } from '../context/AuthContext';
 import api from '../config/api';
@@ -104,6 +105,50 @@ export const SettingsScreen = ({ navigation }: any) => {
     );
   };
 
+  const handleCheckForUpdates = async () => {
+    if (__DEV__) {
+      Alert.alert('Development Mode', 'Updates are disabled in development mode');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      console.log('🔍 Manually checking for updates...');
+      const update = await Updates.checkForUpdateAsync();
+      
+      if (update.isAvailable) {
+        Alert.alert(
+          'Update Available',
+          'A new version is available. Download and install now?',
+          [
+            { text: 'Later', style: 'cancel' },
+            {
+              text: 'Update Now',
+              onPress: async () => {
+                try {
+                  console.log('📥 Downloading update...');
+                  await Updates.fetchUpdateAsync();
+                  console.log('✅ Update downloaded, reloading...');
+                  await Updates.reloadAsync();
+                } catch (error) {
+                  console.error('Update error:', error);
+                  Alert.alert('Update Failed', 'Failed to download update. Please try again.');
+                }
+              },
+            },
+          ]
+        );
+      } else {
+        Alert.alert('Up to Date', 'You are running the latest version!');
+      }
+    } catch (error: any) {
+      console.error('Check for updates error:', error);
+      Alert.alert('Error', `Failed to check for updates: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -173,6 +218,27 @@ export const SettingsScreen = ({ navigation }: any) => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>About</Text>
         
+        <TouchableOpacity 
+          style={styles.menuItem}
+          onPress={() => navigateToScreen('UpdateDebug')}
+        >
+          <Text style={styles.menuItemText}>Update Debug Info</Text>
+          <Text style={styles.menuItemArrow}>→</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.menuItem}
+          onPress={handleCheckForUpdates}
+          disabled={loading}
+        >
+          <Text style={styles.menuItemText}>Check for Updates</Text>
+          {loading ? (
+            <ActivityIndicator size="small" color={theme.colors.primary} />
+          ) : (
+            <Text style={styles.menuItemArrow}>→</Text>
+          )}
+        </TouchableOpacity>
+
         <TouchableOpacity 
           style={styles.menuItem}
           onPress={() => navigateToScreen('TermsOfService')}

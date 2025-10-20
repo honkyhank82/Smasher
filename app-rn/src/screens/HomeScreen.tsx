@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  RefreshControl,
 } from 'react-native';
 import { theme } from '../config/theme';
 import { useAuth } from '../context/AuthContext';
@@ -28,6 +29,7 @@ interface NearbyUser {
 export const HomeScreen = ({ navigation }: any) => {
   const [users, setUsers] = useState<NearbyUser[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const { user, logout } = useAuth();
 
   useEffect(() => {
@@ -108,13 +110,7 @@ export const HomeScreen = ({ navigation }: any) => {
       const response = await api.get('/geo/nearby');
       console.log('✅ Nearby users loaded:', response.data.length, 'users');
       
-      // Filter to show only male profiles
-      const maleUsers = response.data.filter((user: any) => 
-        user.gender === 'male' || user.gender === 'man' || user.gender === 'Male'
-      );
-      console.log('🚹 Filtered to male users:', maleUsers.length, 'users');
-      
-      setUsers(maleUsers);
+      setUsers(response.data);
     } catch (error: any) {
       console.error('❌ Failed to load nearby users:', {
         message: error.message,
@@ -122,17 +118,26 @@ export const HomeScreen = ({ navigation }: any) => {
         data: error.response?.data,
         url: error.config?.url,
       });
-      Alert.alert(
-        'Unable to Load Nearby Users',
-        `Error: ${error.response?.data?.message || error.message || 'Network error'}\n\nPlease check your internet connection and try again.`,
-        [
-          { text: 'Retry', onPress: () => loadNearbyUsers() },
-          { text: 'Cancel', style: 'cancel' },
-        ]
-      );
+      // Don't show alert on refresh, only on initial load
+      if (!refreshing) {
+        Alert.alert(
+          'Unable to Load Nearby Users',
+          `Error: ${error.response?.data?.message || error.message || 'Network error'}\n\nPlease check your internet connection and try again.`,
+          [
+            { text: 'Retry', onPress: () => loadNearbyUsers() },
+            { text: 'Cancel', style: 'cancel' },
+          ]
+        );
+      }
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  };
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    loadNearbyUsers();
   };
 
   const handleUserPress = (userId: string) => {
@@ -188,6 +193,13 @@ export const HomeScreen = ({ navigation }: any) => {
         numColumns={4}
         contentContainerStyle={styles.list}
         columnWrapperStyle={styles.row}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={theme.colors.primary}
+          />
+        }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>No users nearby</Text>

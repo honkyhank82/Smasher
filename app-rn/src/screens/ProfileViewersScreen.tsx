@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  RefreshControl,
 } from 'react-native';
 import { theme } from '../config/theme';
 import api from '../config/api';
@@ -34,6 +35,7 @@ interface ViewersData {
 export const ProfileViewersScreen = ({ navigation }: ProfileViewersScreenProps) => {
   const [data, setData] = useState<ViewersData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     loadViewers();
@@ -44,10 +46,19 @@ export const ProfileViewersScreen = ({ navigation }: ProfileViewersScreenProps) 
       const response = await api.get('/profile-views/viewers');
       setData(response.data);
     } catch (error) {
-      Alert.alert('Error', 'Failed to load profile viewers');
+      // Don't show alert on refresh, only on initial load
+      if (!refreshing) {
+        Alert.alert('Error', 'Failed to load profile viewers');
+      }
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  };
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    loadViewers();
   };
 
   const handleViewerPress = (viewer: Viewer) => {
@@ -163,6 +174,13 @@ export const ProfileViewersScreen = ({ navigation }: ProfileViewersScreenProps) 
             keyExtractor={(item, index) => `${item.id}-${index}`}
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={handleRefresh}
+                tintColor={theme.colors.primary}
+              />
+            }
           />
         </>
       ) : (

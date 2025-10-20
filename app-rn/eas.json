@@ -1,7 +1,6 @@
 {
   "cli": {
-    "version": ">= 5.9.0",
-    "appVersionSource": "remote"
+    "version": ">= 5.9.0"
   },
   "build": {
     "development": {
@@ -52,7 +51,7 @@
     "production": {
       "android": {
         "serviceAccountKeyPath": "./google-play-service-account.json",
-        "track": "internal",
+        "track": "alpha",
         "releaseStatus": "draft"
       }
     }

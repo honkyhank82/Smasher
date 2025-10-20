@@ -73,3 +73,6 @@ node_modules/.cache
 coverage
 .expo
 .expo-shared
+
+# Exclude parent app directory (not part of app-rn)
+../app

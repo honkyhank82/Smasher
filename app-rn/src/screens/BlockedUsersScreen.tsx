@@ -8,6 +8,7 @@ import {
   Alert,
   ActivityIndicator,
   Image,
+  RefreshControl,
 } from 'react-native';
 import { theme } from '../config/theme';
 import api from '../config/api';
@@ -24,6 +25,7 @@ export const BlockedUsersScreen = ({ navigation }: any) => {
   const [loading, setLoading] = useState(true);
   const [blockedUsers, setBlockedUsers] = useState<BlockedUser[]>([]);
   const [unblocking, setUnblocking] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     loadBlockedUsers();
@@ -51,14 +53,23 @@ export const BlockedUsersScreen = ({ navigation }: any) => {
         status: error.response?.status,
         data: error.response?.data,
       });
-      Alert.alert(
-        'Error Loading Blocked Users',
-        `Failed to load blocked users: ${error.response?.data?.message || error.message}`,
-        [{ text: 'OK' }]
-      );
+      // Don't show alert on refresh, only on initial load
+      if (!refreshing) {
+        Alert.alert(
+          'Error Loading Blocked Users',
+          `Failed to load blocked users: ${error.response?.data?.message || error.message}`,
+          [{ text: 'OK' }]
+        );
+      }
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  };
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    loadBlockedUsers();
   };
 
   const handleUnblock = (userId: string, displayName: string) => {
@@ -152,6 +163,13 @@ export const BlockedUsersScreen = ({ navigation }: any) => {
           renderItem={renderBlockedUser}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContent}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              tintColor={theme.colors.primary}
+            />
+          }
         />
       )}
     </View>

@@ -20,6 +20,7 @@ import { PrivacyPolicyScreen } from '../screens/PrivacyPolicyScreen';
 import { HelpSupportScreen } from '../screens/HelpSupportScreen';
 import { LocationShareScreen } from '../screens/LocationShareScreen';
 import { SharedLocationMapScreen } from '../screens/SharedLocationMapScreen';
+import { UpdateDebugScreen } from '../screens/UpdateDebugScreen';
 import { MainTabs } from './MainTabs';
 import { ActivityIndicator, View, StyleSheet, Text } from 'react-native';
 import { theme } from '../config/theme';
@@ -132,6 +133,7 @@ export const AppNavigator = () => {
         <Stack.Screen name="ChangeEmail" component={ChangeEmailScreen} />
         <Stack.Screen name="PrivacySettings" component={PrivacySettingsScreen} />
         <Stack.Screen name="BlockedUsers" component={BlockedUsersScreen} />
+        <Stack.Screen name="UpdateDebug" component={UpdateDebugScreen} />
         <Stack.Screen name="TermsOfService" component={TermsOfServiceScreen} />
         <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
         <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
