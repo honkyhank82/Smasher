@@ -95,8 +95,8 @@ SMASHER is a **location-based social app** that helps you:
 
 1. **Click this link on your phone:** [Download SMASHER](https://github.com/honkyhank82/smasher-app/releases/latest)
 
-   > **By downloading Smasher, you agree to the [License & Terms of Use](#-license--terms-of-use) above.**
-   > 
+   > **By downloading Smasher, you agree to the [License & Terms of Use](#license--terms-of-use) above.**
+
 2. **Tap the APK file** (it will say something like `SMASHER-v1.0.12.apk`)
 
 3. **Wait for it to download** (about 100MB - may take 1-2 minutes)
@@ -155,7 +155,7 @@ SMASHER is a **location-based social app** that helps you:
 
 ### **Home Screen** (Finding People)
 
-- **Swipe through profiles** of people near you
+- **Swipe through profiles**** of people near you
 - **Tap a profile** to see more photos and info
 - **Tap the chat icon** to send a message
 - **Use the filter icon** to change your distance range
@@ -238,155 +238,4 @@ SMASHER is a **location-based social app** that helps you:
 2. **Wait 2-3 minutes** (sometimes delayed)
 3. **Make sure you typed your email correctly**
 4. **Tap "Resend code"** in the app
-5. **Try a different email** (Gmail works best)
-
-### **Problem: App crashes or won't open**
-
-**Solution:**
-1. **Restart your phone**
-2. **Clear the app cache:**
-   - Settings → Apps → SMASHER → Storage → Clear Cache
-3. **Reinstall the app:**
-   - Uninstall SMASHER
-   - Download and install again
-4. **Update your Android** if possible
-
-### **Problem: Can't see people nearby**
-
-**Solution:**
-1. **Make sure Location is enabled:**
-   - Settings → Location → Turn ON
-2. **Give SMASHER location permission:**
-   - Settings → Apps → SMASHER → Permissions → Location → Allow
-3. **Make sure you have internet connection**
-4. **Try increasing your distance filter** (in app settings)
-
-### **Problem: Messages not sending**
-
-**Solution:**
-1. **Check your internet connection**
-2. **Close and reopen the app**
-3. **Make sure the other person didn't block you**
-4. **Try sending a different message**
-
----
-
-## 🔒 Privacy & Safety
-
-### **Your Data is Protected**
-
-- ✅ Your **exact location is never shared** - only approximate distance
-- ✅ Your **messages are private** - we don't read them
-- ✅ Your **email is never shown** to other users
-- ✅ Your **photos are stored securely**
-- ✅ You can **delete your account** and all data anytime
-
-### **Stay Safe**
-
-**DO:**
-- ✅ Meet in public places for first dates
-- ✅ Tell a friend where you're going
-- ✅ Trust your instincts
-- ✅ Block anyone who makes you uncomfortable
-- ✅ Report inappropriate behavior
-
-**DON'T:**
-- ❌ Share your home address
-- ❌ Share financial information
-- ❌ Send money to people you haven't met
-- ❌ Share passwords or personal details
-- ❌ Meet in private locations for first dates
-
-### **Reporting & Blocking**
-
-**To block someone:**
-1. Open their profile
-2. Tap the **three dots** (⋮) in the top right
-3. Tap **"Block User"**
-4. They won't be able to message you anymore
-
-**To report someone:**
-1. Open their profile
-2. Tap the **three dots** (⋮) in the top right
-3. Tap **"Report User"**
-4. Select a reason (harassment, fake profile, inappropriate content, etc.)
-5. We'll review and take action within 24 hours
-
----
-
-## 💰 Is SMASHER Free?
-
-**YES!** SMASHER is **100% free** to download and use.
-
-### **Free Features:**
-- ✅ Create profile
-- ✅ Upload 5 photos
-- ✅ Unlimited messages
-- ✅ Find people within 15 miles
-- ✅ See first 2 profile viewers
-- ✅ Share location
-- ✅ Get notifications
-
-### **Premium Features** (Optional - $9.99/month):
-- ⭐ Upload 6 photos (free: 5 photos)
-- ⭐ See ALL profile viewers (free: first 2 only, rest blurred)
-- ⭐ Extended range (interact beyond 15 miles)
-- ⭐ Advanced search filters
-- ⭐ Profile boost (10x more visibility)
-- ⭐ No ads
-- ⭐ Read receipts
-- ⭐ Priority support
-
-**Payment:** Secure billing through Stripe. Cancel anytime from Settings.
-
-**You don't need Premium to use the app!** All core features are free forever.
-
----
-
-## 📸 Screenshots
-
-### Home Screen
-*See people nearby and swipe through profiles*
-
-### Chat Screen
-*Send messages, photos, and share your location*
-
-### Profile Screen
-*Your profile with photos and bio*
-
-### Settings Screen
-*Control your privacy and preferences*
-
----
-
-## ❓ Frequently Asked Questions
-
-### **Q: Is SMASHER really free?**
-**A:** Yes! Download, create account, and use all basic features for free. Premium is optional.
-
-### **Q: Do I need to be on a dating app to use this?**
-**A:** No! SMASHER is standalone. You don't need Tinder, Bumble, or any other app.
-
-### **Q: Can people see my exact location?**
-**A:** No. People only see approximate distance (e.g., "5 miles away"). You can share your exact location in chat if you choose to.
-
-### **Q: What if I don't want to be found?**
-**A:** You can turn on "Invisible Mode" in Settings. You'll still see others, but they won't see you.
-
-### **Q: Can I use this on iPhone?**
-**A:** Not yet, but iOS version is coming soon! For now, Android only.
-
-### **Q: How do I delete my account?**
-**A:** Settings → Account → Delete Account. All your data will be permanently removed.
-
-### **Q: What if someone is harassing me?**
-**A:** Block them immediately (tap their profile → ⋮ → Block). Then report them (⋮ → Report).
-
-### **Q: Why do you need my location?**
-**A:** To show you people nearby. That's the whole point of the app! We never share your exact location.
-
-### **Q: Can I use this without location?**
-**A:** No, location is required. The app is designed to help you meet people near you.
-
-### **Q: Is my data sold to advertisers?**
-**A:** No. We don't sell
+5. **Try a different email** (G
