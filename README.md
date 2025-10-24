@@ -1,6 +1,6 @@
 ---
 
-## ⚖️ License & Terms of Use
+## License & Terms of Use
 
 **Smasher** is **proprietary software** developed by **HonkyHankInc**.  
 © 2025 HonkyHankInc. All rights reserved.
@@ -28,26 +28,26 @@ HonkyHankInc reserves the right to pursue legal remedies.
 
 ### Contact
 For licensing, partnerships, or inquiries:  
-📧 **smashermain@gmail.com**  
+**smashermain@gmail.com**  
 
 ---
 ![Proprietary License](https://img.shields.io/badge/license-Proprietary-red?style=flat-square)
 
-# 🔥 SMASHER - Meet Local Gay Men
+# SMASHER - Meet Local Gay Men
 
 **A free app to meet, chat, and connect with gay men around you.**
 
 ---
 
-## 🤔 What is SMASHER?
+## What is SMASHER?
 
 SMASHER is a **location-based social app** that helps you:
 
-- 📍 **Find other gay men near you** - See who's within 5 to 100 miles
-- 💬 **Chat instantly** - Send messages in real-time
-- 📸 **Share photos** - Upload up to 6 photos to your profile
-- 🗺️ **Share your location** - Let someone know where you are
-- 🔔 **Get notifications** - Never miss a message
+- **Find other gay men near you** - See who's within 5 to 100 miles
+- **Chat instantly** - Send messages in real-time
+- **Share photos** - Upload up to 6 photos to your profile
+- **Share your location** - Let someone know where you are
+- **Get notifications** - Never miss a message
 
 **Think of it like:** Tinder + WhatsApp + Location Sharing, all in one app.
 
@@ -55,7 +55,7 @@ SMASHER is a **location-based social app** that helps you:
 
 ---
 
-## ✨ What Can You Do With SMASHER?
+## What Can You Do With SMASHER?
 
 ### 1. **Create Your Profile**
 - Add your name, age, and bio
@@ -87,7 +87,7 @@ SMASHER is a **location-based social app** that helps you:
 
 ---
 
-## 📱 How to Download & Install
+## How to Download & Install
 
 ### **For Android Users:**
 
@@ -95,7 +95,7 @@ SMASHER is a **location-based social app** that helps you:
 
 1. **Click this link on your phone:** [Download SMASHER](https://github.com/honkyhank82/smasher-app/releases/latest)
 
-   > **By downloading Smasher, you agree to the [License & Terms of Use](#license--terms-of-use) above.**
+   **By downloading Smasher, you agree to the [License & Terms of Use](#license--terms-of-use) above.**
 
 2. **Tap the APK file** (it will say something like `SMASHER-v1.0.12.apk`)
 
@@ -109,7 +109,7 @@ SMASHER is a **location-based social app** that helps you:
 2. **Tap the SMASHER file** you just downloaded
 
 3. **You might see a warning** that says:
-   - ⚠️ "For your security, your phone is not allowed to install unknown apps"
+   - "For your security, your phone is not allowed to install unknown apps"
    - **This is normal!** The app is safe, it's just not from the Google Play Store yet.
 
 4. **Tap "Settings"** on that warning
@@ -142,20 +142,20 @@ SMASHER is a **location-based social app** that helps you:
    - Add at least 1 photo
 
 5. **Allow permissions** when asked:
-   - ✅ **Location** - So we can show you people nearby
-   - ✅ **Camera** - So you can take profile photos
-   - ✅ **Photos** - So you can upload photos
-   - ✅ **Notifications** - So you get message alerts
+   - **Location** - So we can show you people nearby
+   - **Camera** - So you can take profile photos
+   - **Photos** - So you can upload photos
+   - **Notifications** - So you get message alerts
 
-6. **Start meeting people!** 🎉
+6. **Start meeting people!** 
 
 ---
 
-## 🎯 How to Use SMASHER
+## How to Use SMASHER
 
 ### **Home Screen** (Finding People)
 
-- **Swipe through profiles**** of people near you
+- **Swipe through profiles** of people near you
 - **Tap a profile** to see more photos and info
 - **Tap the chat icon** to send a message
 - **Use the filter icon** to change your distance range
@@ -184,24 +184,24 @@ SMASHER is a **location-based social app** that helps you:
 
 ---
 
-## ⚠️ Requirements
+## Requirements
 
 **To use SMASHER, you need:**
 
-- ✅ **Android phone** with Android 8.0 or newer
-- ✅ **At least 100MB** of free storage space
-- ✅ **Internet connection** (WiFi or mobile data)
-- ✅ **Be 18 years or older**
-- ✅ **Valid email address**
+- **Android phone** with Android 8.0 or newer
+- **At least 100MB** of free storage space
+- **Internet connection** (WiFi or mobile data)
+- **Be 18 years or older**
+- **Valid email address**
 
 **Not supported yet:**
-- ❌ iPhone/iOS (coming soon!)
-- ❌ Tablets (works but not optimized)
-- ❌ Computers/laptops
+- iPhone/iOS (coming soon!)
+- Tablets (works but not optimized)
+- Computers/laptops
 
 ---
 
-## 🆘 Troubleshooting
+## Troubleshooting
 
 ### **Problem: "Install blocked" or "Can't install app"**
 
@@ -236,6 +236,3 @@ SMASHER is a **location-based social app** that helps you:
 **Solution:**
 1. **Check your spam/junk folder**
 2. **Wait 2-3 minutes** (sometimes delayed)
-3. **Make sure you typed your email correctly**
-4. **Tap "Resend code"** in the app
-5. **Try a different email** (G
