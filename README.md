@@ -84,7 +84,7 @@ Who is it for?  18+ Gay men looking to meet other men to date, or make connectio
 
 #### Step 1: Download the App
 
-1. Click this link on your phone: [Download SMASHER](https://github.com/honkyhank82/smasher-app/releases/latest)
+1. Click this link on your phone: [Download SMASHER](https://github.com/honkyhank82/Smasher/releases/tag/v1.0.12)
 
    By downloading Smasher, you agree to the License & Terms of Use above.
 
@@ -396,7 +396,7 @@ A: Yes! Cancel anytime, no questions asked. You'll keep Premium until the end of
 
 ### Download SMASHER now:
 
-[DOWNLOAD FOR ANDROID](https://github.com/honkyhank82/smasher-app/releases/latest)
+[DOWNLOAD FOR ANDROID](https://github.com/honkyhank82/Smasher/releases/tag/v1.0.12)
 
 File size: ~100MB | Android 8.0+ required | 100% Free
 
@@ -445,7 +445,7 @@ Safety: We have zero tolerance for harassment, fake profiles, or illegal activit
 
 Download SMASHER today and start meeting people nearby!
 
-[DOWNLOAD NOW](https://github.com/honkyhank82/smasher-app/releases/latest)
+[DOWNLOAD NOW](https://github.com/honkyhank82/Smasher/releases/tag/v1.0.12).
 
 Questions? Email smashermain@gmail.com
 
