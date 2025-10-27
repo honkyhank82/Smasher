@@ -3,8 +3,8 @@ services:
     name: smasher-api
     env: docker
     dockerfilePath: ./Dockerfile
-    repo: https://github.com/yourusername/smasher
-    branch: main
+    repo: https://github.com/honkyhank82/Smasher
+    branch: master
     
     envVars:
       - key: NODE_ENV
