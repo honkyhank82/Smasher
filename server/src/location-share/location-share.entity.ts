@@ -34,14 +34,14 @@ export class LocationShare {
   @Column({ type: 'decimal', precision: 11, scale: 8 })
   longitude: number;
 
-  @Column({ type: 'datetime' })
+  @Column({ type: 'timestamp' })
   @Index()
   expiresAt: Date;
 
-  @CreateDateColumn({ type: 'datetime' })
+  @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
-  @UpdateDateColumn({ type: 'datetime' })
+  @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 
   @Column({ type: 'boolean', default: true })

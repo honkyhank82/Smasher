@@ -36,6 +36,6 @@ export class Notification {
   @Index()
   read: boolean;
 
-  @CreateDateColumn({ type: 'datetime' })
+  @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 }
