@@ -2,8 +2,7 @@ services:
   - type: web
     name: smasher-api
     env: docker
-    dockerfilePath: ./Dockerfile
-    rootDir: server
+    dockerfilePath: ./server/Dockerfile
     repo: https://github.com/honkyhank82/Smasher
     branch: master
     
@@ -32,8 +31,8 @@ services:
         value: https://r2.smasher.app
     
     healthCheckPath: /health
-    buildCommand: npm ci && npm run build
-    startCommand: npm run start:prod
+    buildCommand: cd server && npm ci && npm run build
+    startCommand: cd server && npm run start:prod
     
     domains:
       - smasher-production.up.railway.app

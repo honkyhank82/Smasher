@@ -23,3 +23,10 @@ server/.cache/
 .vscode/
 .idea/
 *.iml
+
+# Build artifacts
+*.apk
+*.aab
+*.app
+dist/
+build/
