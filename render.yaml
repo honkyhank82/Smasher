@@ -1,0 +1,56 @@
+services:
+  - type: web
+    name: smasher-api
+    env: docker
+    dockerfilePath: ./Dockerfile
+    rootDir: server
+    repo: https://github.com/honkyhank82/Smasher
+    branch: master
+    
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: DATABASE_URL
+        scope: shared_db_connection_string
+      - key: JWT_SECRET
+        fromSecret: jwt_secret
+      - key: RESEND_API_KEY
+        fromSecret: resend_api_key
+      - key: FROM_EMAIL
+        value: noreply@smasher.app
+      - key: R2_ACCOUNT_ID
+        fromSecret: r2_account_id
+      - key: R2_ACCESS_KEY_ID
+        fromSecret: r2_access_key_id
+      - key: R2_SECRET_ACCESS_KEY
+        fromSecret: r2_secret_access_key
+      - key: R2_BUCKET_NAME
+        value: smasher-media
+      - key: R2_PUBLIC_URL
+        value: https://r2.smasher.app
+    
+    healthCheckPath: /health
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start:prod
+    
+    domains:
+      - smasher-production.up.railway.app
+    
+    resources:
+      cpu: 500m
+      memory: 512MB
+      disk: 1GB
+    
+    autoDeploy: true
+    
+    volumes:
+      - name: smasher_data
+        mountPath: /data
+
+databases:
+  - name: smasher-db
+    databaseName: smasher
+    plan: standard
+    postgresVersion: "14"
