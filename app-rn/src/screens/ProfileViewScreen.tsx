@@ -11,7 +11,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { theme } from '../config/theme';
-import api from '../config/api';
+import api from '../services/api';
 
 const { width } = Dimensions.get('window');
 

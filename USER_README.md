@@ -283,19 +283,24 @@ SMASHER is a **location-based social app** that helps you:
 
 ### **Free Features:**
 - ✅ Create profile
-- ✅ Upload photos
-- ✅ Find people nearby
-- ✅ Send messages
+- ✅ Upload 5 photos
+- ✅ Unlimited messages
+- ✅ Find people within 15 miles
+- ✅ See first 2 profile viewers
 - ✅ Share location
 - ✅ Get notifications
 
 ### **Premium Features** (Optional - $9.99/month):
-- ⭐ See who viewed your profile
-- ⭐ Unlimited messages
+- ⭐ Upload 6 photos (free: 5 photos)
+- ⭐ See ALL profile viewers (free: first 2 only, rest blurred)
+- ⭐ Extended range (interact beyond 15 miles)
 - ⭐ Advanced search filters
+- ⭐ Profile boost (10x more visibility)
 - ⭐ No ads
-- ⭐ Profile boost (more visibility)
+- ⭐ Read receipts
 - ⭐ Priority support
+
+**Payment:** Secure billing through Stripe. Cancel anytime from Settings.
 
 **You don't need Premium to use the app!** All core features are free forever.
 

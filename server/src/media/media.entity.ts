@@ -20,10 +20,10 @@ export class Media {
   @Column({ name: 'content_type', type: 'varchar', length: 64 })
   contentType!: string;
 
-  @Column({ name: 'is_nsfw', default: false })
+  @Column({ type: 'boolean', name: 'is_nsfw', default: false })
   isNsfw!: boolean;
 
-  @Column({ name: 'is_profile_picture', default: false })
+  @Column({ type: 'boolean', name: 'is_profile_picture', default: false })
   isProfilePicture!: boolean;
 
   @CreateDateColumn({ name: 'created_at' })

@@ -12,10 +12,12 @@ import {
 import * as Updates from 'expo-updates';
 import { theme } from '../config/theme';
 import { useAuth } from '../context/AuthContext';
-import api from '../config/api';
+import { usePremium } from '../contexts/PremiumContext';
+import api from '../services/api';
 
 export const SettingsScreen = ({ navigation }: any) => {
   const { logout } = useAuth();
+  const { isPremium, subscriptionStatus } = usePremium();
   const [notificationsEnabled, setNotificationsEnabled] = React.useState(true);
   const [locationEnabled, setLocationEnabled] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
@@ -188,6 +190,39 @@ export const SettingsScreen = ({ navigation }: any) => {
       </View>
 
       <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Premium</Text>
+        
+        {isPremium ? (
+          <TouchableOpacity 
+            style={[styles.menuItem, styles.premiumMenuItem]}
+            onPress={() => navigateToScreen('ManageSubscription')}
+          >
+            <View>
+              <Text style={[styles.menuItemText, styles.premiumText]}>✨ Premium Active</Text>
+              <Text style={styles.premiumSubtext}>
+                {subscriptionStatus?.subscription?.cancelAtPeriodEnd 
+                  ? 'Expires: ' + new Date(subscriptionStatus.subscription.currentPeriodEnd).toLocaleDateString()
+                  : 'Renews: ' + new Date(subscriptionStatus?.subscription?.currentPeriodEnd || '').toLocaleDateString()
+                }
+              </Text>
+            </View>
+            <Text style={styles.menuItemArrow}>→</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity 
+            style={[styles.menuItem, styles.upgradeMenuItem]}
+            onPress={() => navigateToScreen('PremiumUpgrade')}
+          >
+            <View>
+              <Text style={[styles.menuItemText, styles.upgradeText]}>✨ Upgrade to Premium</Text>
+              <Text style={styles.upgradeSubtext}>Extended range, see all viewers & more - $9.99/month</Text>
+            </View>
+            <Text style={styles.menuItemArrow}>→</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
+      <View style={styles.section}>
         <Text style={styles.sectionTitle}>Account</Text>
         
         <TouchableOpacity 
@@ -195,6 +230,14 @@ export const SettingsScreen = ({ navigation }: any) => {
           onPress={() => navigateToScreen('ChangeEmail')}
         >
           <Text style={styles.menuItemText}>Change Email</Text>
+          <Text style={styles.menuItemArrow}>→</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.menuItem}
+          onPress={() => navigateToScreen('BackendService')}
+        >
+          <Text style={styles.menuItemText}>Backend Services</Text>
           <Text style={styles.menuItemArrow}>→</Text>
         </TouchableOpacity>
 
@@ -438,5 +481,33 @@ const styles = StyleSheet.create({
     color: '#ff4444',
     fontSize: theme.fontSize.md,
     fontWeight: 'bold',
+  },
+  premiumMenuItem: {
+    backgroundColor: '#1a1a1a',
+    borderColor: '#8B0000',
+    borderWidth: 2,
+  },
+  premiumText: {
+    color: '#8B0000',
+    fontWeight: 'bold',
+  },
+  premiumSubtext: {
+    fontSize: theme.fontSize.xs,
+    color: '#999',
+    marginTop: 4,
+  },
+  upgradeMenuItem: {
+    backgroundColor: '#2a1a1a',
+    borderColor: '#8B0000',
+    borderWidth: 2,
+  },
+  upgradeText: {
+    color: '#8B0000',
+    fontWeight: 'bold',
+  },
+  upgradeSubtext: {
+    fontSize: theme.fontSize.xs,
+    color: '#ccc',
+    marginTop: 4,
   },
 });

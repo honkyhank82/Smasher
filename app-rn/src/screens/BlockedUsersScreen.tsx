@@ -11,7 +11,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { theme } from '../config/theme';
-import api from '../config/api';
+import api from '../services/api';
 import { USE_MOCK_DATA, MOCK_BLOCKED_USERS } from '../utils/mockData';
 
 interface BlockedUser {

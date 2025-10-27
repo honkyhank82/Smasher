@@ -96,8 +96,8 @@ export class ProfileViewsService {
           }
         }
 
-        // For free users, blur viewers after the first 3
-        const isBlurred = !isPremium && index >= 3;
+        // For free users, blur viewers after the first 2
+        const isBlurred = !isPremium && index >= 2;
 
         return {
           id: view.viewerId,

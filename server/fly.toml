@@ -11,14 +11,15 @@ primary_region = 'iad'
 [env]
   NODE_ENV = 'production'
   PORT = '3001'
+  DATABASE_URL = 'postgres://smasher_api:1Nw31O7O9O5rZZc@smasher-db.flycast:5432/smasher_api?sslmode=disable'
 
 [http_service]
   internal_port = 3001
   force_https = true
-  auto_stop_machines = 'stop'
+  auto_stop_machines = false
   auto_start_machines = true
   min_machines_running = 1
-  processes = ['app']
+  # Removed deprecated processes field
 
   [[http_service.checks]]
     interval = '30s'
@@ -27,25 +28,9 @@ primary_region = 'iad'
     method = 'GET'
     path = '/health'
 
-[[services]]
-  protocol = 'tcp'
-  internal_port = 3001
-
-  [[services.ports]]
-    port = 80
-    handlers = ['http']
-    force_https = true
-
-  [[services.ports]]
-    port = 443
-    handlers = ['tls', 'http']
-
-  [services.concurrency]
-    type = 'connections'
-    hard_limit = 25
-    soft_limit = 20
+# Removed legacy [[services]] block to avoid conflicts with http_service
 
 [[vm]]
   cpu_kind = 'shared'
   cpus = 1
-  memory_mb = 256
+  memory_mb = 512

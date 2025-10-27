@@ -13,7 +13,7 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import { theme } from '../config/theme';
 import { useAuth } from '../context/AuthContext';
-import api from '../config/api';
+import api from '../services/api';
 
 interface CreateProfileScreenProps {
   navigation: any;

@@ -6,6 +6,7 @@ import { ChatService } from './chat.service';
 import { ChatController } from './chat.controller';
 import { Message } from './message.entity';
 import { User } from '../users/user.entity';
+import { GeoModule } from '../geo/geo.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { User } from '../users/user.entity';
       secret: process.env.JWT_SECRET || 'your-secret-key',
       signOptions: { expiresIn: '7d' },
     }),
+    GeoModule,
   ],
   controllers: [ChatController],
   providers: [ChatGateway, ChatService],

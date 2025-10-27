@@ -24,10 +24,10 @@ export class Message {
   @Column({ type: 'text' })
   content!: string;
 
-  @Column({ default: false, name: 'is_read' })
+  @Column({ type: 'boolean', default: false, name: 'is_read' })
   isRead!: boolean;
 
-  @Column({ type: 'timestamp', name: 'read_at', nullable: true })
+  @Column({ type: 'datetime', name: 'read_at', nullable: true })
   readAt!: Date | null;
 
   @CreateDateColumn({ name: 'created_at' })

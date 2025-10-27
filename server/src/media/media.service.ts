@@ -1,5 +1,4 @@
 import { Injectable, Logger, ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -17,16 +16,15 @@ export class MediaService {
   private readonly publicBaseUrl?: string;
 
   constructor(
-    private readonly config: ConfigService,
     @InjectRepository(Media) private readonly mediaRepo: Repository<Media>,
     @InjectRepository(User) private readonly userRepo: Repository<User>,
   ) {
-    const endpoint = this.config.get<string>('S3_ENDPOINT');
-    const region = this.config.get<string>('S3_REGION') ?? 'auto';
-    const accessKeyId = this.config.get<string>('S3_ACCESS_KEY_ID');
-    const secretAccessKey = this.config.get<string>('S3_SECRET_ACCESS_KEY');
-    this.bucket = this.config.get<string>('S3_BUCKET') ?? 'smasher-media';
-    this.publicBaseUrl = this.config.get<string>('PUBLIC_MEDIA_BASE_URL') ?? undefined;
+    const endpoint = process.env.S3_ENDPOINT;
+    const region = process.env.S3_REGION ?? 'auto';
+    const accessKeyId = process.env.S3_ACCESS_KEY_ID;
+    const secretAccessKey = process.env.S3_SECRET_ACCESS_KEY;
+    this.bucket = process.env.S3_BUCKET ?? 'smasher-media';
+    this.publicBaseUrl = process.env.PUBLIC_MEDIA_BASE_URL ?? undefined;
 
     this.logger.log(`Initializing S3 client with endpoint: ${endpoint}, region: ${region}, bucket: ${this.bucket}`);
     this.logger.log(`Access Key ID: ${accessKeyId ? accessKeyId.substring(0, 8) + '...' : 'NOT SET'}`);
@@ -106,6 +104,23 @@ export class MediaService {
   async createMediaRecord(userId: string, key: string, contentType: string, mediaType: 'photo' | 'video'): Promise<{ id: string; key: string; url: string }> {
     const user = await this.userRepo.findOne({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
+
+    // Check photo limit for photos only
+    if (mediaType === 'photo') {
+      const photoCount = await this.mediaRepo.count({
+        where: { owner: { id: userId }, type: 'photo' },
+      });
+
+      const maxPhotos = user.isPremium ? 6 : 5;
+      
+      if (photoCount >= maxPhotos) {
+        throw new BadRequestException(
+          user.isPremium 
+            ? 'Maximum 6 photos allowed for Premium users' 
+            : 'Maximum 5 photos allowed. Upgrade to Premium to upload 6 photos'
+        );
+      }
+    }
 
     const media = this.mediaRepo.create({
       owner: user,

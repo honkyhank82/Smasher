@@ -8,7 +8,7 @@ import { MediaController } from './media.controller';
 import { MediaService } from './media.service';
 
 @Module({
-  imports: [ConfigModule, TypeOrmModule.forFeature([Media, User]), PassportModule],
+  imports: [TypeOrmModule.forFeature([Media, User]), PassportModule],
   controllers: [MediaController],
   providers: [MediaService],
   exports: [MediaService],

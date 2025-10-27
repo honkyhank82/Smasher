@@ -1,0 +1,108 @@
+name: Build iOS IPA (EAS Fallback)
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment (development, preview, production)'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - development
+          - preview
+          - production
+  push:
+    branches:
+      - main
+    paths:
+      - 'app-rn/**'
+      - '.github/workflows/build-ios.yml'
+
+jobs:
+  build:
+    name: Build iOS IPA
+    runs-on: macos-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: app-rn/package-lock.json
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      - name: Install CocoaPods
+        run: |
+          sudo gem install cocoapods
+
+      - name: Install dependencies
+        working-directory: app-rn
+        run: npm ci
+
+      - name: Setup Expo
+        working-directory: app-rn
+        run: |
+          npm install -g eas-cli
+          npx expo install
+
+      - name: Install iOS dependencies
+        working-directory: app-rn/ios
+        run: pod install
+
+      - name: Import certificates
+        uses: apple-actions/import-codesign-certs@v2
+        with:
+          p12-file-base64: ${{ secrets.IOS_DIST_CERT_BASE64 }}
+          p12-password: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
+
+      - name: Import provisioning profile
+        run: |
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo '${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}' | base64 -d > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
+
+      - name: Build iOS app
+        working-directory: app-rn/ios
+        run: |
+          xcodebuild -workspace SmasherApp.xcworkspace \
+            -scheme SmasherApp \
+            -configuration Release \
+            -archivePath $PWD/build/SmasherApp.xcarchive \
+            archive
+
+      - name: Export IPA
+        working-directory: app-rn/ios
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath $PWD/build/SmasherApp.xcarchive \
+            -exportOptionsPlist ExportOptions.plist \
+            -exportPath $PWD/build
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: smasher-app-${{ github.event.inputs.environment || 'production' }}.ipa
+          path: app-rn/ios/build/SmasherApp.ipa
+          retention-days: 30
+
+      - name: Create Release
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ github.run_number }}
+          name: Release v${{ github.run_number }}
+          draft: false
+          prerelease: false
+          files: |
+            app-rn/ios/build/SmasherApp.ipa
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

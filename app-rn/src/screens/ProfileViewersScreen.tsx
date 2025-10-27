@@ -11,7 +11,8 @@ import {
   RefreshControl,
 } from 'react-native';
 import { theme } from '../config/theme';
-import api from '../config/api';
+import api from '../services/api';
+import { usePremium } from '../contexts/PremiumContext';
 
 interface ProfileViewersScreenProps {
   navigation: any;
@@ -33,12 +34,20 @@ interface ViewersData {
 }
 
 export const ProfileViewersScreen = ({ navigation }: ProfileViewersScreenProps) => {
+  const { checkPremiumFeature } = usePremium();
   const [data, setData] = useState<ViewersData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    loadViewers();
+    // Check if user has premium access
+    const hasPremium = checkPremiumFeature('See Who Viewed Your Profile', true);
+    if (hasPremium) {
+      loadViewers();
+    } else {
+      // User doesn't have premium, navigate back
+      navigation.goBack();
+    }
   }, []);
 
   const loadViewers = async () => {

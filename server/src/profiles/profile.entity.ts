@@ -16,7 +16,7 @@ export class Profile {
   @Column({ type: 'text', nullable: true })
   bio!: string | null;
 
-  @Column({ name: 'is_distance_hidden', default: false })
+  @Column({ name: 'is_distance_hidden', type: 'boolean', default: false })
   isDistanceHidden!: boolean;
 
   // Optional location snapshot (we will rely on PostGIS later)

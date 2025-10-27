@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { theme } from '../config/theme';
 import { useAuth } from '../context/AuthContext';
-import api from '../config/api';
+import api from '../services/api';
 import { USE_MOCK_DATA, MOCK_NEARBY_USERS } from '../utils/mockData';
 
 interface NearbyUser {

@@ -1,5 +1,5 @@
 import * as Location from 'expo-location';
-import api from '../config/api';
+import api from './api';
 import { LocationShare, LocationShareRequest, LocationShareUpdate } from '../types/locationShare';
 
 class LocationShareService {

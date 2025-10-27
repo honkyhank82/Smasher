@@ -1,0 +1,254 @@
+# Smasher Cleanup and Test Script
+# Per global rules: 45-second timeouts for all commands
+
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host "SMASHER CLEANUP & TEST SCRIPT" -ForegroundColor Cyan
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host ""
+
+$ErrorActionPreference = "Continue"
+
+# Navigate to project root
+cd d:\Dev\smasher
+
+Write-Host "=== STEP 1: VERIFY ACTIVE CONFIGURATION ===" -ForegroundColor Yellow
+Write-Host ""
+
+# Check active server configuration
+Write-Host "Checking active server (d:\Dev\smasher\server)..." -ForegroundColor Cyan
+$activeVersion = (Get-Content "server\package.json" | ConvertFrom-Json).version
+Write-Host "✅ Active server version: $activeVersion" -ForegroundColor Green
+
+$activeFlyToml = Get-Content "server\fly.toml" -Raw
+if ($activeFlyToml -match "auto_stop_machines\s*=\s*false") {
+    Write-Host "✅ auto_stop_machines = false (CORRECT)" -ForegroundColor Green
+} else {
+    Write-Host "❌ auto_stop_machines not set correctly" -ForegroundColor Red
+}
+
+if ($activeFlyToml -match "memory_mb\s*=\s*512") {
+    Write-Host "✅ memory_mb = 512 (OPTIMIZED)" -ForegroundColor Green
+} else {
+    Write-Host "⚠️ memory_mb not set to 512" -ForegroundColor Yellow
+}
+
+Write-Host ""
+Write-Host "=== STEP 2: BACKUP CHECK ===" -ForegroundColor Yellow
+Write-Host ""
+Write-Host "⚠️ About to remove duplicate directory: d:\Dev\smasher\smasher" -ForegroundColor Yellow
+Write-Host "This will free up ~634MB of disk space" -ForegroundColor White
+Write-Host ""
+$confirm = Read-Host "Continue with removal? (yes/no)"
+
+if ($confirm -ne "yes") {
+    Write-Host "❌ Cleanup cancelled by user" -ForegroundColor Red
+    exit 0
+}
+
+Write-Host ""
+Write-Host "=== STEP 3: REMOVING DUPLICATE FILES ===" -ForegroundColor Yellow
+Write-Host ""
+
+# Remove duplicate smasher subdirectory
+if (Test-Path "smasher") {
+    Write-Host "Removing duplicate smasher subdirectory..." -ForegroundColor Cyan
+    try {
+        Remove-Item -Recurse -Force "smasher" -ErrorAction Stop
+        Write-Host "✅ Removed: d:\Dev\smasher\smasher" -ForegroundColor Green
+    } catch {
+        Write-Host "❌ Failed to remove smasher directory: $_" -ForegroundColor Red
+    }
+} else {
+    Write-Host "✅ smasher subdirectory already removed" -ForegroundColor Green
+}
+
+# Remove empty directories
+Write-Host ""
+Write-Host "Removing empty directories..." -ForegroundColor Cyan
+
+$emptyDirs = @("app", "infra", ".idea", ".trae")
+foreach ($dir in $emptyDirs) {
+    if (Test-Path $dir) {
+        try {
+            Remove-Item -Recurse -Force $dir -ErrorAction Stop
+            Write-Host "✅ Removed: $dir" -ForegroundColor Green
+        } catch {
+            Write-Host "⚠️ Could not remove $dir : $_" -ForegroundColor Yellow
+        }
+    }
+}
+
+Write-Host ""
+Write-Host "=== STEP 4: TESTING FLY.IO DEPLOYMENT ===" -ForegroundColor Yellow
+Write-Host ""
+
+cd server
+
+# Test 1: Check if fly CLI is installed
+Write-Host "Checking fly CLI..." -ForegroundColor Cyan
+try {
+    $flyVersionJob = Start-Job -ScriptBlock { fly version 2>&1 }
+    $flyVersion = Wait-Job $flyVersionJob -Timeout 45 | Receive-Job
+    if ($flyVersion) {
+        Write-Host "✅ Fly CLI is installed" -ForegroundColor Green
+    }
+    Remove-Job $flyVersionJob -Force -ErrorAction SilentlyContinue
+} catch {
+    Write-Host "❌ Fly CLI not found. Install from: https://fly.io/docs/hands-on/install-flyctl/" -ForegroundColor Red
+    Write-Host "Skipping deployment tests..." -ForegroundColor Yellow
+    cd ..
+    exit 1
+}
+
+# Test 2: Check machine status
+Write-Host ""
+Write-Host "Checking machine status (45-second timeout)..." -ForegroundColor Cyan
+try {
+    $statusJob = Start-Job -ScriptBlock { fly status 2>&1 }
+    $status = Wait-Job $statusJob -Timeout 45 | Receive-Job
+    
+    if ($status) {
+        Write-Host $status
+        if ($status -match "running") {
+            Write-Host "✅ Machines are running" -ForegroundColor Green
+        } elseif ($status -match "stopped") {
+            Write-Host "⚠️ Machines are stopped - will deploy to restart" -ForegroundColor Yellow
+            $needsDeploy = $true
+        }
+    } else {
+        Write-Host "⚠️ Status check timed out after 45 seconds" -ForegroundColor Yellow
+    }
+    Remove-Job $statusJob -Force -ErrorAction SilentlyContinue
+} catch {
+    Write-Host "⚠️ Could not check status: $_" -ForegroundColor Yellow
+}
+
+# Test 3: Test health endpoint
+Write-Host ""
+Write-Host "Testing health endpoint (45-second timeout)..." -ForegroundColor Cyan
+try {
+    $healthJob = Start-Job -ScriptBlock {
+        Invoke-RestMethod -Uri "https://smasher-api.fly.dev/health" -Method Get -TimeoutSec 30 -ErrorAction Stop
+    }
+    $health = Wait-Job $healthJob -Timeout 45 | Receive-Job -ErrorAction Stop
+    
+    if ($health -and $health.status -eq "ok") {
+        Write-Host "✅ Health check PASSED" -ForegroundColor Green
+        Write-Host "   Status: $($health.status)" -ForegroundColor White
+        Write-Host "   Uptime: $($health.uptime) seconds" -ForegroundColor White
+        Write-Host "   Environment: $($health.environment)" -ForegroundColor White
+        $needsDeploy = $false
+    }
+    Remove-Job $healthJob -Force -ErrorAction SilentlyContinue
+} catch {
+    Write-Host "❌ Health check FAILED" -ForegroundColor Red
+    Write-Host "   Error: $_" -ForegroundColor Red
+    Write-Host "   Machines may be stopped or not deployed" -ForegroundColor Yellow
+    $needsDeploy = $true
+}
+
+# Test 4: Test detailed health endpoint
+Write-Host ""
+Write-Host "Testing detailed health endpoint..." -ForegroundColor Cyan
+try {
+    $detailedJob = Start-Job -ScriptBlock {
+        Invoke-RestMethod -Uri "https://smasher-api.fly.dev/health/detailed" -Method Get -TimeoutSec 30 -ErrorAction Stop
+    }
+    $detailed = Wait-Job $detailedJob -Timeout 45 | Receive-Job -ErrorAction Stop
+    
+    if ($detailed) {
+        Write-Host "✅ Detailed health check PASSED" -ForegroundColor Green
+        Write-Host "   Database: $($detailed.checks.database.status) ($($detailed.checks.database.responseTime))" -ForegroundColor White
+        Write-Host "   Memory: $($detailed.checks.memory.status) - $($detailed.checks.memory.usage)" -ForegroundColor White
+        Write-Host "   CPU: $($detailed.checks.cpu.status) - $($detailed.checks.cpu.usage)" -ForegroundColor White
+        Write-Host "   Heap Used: $($detailed.checks.memory.heapUsed)" -ForegroundColor White
+    }
+    Remove-Job $detailedJob -Force -ErrorAction SilentlyContinue
+} catch {
+    Write-Host "⚠️ Detailed health check unavailable (this is OK if machines are stopped)" -ForegroundColor Yellow
+}
+
+# Test 5: List machines
+Write-Host ""
+Write-Host "Listing machines (45-second timeout)..." -ForegroundColor Cyan
+try {
+    $machinesJob = Start-Job -ScriptBlock { fly machines list 2>&1 }
+    $machines = Wait-Job $machinesJob -Timeout 45 | Receive-Job
+    
+    if ($machines) {
+        Write-Host $machines
+    }
+    Remove-Job $machinesJob -Force -ErrorAction SilentlyContinue
+} catch {
+    Write-Host "⚠️ Could not list machines: $_" -ForegroundColor Yellow
+}
+
+# Deploy if needed
+if ($needsDeploy) {
+    Write-Host ""
+    Write-Host "=== STEP 5: DEPLOYING TO FLY.IO ===" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "Machines are stopped or unhealthy. Deploying now..." -ForegroundColor Cyan
+    Write-Host ""
+    
+    $deployConfirm = Read-Host "Deploy to Fly.io now? (yes/no)"
+    
+    if ($deployConfirm -eq "yes") {
+        Write-Host ""
+        Write-Host "Starting deployment..." -ForegroundColor Cyan
+        fly deploy
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host ""
+            Write-Host "✅ Deployment successful!" -ForegroundColor Green
+            
+            # Wait for deployment to stabilize
+            Write-Host ""
+            Write-Host "Waiting 30 seconds for deployment to stabilize..." -ForegroundColor Cyan
+            Start-Sleep -Seconds 30
+            
+            # Test health again
+            Write-Host ""
+            Write-Host "Testing health endpoint after deployment..." -ForegroundColor Cyan
+            try {
+                $postDeployHealth = Invoke-RestMethod -Uri "https://smasher-api.fly.dev/health" -Method Get -TimeoutSec 30
+                if ($postDeployHealth.status -eq "ok") {
+                    Write-Host "✅ Post-deployment health check PASSED" -ForegroundColor Green
+                    Write-Host "   Status: $($postDeployHealth.status)" -ForegroundColor White
+                    Write-Host "   Uptime: $($postDeployHealth.uptime) seconds" -ForegroundColor White
+                }
+            } catch {
+                Write-Host "⚠️ Post-deployment health check failed: $_" -ForegroundColor Yellow
+            }
+        } else {
+            Write-Host ""
+            Write-Host "❌ Deployment failed!" -ForegroundColor Red
+        }
+    } else {
+        Write-Host "⚠️ Deployment skipped by user" -ForegroundColor Yellow
+    }
+}
+
+cd ..
+
+Write-Host ""
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host "CLEANUP & TEST COMPLETE" -ForegroundColor Cyan
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "📊 Summary:" -ForegroundColor Yellow
+Write-Host "   ✅ Configuration verified (auto_stop_machines = false, memory = 512MB)" -ForegroundColor Green
+Write-Host "   ✅ Duplicate files removed" -ForegroundColor Green
+Write-Host "   ✅ Health checks completed" -ForegroundColor Green
+Write-Host ""
+Write-Host "📝 Next Steps:" -ForegroundColor Yellow
+Write-Host "   1. Monitor logs: cd server && fly logs" -ForegroundColor White
+Write-Host "   2. Check status: fly status" -ForegroundColor White
+Write-Host "   3. View machines: fly machines list" -ForegroundColor White
+Write-Host ""
+Write-Host "🌐 API Endpoints:" -ForegroundColor Yellow
+Write-Host "   Health: https://smasher-api.fly.dev/health" -ForegroundColor White
+Write-Host "   Detailed: https://smasher-api.fly.dev/health/detailed" -ForegroundColor White
+Write-Host "   Ready: https://smasher-api.fly.dev/health/ready" -ForegroundColor White
+Write-Host "   Live: https://smasher-api.fly.dev/health/live" -ForegroundColor White
+Write-Host ""

@@ -40,6 +40,7 @@ We DO NOT sell your personal information. We may share information with:
 - Email service providers (Resend) for account emails
 - Hosting providers (Fly.io) for our servers
 - Analytics providers for app improvement
+- Payment processors (Stripe) for subscription billing
 
 ### Legal Requirements
 We may disclose your information if required by law or to:
@@ -95,6 +96,17 @@ We collect approximate location to:
 - Improve matching algorithms
 
 You can disable location services in your device settings, but this will limit app functionality.
+
+## Payment Information
+
+When you subscribe to Premium features:
+- **Payment Processing:** All payment information is processed securely by Stripe, our payment processor
+- **Information Collected:** We do not store your credit card information on our servers
+- **Stripe Privacy:** Stripe collects and processes payment information according to their privacy policy
+- **Subscription Data:** We store subscription status, plan type, and billing dates
+- **Refunds:** Subscription payments are non-refundable except as required by law
+
+For more information about how Stripe handles your payment data, visit: https://stripe.com/privacy
 
 ## Cookies and Tracking
 

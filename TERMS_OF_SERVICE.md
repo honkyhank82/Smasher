@@ -69,20 +69,49 @@ Your privacy is important to us. Please review our [Privacy Policy](PRIVACY_POLI
 ## 6. Premium Subscriptions
 
 ### Premium Features
+Premium membership ($9.99/month) includes:
+- Upload up to 6 photos (free users: 5 photos)
+- See ALL profile viewers unblurred (free users: first 2 only)
+- Extended range - interact with users beyond 15 miles (free users: 15 miles only)
+- Advanced search filters
+- Profile boost (10x visibility)
+- No advertisements
 - Read receipts in chat
-- Additional features as announced
-- Subscription-based access
+- Priority customer support
 
-### Billing
-- Subscriptions are billed through Google Play Store
-- Prices are shown before purchase
-- Subscriptions auto-renew unless cancelled
-- Refunds are subject to Google Play Store policies
+### Free Tier Limitations
+Free users have access to:
+- Upload 5 photos
+- Unlimited messages
+- View users within 15 miles only
+- See first 2 profile viewers (additional viewers are blurred)
 
-### Cancellation
-- You may cancel anytime through Google Play Store
-- Cancellation takes effect at end of current billing period
-- No refunds for partial periods
+### Billing and Payment
+- **Price:** $9.99 USD per month (subject to change with 30 days notice)
+- **Payment Processing:** All payments are processed securely through Stripe
+- **Auto-Renewal:** Subscriptions automatically renew monthly unless cancelled
+- **Payment Method:** Credit card, debit card, or other methods accepted by Stripe
+- **Billing Date:** You will be charged on the same day each month
+- **Failed Payments:** If payment fails, your subscription may be suspended
+- **Price Changes:** We will notify you 30 days before any price changes
+
+### Free Trial
+- New users may be eligible for a free trial period
+- Trial converts to paid subscription unless cancelled before trial ends
+- Only one free trial per user
+
+### Cancellation and Refunds
+- **Cancellation:** You may cancel anytime from Settings → Manage Subscription
+- **Effect:** Cancellation takes effect at end of current billing period
+- **Access:** You retain Premium access until the end of your paid period
+- **Refunds:** Payments are non-refundable except as required by law
+- **No Partial Refunds:** No refunds for unused portions of subscription periods
+- **Reactivation:** You may reactivate a cancelled subscription before it expires
+
+### Subscription Changes
+- We reserve the right to modify, suspend, or discontinue Premium features
+- We will provide reasonable notice of material changes
+- Continued use after changes constitutes acceptance
 
 ## 7. Termination
 

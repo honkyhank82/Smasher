@@ -10,14 +10,14 @@ export class ProfileView {
   @JoinColumn({ name: 'viewer_id' })
   viewer!: User;
 
-  @Column({ name: 'viewer_id' })
+  @Column({ type: 'uuid', name: 'viewer_id' })
   viewerId!: string;
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'viewed_id' })
   viewed!: User;
 
-  @Column({ name: 'viewed_id' })
+  @Column({ type: 'uuid', name: 'viewed_id' })
   viewedId!: string;
 
   @CreateDateColumn({ name: 'viewed_at' })

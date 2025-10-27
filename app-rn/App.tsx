@@ -4,6 +4,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as Updates from 'expo-updates';
 import * as SystemUI from 'expo-system-ui';
 import { AuthProvider } from './src/context/AuthContext';
+import { PremiumProvider } from './src/contexts/PremiumContext';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
 import './src/config/i18n'; // Initialize i18n
@@ -47,7 +48,9 @@ function App() {
           translucent={true}
         />
         <AuthProvider>
-          <AppNavigator />
+          <PremiumProvider>
+            <AppNavigator />
+          </PremiumProvider>
         </AuthProvider>
       </SafeAreaProvider>
     </ErrorBoundary>

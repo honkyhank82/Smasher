@@ -1,22 +1,43 @@
-import { Injectable, Inject, forwardRef } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Profile } from '../profiles/profile.entity';
 import { Media } from '../media/media.entity';
 import { MediaService } from '../media/media.service';
-import { ChatGateway } from '../chat/chat.gateway';
+import { OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
 export class GeoService {
+  private onlineUsers: Map<string, Date> = new Map(); // userId -> last online timestamp
+  private offlineUsers: Map<string, Date> = new Map(); // userId -> last seen timestamp
+
   constructor(
     @InjectRepository(Profile)
     private readonly profileRepository: Repository<Profile>,
     @InjectRepository(Media)
     private readonly mediaRepository: Repository<Media>,
     private readonly mediaService: MediaService,
-    @Inject(forwardRef(() => ChatGateway))
-    private readonly chatGateway: ChatGateway,
   ) {}
+
+  @OnEvent('user.online')
+  handleUserOnline(payload: { userId: string; timestamp: Date }) {
+    this.onlineUsers.set(payload.userId, payload.timestamp);
+    this.offlineUsers.delete(payload.userId);
+  }
+
+  @OnEvent('user.offline')
+  handleUserOffline(payload: { userId: string; timestamp: Date }) {
+    this.onlineUsers.delete(payload.userId);
+    this.offlineUsers.set(payload.userId, payload.timestamp);
+  }
+
+  isUserOnline(userId: string): boolean {
+    return this.onlineUsers.has(userId);
+  }
+
+  getLastSeen(userId: string): Date | null {
+    return this.offlineUsers.get(userId) || null;
+  }
 
   async updateLocation(
     userId: string,
@@ -109,9 +130,9 @@ export class GeoService {
             })
           );
           
-          // Check online status
-          const isOnline = this.chatGateway.isUserOnline(profile.user.id);
-          const lastSeen = this.chatGateway.getLastSeen(profile.user.id);
+          // Online status from event emitters
+          const isOnline = this.isUserOnline(profile.user.id);
+          const lastSeen = this.getLastSeen(profile.user.id);
           
           return {
             id: profile.user.id,
@@ -132,6 +153,48 @@ export class GeoService {
       console.error('Error fetching nearby users:', error);
       return [];
     }
+  }
+
+  /**
+   * Calculate distance between two users in miles
+   */
+  async calculateDistanceBetweenUsers(userId1: string, userId2: string): Promise<number | null> {
+    const profile1 = await this.profileRepository.findOne({
+      where: { user: { id: userId1 } },
+    });
+    const profile2 = await this.profileRepository.findOne({
+      where: { user: { id: userId2 } },
+    });
+
+    if (!profile1 || !profile2 || 
+        profile1.lat === null || profile1.lng === null ||
+        profile2.lat === null || profile2.lng === null) {
+      return null;
+    }
+
+    // Haversine formula to calculate distance in miles
+    const lat1 = profile1.lat;
+    const lng1 = profile1.lng;
+    const lat2 = profile2.lat;
+    const lng2 = profile2.lng;
+
+    const R = 3959; // Earth's radius in miles
+    const dLat = this.toRadians(lat2 - lat1);
+    const dLng = this.toRadians(lng2 - lng1);
+
+    const a = 
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.toRadians(lat1)) * Math.cos(this.toRadians(lat2)) *
+      Math.sin(dLng / 2) * Math.sin(dLng / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+
+    return distance;
+  }
+
+  private toRadians(degrees: number): number {
+    return degrees * (Math.PI / 180);
   }
 
   private calculateAge(user: any): number {

@@ -1,6 +1,6 @@
 import * as ExpoLocation from 'expo-location';
 import { Alert } from 'react-native';
-import api from '../config/api';
+import api from './api';
 
 export interface Location {
   latitude: number;

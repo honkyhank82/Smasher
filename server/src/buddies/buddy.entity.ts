@@ -13,10 +13,10 @@ export class Buddy {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column()
+  @Column({ type: 'uuid' })
   userId!: string;
 
-  @Column()
+  @Column({ type: 'uuid' })
   buddyId!: string;
 
   @ManyToOne(() => User)

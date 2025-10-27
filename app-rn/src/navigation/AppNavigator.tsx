@@ -21,7 +21,11 @@ import { HelpSupportScreen } from '../screens/HelpSupportScreen';
 import { LocationShareScreen } from '../screens/LocationShareScreen';
 import { SharedLocationMapScreen } from '../screens/SharedLocationMapScreen';
 import { UpdateDebugScreen } from '../screens/UpdateDebugScreen';
+import { PremiumUpgradeScreen } from '../screens/PremiumUpgradeScreen';
+import { ManageSubscriptionScreen } from '../screens/ManageSubscriptionScreen';
+import { BackendServiceScreen } from '../screens/BackendServiceScreen';
 import { MainTabs } from './MainTabs';
+import { usePremium } from '../contexts/PremiumContext';
 import { ActivityIndicator, View, StyleSheet, Text } from 'react-native';
 import { theme } from '../config/theme';
 import type { NavigationContainerRef } from '@react-navigation/native';
@@ -30,8 +34,15 @@ const Stack = createStackNavigator();
 
 export const AppNavigator = () => {
   const { isAuthenticated, loading, user } = useAuth();
+  const { setNavigationRef } = usePremium();
   const [birthdate, setBirthdate] = useState<string>();
   const navigationRef = React.useRef<NavigationContainerRef<any>>(null);
+
+  useEffect(() => {
+    if (navigationRef.current) {
+      setNavigationRef(navigationRef.current);
+    }
+  }, [navigationRef.current]);
 
   useEffect(() => {
     console.log('🧭 AppNavigator state:', { isAuthenticated, loading, user: user?.email, hasProfile: user?.hasProfile });
@@ -117,7 +128,7 @@ export const AppNavigator = () => {
 
   // User is authenticated and has profile
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <Stack.Navigator
         screenOptions={{
           headerShown: false,
@@ -139,6 +150,9 @@ export const AppNavigator = () => {
         <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
         <Stack.Screen name="LocationShare" component={LocationShareScreen} />
         <Stack.Screen name="SharedLocationMap" component={SharedLocationMapScreen} />
+        <Stack.Screen name="PremiumUpgrade" component={PremiumUpgradeScreen} />
+        <Stack.Screen name="ManageSubscription" component={ManageSubscriptionScreen} />
+        <Stack.Screen name="BackendService" component={BackendServiceScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

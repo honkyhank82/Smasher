@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import api from '../config/api';
+import api from '../services/api';
 import NotificationService from '../services/NotificationService';
 
 interface User {

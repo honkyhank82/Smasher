@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
 
 @Injectable()
@@ -8,14 +7,21 @@ export class EmailService {
   private readonly resend?: Resend;
   private readonly from: string;
 
-  constructor(private readonly config: ConfigService) {
-    const apiKey = this.config.get<string>('RESEND_API_KEY');
-    this.from = this.config.get<string>('RESEND_FROM') ?? 'no-reply@smasher.app';
-    if (!apiKey) {
+  constructor() {
+    const apiKey = process.env.RESEND_API_KEY;
+    this.from = process.env.RESEND_FROM ?? 'no-reply@smasher.app';
+    
+    if (!apiKey || apiKey.trim() === '') {
       this.logger.warn('RESEND_API_KEY not set. Email sending is disabled.');
       this.resend = undefined;
     } else {
-      this.resend = new Resend(apiKey);
+      try {
+        this.resend = new Resend(apiKey);
+        this.logger.log('Email service initialized successfully');
+      } catch (error) {
+        this.logger.error('Failed to initialize Resend with API key', error);
+        this.resend = undefined;
+      }
     }
   }
 
@@ -81,7 +87,7 @@ export class EmailService {
   }
 
   private hasKey(): boolean {
-    const apiKey = this.config.get<string>('RESEND_API_KEY');
+    const apiKey = process.env.RESEND_API_KEY;
     return Boolean(apiKey && apiKey.length > 0);
   }
 }

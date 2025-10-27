@@ -41,11 +41,60 @@ export const LoginScreen = ({ onLoginSuccess, onBack }: LoginScreenProps) => {
       console.log('✅ onLoginSuccess called');
     } catch (error: any) {
       console.error('❌ Login error:', error);
-      const errorMessage = error.response?.data?.message;
-      const displayMessage = Array.isArray(errorMessage) 
-        ? errorMessage.join(', ') 
-        : errorMessage || error.message || 'Login failed';
-      Alert.alert('Error', displayMessage);
+      
+      // Provide detailed error information
+      let displayMessage = 'Login failed';
+      let title = 'Error';
+      
+      // Check for server unavailability (added for 502 errors)
+      if (error.isServerUnavailable || error.response?.status === 502) {
+        title = 'Server Unavailable';
+        displayMessage = error.userFriendlyMessage || 'The server is currently unavailable. Would you like to try another backend service?';
+      } else if (error.code === 'ECONNREFUSED') {
+        displayMessage = 'Cannot connect to server. Check if backend is running and accessible.';
+      } else if (error.code === 'ENOTFOUND') {
+        displayMessage = 'Server domain not found. Check your API endpoint configuration.';
+      } else if (error.code === 'ETIMEDOUT' || error.code === 'ECONNABORTED') {
+        displayMessage = 'Connection timeout. Server is not responding quickly enough.';
+      } else if (error.message?.includes('Network')) {
+        displayMessage = 'Network error. Check your internet connection and firewall settings.';
+      } else if (error.response?.status === 401) {
+        displayMessage = 'Invalid email or password';
+      } else if (error.response?.data?.message) {
+        displayMessage = Array.isArray(error.response.data.message)
+          ? error.response.data.message.join(', ')
+          : error.response.data.message;
+      } else if (error.message) {
+        displayMessage = error.message;
+      }
+      
+      // Show error with retry option for server unavailability
+      if (title === 'Server Unavailable') {
+        Alert.alert(
+          title,
+          displayMessage,
+          [
+            {
+              text: 'Switch Service',
+              onPress: () => {
+                setLoading(false);
+                // Navigate to backend service selection
+                onBack(); // Go back to previous screen where service selection might be available
+              }
+            },
+            { 
+              text: 'Try Again', 
+              onPress: () => handleLogin() 
+            },
+            { 
+              text: 'Cancel',
+              style: 'cancel'
+            }
+          ]
+        );
+      } else {
+        Alert.alert(title, displayMessage);
+      }
     } finally {
       setLoading(false);
     }

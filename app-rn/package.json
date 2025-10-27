@@ -1,12 +1,13 @@
 {
-  "name": "SmasherApp",
-  "version": "1.0.8",
+  "name": "smasher-app",
+  "version": "1.0.15",
   "private": true,
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
+    "build:web": "expo export:web",
     "lint": "eslint .",
     "test": "jest",
     "build:apk": "cd android && .\\gradlew assembleRelease",
@@ -22,6 +23,7 @@
     "@react-navigation/native": "^7.1.18",
     "@react-navigation/stack": "^7.4.9",
     "axios": "^1.12.2",
+    "eas-cli": "^16.24.1",
     "expo": "^54.0.13",
     "expo-av": "~16.0.7",
     "expo-device": "~8.0.9",

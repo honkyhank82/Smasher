@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { theme } from '../config/theme';
-import api from '../config/api';
+import api from '../services/api';
 import { USE_MOCK_DATA, MOCK_PRIVACY_SETTINGS } from '../utils/mockData';
 
 export const PrivacySettingsScreen = ({ navigation }: any) => {

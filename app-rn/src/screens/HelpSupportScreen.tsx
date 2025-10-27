@@ -11,7 +11,7 @@ import {
   Linking,
 } from 'react-native';
 import { theme } from '../config/theme';
-import api from '../config/api';
+import api from '../services/api';
 
 export const HelpSupportScreen = ({ navigation }: any) => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);

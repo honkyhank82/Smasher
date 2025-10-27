@@ -27,7 +27,7 @@ export class Report {
   @Column({ type: 'text', nullable: true })
   details!: string | null;
 
-  @Column({ default: 'pending' })
+  @Column({ type: 'varchar', default: 'pending' })
   status!: string; // pending, reviewed, actioned
 
   @CreateDateColumn({ name: 'created_at' })

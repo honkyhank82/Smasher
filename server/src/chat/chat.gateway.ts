@@ -14,6 +14,8 @@ import { Repository } from 'typeorm';
 import { Message } from './message.entity';
 import { User } from '../users/user.entity';
 import { JwtService } from '@nestjs/jwt';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { GeoService } from '../geo/geo.service';
 
 @WebSocketGateway({
   cors: {
@@ -34,6 +36,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private jwtService: JwtService,
+    private eventEmitter: EventEmitter2,
+    private geoService: GeoService,
   ) {}
 
   async handleConnection(client: Socket) {
@@ -51,6 +55,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.onlineStatus.set(userId, new Date());
       client.data.userId = userId;
 
+      // Emit online status event
+      this.eventEmitter.emit('user.online', { userId, timestamp: new Date() });
+      
       // Broadcast online status to all connected users
       this.server.emit('userOnline', { userId, timestamp: new Date() });
 
@@ -65,10 +72,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const userId = client.data.userId;
     if (userId) {
       this.connectedUsers.delete(userId);
-      this.onlineStatus.set(userId, new Date()); // Keep last seen time
+      const lastSeen = new Date();
+      this.onlineStatus.set(userId, lastSeen);
+      
+      // Emit offline status event
+      this.eventEmitter.emit('user.offline', { userId, timestamp: lastSeen });
       
       // Broadcast offline status to all connected users
-      this.server.emit('userOffline', { userId, timestamp: new Date() });
+      this.server.emit('userOffline', { userId, timestamp: lastSeen });
       
       console.log(`User ${userId} disconnected`);
     }
@@ -150,6 +161,28 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // Get sender's premium status
     const sender = await this.userRepository.findOne({ where: { id: senderId } });
     const senderIsPremium = sender && sender.isPremium && sender.premiumExpiresAt && sender.premiumExpiresAt > new Date();
+
+    // Check if this is the first message between these users
+    const existingMessages = await this.messageRepository.count({
+      where: [
+        { sender: { id: senderId }, receiver: { id: data.receiverId } },
+        { sender: { id: data.receiverId }, receiver: { id: senderId } },
+      ],
+    });
+
+    // If no existing messages and user is not premium, check distance restriction
+    if (existingMessages === 0 && !senderIsPremium) {
+      const distance = await this.geoService.calculateDistanceBetweenUsers(senderId, data.receiverId);
+      
+      if (distance !== null && distance > 15) {
+        client.emit('messageError', {
+          error: 'DISTANCE_RESTRICTION',
+          message: 'Upgrade to Premium to message users beyond 15 miles',
+          distance: Math.round(distance * 10) / 10,
+        });
+        return;
+      }
+    }
 
     // Save message to database
     const message = this.messageRepository.create({

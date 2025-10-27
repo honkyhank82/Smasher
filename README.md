@@ -4,7 +4,7 @@
 
 **Location-based social networking app for the 18+ community**
 
-[![Version](https://img.shields.io/badge/version-1.0.12-blue.svg)](https://github.com/yourusername/smasher)
+[![Version](https://img.shields.io/badge/version-1.0.13-blue.svg)](https://github.com/yourusername/smasher)
 [![License](https://img.shields.io/badge/license-Proprietary-red.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Android%20%7C%20iOS-green.svg)](https://expo.dev)
 
