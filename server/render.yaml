@@ -1,8 +1,8 @@
 services:
   - type: web
     name: smasher-api
-    env: docker
-    dockerfilePath: ./Dockerfile
+    env: node
+    rootDir: server
     repo: https://github.com/honkyhank82/Smasher
     branch: master
     
@@ -12,7 +12,7 @@ services:
       - key: PORT
         value: 3001
       - key: DATABASE_URL
-        scope: shared_db_connection_string
+        fromDatabase: smasher-db
       - key: JWT_SECRET
         fromSecret: jwt_secret
       - key: RESEND_API_KEY
@@ -44,9 +44,7 @@ services:
     
     autoDeploy: true
     
-    volumes:
-      - name: smasher_data
-        mountPath: /data
+    # Node runtime does not require explicit Docker volumes
 
 databases:
   - name: smasher-db
