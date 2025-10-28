@@ -401,7 +401,7 @@ A: Yes! But these are recommended for best experience.
 A: $50-150/month depending on usage. Scales gradually.
 
 **Q: Can I test failover?**
-A: Yes! Stop Fly.io and web app switches to Railway automatically.
+A: Yes! Stop Fly.io and the web app switches to Render automatically.
 
 **Q: Do I need to update the web app source code?**
 A: No, everything is ready to use. But you can customize if desired.

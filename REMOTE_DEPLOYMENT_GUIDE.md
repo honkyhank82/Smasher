@@ -73,7 +73,6 @@ This deployment setup ensures:
 1. **Cloud Provider** (choose one or more for redundancy):
    - Fly.io (Primary - recommended)
    - Render.com (Backup)
-   - Railway.app (Backup)
    - Vercel (Backup)
 
 2. **External Services**:
@@ -219,28 +218,7 @@ fly logs
 5. Add environment variables
 6. Deploy
 
-### Backup: Railway.app
-
-**Advantages**: Simple deployment, good free tier
-
-```bash
-# Install Railway CLI
-npm install -g @railway/cli
-
-# Login
-railway login
-
-# Initialize
-cd server
-railway init
-
-# Deploy
-railway up
-
-# Set variables
-railway variables set JWT_SECRET=your-secret
-railway variables set DATABASE_URL=your-db-url
-```
+<!-- Railway removed: we now standardize on Fly.io + Render only -->
 
 ### Backup: Vercel
 
@@ -317,9 +295,8 @@ The app automatically switches between backend services:
 
 1. **Priority Order**:
    - Fly.io (Primary)
-   - Render (Backup 1)
-   - Railway (Backup 2)
-   - Vercel (Backup 3)
+   - Render (Backup)
+   - Vercel (Backup 2)
 
 2. **Health Checks**:
    - Runs every 60 seconds
@@ -410,9 +387,6 @@ fly status
 
 # Render
 # Check dashboard
-
-# Railway
-railway status
 ```
 
 2. **Check logs**:

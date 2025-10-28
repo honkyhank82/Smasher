@@ -77,7 +77,7 @@ smasher/
 ## DEPLOYMENT PLATFORMS
 
 ### Currently Active
-- **Backend**: Render (formerly Railway)
+- **Backend**: Render
 - **Web App**: Vercel
 - **Mobile**: Expo & Google Play / Apple App Store
 

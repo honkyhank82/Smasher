@@ -94,8 +94,7 @@ postgresql://username:password@host:5432/smasher
 1. **Health Check**: Every 60 seconds, clients check all servers
 2. **Priority Order**:
    - Fly.io (Primary)
-   - Railway (Secondary)
-   - Render (Tertiary)
+   - Render (Secondary)
 3. **On Server Down**:
    - Automatic connection to next available server
    - No user action needed
@@ -106,7 +105,6 @@ postgresql://username:password@host:5432/smasher
 ```bash
 # Check server health
 curl https://smasher-api.fly.dev/health
-curl https://smasher-production.up.railway.app/health
 curl https://smasher.onrender.com/health
 
 # Detailed health check
@@ -168,13 +166,6 @@ NODE_ENV=production
 ```bash
 fly secrets set DATABASE_URL="postgresql://..."
 fly secrets set JWT_SECRET="your-secret"
-# ... repeat for others
-```
-
-**Railway**:
-```bash
-railway variables set DATABASE_URL="postgresql://..."
-railway variables set JWT_SECRET="your-secret"
 # ... repeat for others
 ```
 

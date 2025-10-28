@@ -49,7 +49,7 @@ function Deploy-Flyio {
 
 
 function Deploy-Render {
-  Write-Host "`n[DEPLOY] Deploying to Render (Tertiary)..." -ForegroundColor Green
+  Write-Host "`n[DEPLOY] Deploying to Render (Secondary)..." -ForegroundColor Green
   
   Write-Host "[INFO] Instructions:" -ForegroundColor Yellow
   Write-Host "1. Go to https://dashboard.render.com" -ForegroundColor White
@@ -92,7 +92,7 @@ function Check-ServerHealth {
   
   $servers = @(
     @{ name = "Fly.io (Primary)"; url = "https://smasher-api.fly.dev/health" },
-    @{ name = "Render (Tertiary)"; url = "https://smasher.onrender.com/health" }
+    @{ name = "Render (Secondary)"; url = "https://smasher.onrender.com/health" }
   )
   
   foreach ($server in $servers) {

@@ -15,7 +15,7 @@ GETTING STARTED IN 3 STEPS
 STEP 1: PREPARE (5 minutes)
 ───────────────────────────────────────────────────────────────────────────────
 You need:
-  □ PostgreSQL database URL (create free on Railway)
+  □ PostgreSQL database URL (create free on Render)
   □ JWT Secret (random 32-character string)
   □ Resend API key (for email)
   □ Cloudflare R2 credentials (for photos)
@@ -29,7 +29,7 @@ From PowerShell in d:\Dev\smasher:
   .\setup-all.ps1
 
 Choose:
-  1. Install CLI tools (Fly, Railway, Vercel)
+  1. Install CLI tools (Fly, Vercel)
   2. Setup environment variables (paste your values)
 
 STEP 3: DEPLOY (15 minutes)
@@ -76,8 +76,7 @@ Primary Server (Fly.io)
   URL: https://smasher-api.fly.dev
   Already running
   
-Backup Servers (Ready to deploy)
-  Railway: https://smasher-production.up.railway.app
+Backup Server (Ready to deploy)
   Render:  https://smasher.onrender.com
 
 Web App (Deploy this)
@@ -93,8 +92,7 @@ HOW AUTOMATIC FAILOVER WORKS
 1. Users access web app or mobile app
 2. App checks health of servers (every 60 seconds)
 3. Tries to use Fly.io (primary)
-4. If down, switches to Railway (secondary) 
-5. If down, switches to Render (tertiary)
+4. If down, switches to Render (backup)
 6. User doesn't notice anything - seamless!
 
 When servers recover:

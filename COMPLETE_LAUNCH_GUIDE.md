@@ -176,7 +176,7 @@ fly info
 # Note: https://your-app.fly.dev
 ```
 
-**Option B: Railway/Render/Heroku**
+**Option B: Render/Heroku**
 
 See `DEPLOYMENT.md` for detailed instructions.
 
@@ -415,7 +415,6 @@ curl https://your-backend.fly.dev/health
 **Production database options:**
 1. **Fly.io Postgres** (included with Fly.io)
 2. **Supabase** (free tier available)
-3. **Railway** (free tier available)
 4. **Neon** (serverless Postgres)
 
 **Run migrations on production:**

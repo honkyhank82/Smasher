@@ -247,7 +247,7 @@ smasher-backend/
 3. ✅ Configure Render (Phase 3)
 4. ✅ Update frontend URLs (Phase 4)
 5. ✅ Test backend endpoints
-6. ✅ Delete old backend deployment (from original Render/Railway)
+6. ✅ Delete old backend deployment (from original Render)
 7. ✅ Update frontend apps to use new backend URL
 
 ---

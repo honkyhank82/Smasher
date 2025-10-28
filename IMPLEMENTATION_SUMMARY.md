@@ -64,7 +64,7 @@ Users (Web & Mobile)
     ↓
 Health Check & Failover (Every 60 seconds)
     ↓
-Fly.io (Primary)    Railway (Secondary)    Render (Tertiary)
+Fly.io (Primary)    Render (Secondary)
     ↓
 Shared PostgreSQL Database
 ```
@@ -73,21 +73,18 @@ Shared PostgreSQL Database
 1. **Health Checks**: Every 60 seconds, clients check all servers
 2. **Priority Order**: 
    - Fly.io (Primary)
-   - Railway (Secondary)
-   - Render (Tertiary)
+   - Render (Secondary)
 3. **Automatic Switch**: If primary is down, instantly switch to secondary
 4. **Seamless**: No data loss, no logout, no user interruption
 5. **Instant Recovery**: Automatically switch back when primary recovers
 
 ### Server URLs
 - **Fly.io**: https://smasher-api.fly.dev
-- **Railway**: https://smasher-production.up.railway.app
 - **Render**: https://smasher.onrender.com
 
 ### Health Check Endpoints
 ```bash
 GET https://smasher-api.fly.dev/health
-GET https://smasher-production.up.railway.app/health
 GET https://smasher.onrender.com/health
 
 # Detailed health
@@ -105,7 +102,7 @@ GET https://smasher-api.fly.dev/health/detailed
 - ✅ Simple disaster recovery
 
 ### Setup Options
-1. **Railway Managed PostgreSQL** (Recommended)
+1. **Managed PostgreSQL (e.g., Render)** (Recommended)
    - Easiest to setup
    - Built-in backups
    - Same provider as backup server
@@ -133,7 +130,7 @@ postgresql://username:password@host:5432/smasher
 **File**: `setup-all.ps1`
 
 Menu options:
-1. Install CLI tools (Fly, Railway, Vercel)
+1. Install CLI tools (Fly, Vercel)
 2. Setup environment variables
 3. Setup backend only
 4. Setup mobile app only
@@ -146,13 +143,12 @@ Menu options:
 
 Menu options:
 1. Deploy to Fly.io (Primary)
-2. Deploy to Railway (Secondary)
-3. Deploy to Render (Tertiary)
-4. Deploy web app to Vercel
-5. Deploy to ALL servers (one command)
-6. Check server health
-7. Setup shared database
-8. Configure environment variables
+2. Deploy to Render (Secondary)
+3. Deploy web app to Vercel
+4. Deploy to ALL servers (one command)
+5. Check server health
+6. Setup shared database
+7. Configure environment variables
 
 ### Usage
 ```powershell
@@ -183,7 +179,7 @@ Menu options:
 |------|---------|
 | `server/render.yaml` | Render deployment config |
 | `server/render.json` | Render build config |
-| `server/railway.json` | Railway deployment config |
+| `server/railway.json` | (Removed) Railway deployment config |
 | `app-web/vercel.json` | Vercel deployment config |
 
 ---
@@ -210,7 +206,7 @@ Menu options:
 - TypeORM
 
 ### Infrastructure
-- **Servers**: Fly.io, Railway, Render
+- **Servers**: Fly.io, Render
 - **Database**: PostgreSQL (shared)
 - **Web Hosting**: Vercel
 - **API**: REST + WebSocket
@@ -293,7 +289,6 @@ npm run dev
 
 # Or deploy individually:
 # 1. Backend to Fly.io: fly deploy
-# 2. Backend to Railway: railway up
 # 3. Backend to Render: Via dashboard
 # 4. Web app to Vercel: vercel --prod
 ```
@@ -312,8 +307,7 @@ npm run dev
 ### Phase 2: Backend Servers
 ```bash
 1. Deploy to Fly.io (primary)
-2. Deploy to Railway (secondary)
-3. Deploy to Render (tertiary)
+2. Deploy to Render (secondary)
 ```
 
 ### Phase 3: Frontend
@@ -364,12 +358,10 @@ After full deployment:
 ### Current Setup Costs
 ```
 Fly.io API:           $5-30/month
-Railway API:          $5-30/month
-Railway PostgreSQL:   $15-50/month
 Render API:           Free-7/month
 Vercel Web:           Free-20/month
 ───────────────────────────────
-Total:               $30-140/month
+Total:               $10-57/month
 ```
 
 ### Scaling Strategy
@@ -410,7 +402,7 @@ IMPLEMENTATION_SUMMARY.md   # This file
 server/
 ├── render.yaml             # Render config
 ├── render.json             # Render build config
-└── railway.json            # Railway config
+└── (removed) railway.json  # Railway config
 ```
 
 ---
@@ -478,7 +470,6 @@ vercel --prod
 
 ### External Resources
 - **Fly.io Docs**: https://fly.io/docs
-- **Railway Docs**: https://docs.railway.app
 - **Render Docs**: https://render.com/docs
 - **Vercel Docs**: https://vercel.com/docs
 - **React Docs**: https://react.dev
@@ -491,7 +482,6 @@ curl https://smasher-api.fly.dev/health/detailed
 
 # View logs
 fly logs --follow
-railway logs
 
 # Stop all servers
 fly scale count 0

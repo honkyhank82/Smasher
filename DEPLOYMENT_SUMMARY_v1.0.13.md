@@ -12,7 +12,7 @@
 **No local dependencies required** - Everything runs in the cloud:
 
 - **Docker Compose Setup**: Complete containerized deployment
-- **Multi-Cloud Support**: Fly.io, Render, Railway, Vercel
+- **Multi-Cloud Support**: Fly.io, Render, Vercel
 - **Managed Services**: PostgreSQL, Redis, Cloudflare R2, Resend
 - **Auto-Scaling**: Horizontal scaling support
 
@@ -130,7 +130,6 @@ fly deploy
 Deploy to all providers for automatic failover:
 - **Fly.io** (Primary)
 - **Render** (Backup 1)
-- **Railway** (Backup 2)
 - **Vercel** (Backup 3)
 
 App automatically switches between them based on health checks.
@@ -166,7 +165,6 @@ The app automatically checks health and switches between:
 
 1. **Fly.io** (Priority 1)
 2. **Render** (Priority 2)
-3. **Railway** (Priority 3)
 4. **Vercel** (Priority 4)
 
 Health checks run every 60 seconds with 5-second timeout.
@@ -345,7 +343,6 @@ GET /health/live
    # Choose your deployment method
    docker-compose up -d  # OR
    fly deploy            # OR
-   railway up
    ```
 
 3. **Build Mobile App**
