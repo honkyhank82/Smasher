@@ -12,39 +12,39 @@ import { User } from '../users/user.entity';
 @Entity('location_shares')
 export class LocationShare {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column({ type: 'uuid' })
   @Index()
-  userId: string;
+  userId!: string;
 
   @ManyToOne(() => User)
-  user: User;
+  user!: User;
 
   @Column({ type: 'uuid' })
   @Index()
-  sharedWithUserId: string;
+  sharedWithUserId!: string;
 
   @ManyToOne(() => User)
-  sharedWithUser: User;
+  sharedWithUser!: User;
 
   @Column({ type: 'decimal', precision: 10, scale: 8 })
-  latitude: number;
+  latitude!: number;
 
   @Column({ type: 'decimal', precision: 11, scale: 8 })
-  longitude: number;
+  longitude!: number;
 
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'datetime' })
   @Index()
-  expiresAt: Date;
+  expiresAt!: Date;
 
-  @CreateDateColumn({ type: 'timestamp' })
-  createdAt: Date;
+  @CreateDateColumn({ type: 'datetime' })
+  createdAt!: Date;
 
-  @UpdateDateColumn({ type: 'timestamp' })
-  updatedAt: Date;
+  @UpdateDateColumn({ type: 'datetime' })
+  updatedAt!: Date;
 
   @Column({ type: 'boolean', default: true })
   @Index()
-  isActive: boolean;
+  isActive!: boolean;
 }

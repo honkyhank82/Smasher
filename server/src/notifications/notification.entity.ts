@@ -11,31 +11,31 @@ import { User } from '../users/user.entity';
 @Entity('notifications')
 export class Notification {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column({ type: 'uuid' })
   @Index()
-  userId: string;
+  userId!: string;
 
   @ManyToOne(() => User)
-  user: User;
+  user!: User;
 
   @Column({ type: 'varchar', length: 50 })
-  type: string; // 'location_share_started', 'location_share_stopped', 'location_share_expired', 'message', 'match', etc.
+  type!: string; // 'location_share_started', 'location_share_stopped', 'location_share_expired', 'message', 'match', etc.
 
   @Column({ type: 'varchar', length: 255 })
-  title: string;
+  title!: string;
 
   @Column({ type: 'text' })
-  body: string;
+  body!: string;
 
   @Column({ type: 'jsonb', nullable: true })
   data: any;
 
   @Column({ type: 'boolean', default: false })
   @Index()
-  read: boolean;
+  read!: boolean;
 
-  @CreateDateColumn({ type: 'timestamp' })
-  createdAt: Date;
+  @CreateDateColumn({ type: 'datetime' })
+  createdAt!: Date;
 }
