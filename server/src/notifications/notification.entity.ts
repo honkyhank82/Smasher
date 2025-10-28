@@ -29,7 +29,8 @@ export class Notification {
   @Column({ type: 'text' })
   body!: string;
 
-  @Column({ type: 'jsonb', nullable: true })
+  // Use Postgres jsonb when DATABASE_URL is set; fallback to simple-json for SQLite
+  @Column({ type: process.env.DATABASE_URL ? 'jsonb' : 'simple-json', nullable: true })
   data: any;
 
   @Column({ type: 'boolean', default: false })
