@@ -31,7 +31,6 @@ export class MediaService {
 
     // Create custom HTTPS agent for R2
     const httpsAgent = new https.Agent({
-      rejectUnauthorized: false,
       keepAlive: true,
       maxSockets: 50,
       minVersion: 'TLSv1.2',

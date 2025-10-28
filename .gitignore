@@ -1,4 +1,4 @@
-﻿# General
+# General
 .DS_Store
 Thumbs.db
 *.log
@@ -30,3 +30,14 @@ server/.cache/
 *.app
 dist/
 build/
+
+# Android build logs (explicit path ignores)
+app-rn/android/build-log.txt
+app-rn/android/*.log
+
+# Android heavy artifacts
+app-rn/android/app/build/
+app-rn/android/.cxx/
+*.hprof
+# Backup files
+*.bak

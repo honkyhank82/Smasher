@@ -3,16 +3,32 @@ import { useNavigate } from 'react-router-dom'
 import { apiFailoverService } from '../services/api-failover'
 import '../styles/profile.css'
 
+interface User {
+  id: string
+  name: string
+  age: number
+  bio: string
+  profilePhoto?: string
+  isPremium: boolean
+  viewCount: number
+}
+
+interface ProfileFormData {
+  name: string
+  age: string
+  bio: string
+}
+
 interface ProfileProps {
   setIsAuthenticated: (auth: boolean) => void
 }
 
 export default function Profile({ setIsAuthenticated }: ProfileProps) {
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [editing, setEditing] = useState(false)
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ProfileFormData>({
     name: '',
     age: '',
     bio: '',
@@ -25,12 +41,13 @@ export default function Profile({ setIsAuthenticated }: ProfileProps) {
   const loadProfile = async () => {
     try {
       setLoading(true)
-      const response = await apiFailoverService.get('/users/profile')
-      setUser(response.data)
+      const response = await apiFailoverService.get<User>('/users/profile')
+      const userData: User = response.data
+      setUser(userData)
       setFormData({
-        name: response.data.name,
-        age: response.data.age,
-        bio: response.data.bio,
+        name: userData.name,
+        age: userData.age.toString(), // Convert number to string for form input
+        bio: userData.bio,
       })
     } catch (error) {
       console.error('Failed to load profile:', error)
@@ -42,8 +59,16 @@ export default function Profile({ setIsAuthenticated }: ProfileProps) {
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      const response = await apiFailoverService.put('/users/profile', formData)
-      setUser(response.data)
+      // Convert form data to proper types for API
+      const updateData = {
+        name: formData.name,
+        age: parseInt(formData.age, 10), // Convert string back to number
+        bio: formData.bio,
+      }
+      
+      const response = await apiFailoverService.put<User>('/users/profile', updateData)
+      const updatedUser: User = response.data
+      setUser(updatedUser)
       setEditing(false)
     } catch (error) {
       console.error('Failed to update profile:', error)

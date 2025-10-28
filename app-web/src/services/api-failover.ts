@@ -1,33 +1,56 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
 import { BACKEND_SERVICES, checkServiceHealth, updateServiceUrls, API_TIMEOUT } from '../config/api'
 
+// Maximum number of retries per request
+const MAX_RETRIES = 3
+
 class ApiFailoverService {
   private currentServiceIndex: number = 0
   private axiosInstance: AxiosInstance
   private failoverAttempts: number = 0
   private maxFailoverAttempts: number = 3
+  private requestInterceptorId: number | null = null
+  private responseInterceptorId: number | null = null
+  private healthCheckInterval: NodeJS.Timeout | null = null
 
   constructor() {
     this.axiosInstance = this.createAxiosInstance(BACKEND_SERVICES[0])
     this.initializeHealthMonitoring()
-    this.setupInterceptors()
   }
 
   private createAxiosInstance(service: typeof BACKEND_SERVICES[0]): AxiosInstance {
     console.log(`🔗 Creating axios instance for ${service.name}`)
-    return axios.create({
+    const instance = axios.create({
       baseURL: service.apiUrl,
       timeout: API_TIMEOUT,
       headers: {
         'Content-Type': 'application/json',
       },
     })
+    
+    // Setup interceptors immediately for the new instance
+    this.setupInterceptors(instance)
+    return instance
   }
 
-  private setupInterceptors() {
-    this.axiosInstance.interceptors.request.use(
+  private setupInterceptors(instance: AxiosInstance) {
+    // Eject any existing interceptors to prevent duplicates
+    if (this.requestInterceptorId !== null) {
+      this.axiosInstance.interceptors.request.eject(this.requestInterceptorId)
+    }
+    if (this.responseInterceptorId !== null) {
+      this.axiosInstance.interceptors.response.eject(this.responseInterceptorId)
+    }
+
+    // Add new interceptors and store their IDs
+    this.requestInterceptorId = instance.interceptors.request.use(
       (config) => {
-        const token = localStorage.getItem('authToken')
+        let token: string | null = null
+        try {
+          token = localStorage.getItem('authToken')
+        } catch (e) {
+          console.warn('⚠️ localStorage is not available')
+        }
         if (token) {
           config.headers.Authorization = `Bearer ${token}`
         }
@@ -40,7 +63,7 @@ class ApiFailoverService {
       },
     )
 
-    this.axiosInstance.interceptors.response.use(
+    this.responseInterceptorId = instance.interceptors.response.use(
       (response) => {
         console.log(`✅ Response: ${response.status} from ${response.config.url}`)
         return response
@@ -59,18 +82,34 @@ class ApiFailoverService {
           error.code === 'ECONNABORTED' ||
           error.code === 'ERR_NETWORK'
         ) {
-          console.warn('⚠️ Server error detected, attempting failover...')
-          const failedOver = await this.performFailover()
-          
-          if (failedOver && error.config) {
-            console.log('🔄 Retrying request with backup server...')
-            return this.axiosInstance.request(error.config)
+          // Initialize retry counter if missing
+          if (!error.config.__retryCount) {
+            error.config.__retryCount = 0
+          }
+
+          // Check if we haven't exceeded max retries
+          if (error.config.__retryCount < MAX_RETRIES) {
+            console.warn(`⚠️ Server error detected, attempting failover... (retry ${error.config.__retryCount + 1}/${MAX_RETRIES})`)
+            const failedOver = await this.performFailover()
+            
+            if (failedOver && error.config) {
+              // Increment retry counter before retrying
+              error.config.__retryCount++
+              console.log(`🔄 Retrying request with backup server... (attempt ${error.config.__retryCount}/${MAX_RETRIES})`)
+              return this.axiosInstance.request(error.config)
+            }
+          } else {
+            console.error(`❌ Max retries (${MAX_RETRIES}) exceeded for request to ${error.config?.url}`)
           }
         }
 
         if (error.response?.status === 401) {
-          localStorage.removeItem('authToken')
-          localStorage.removeItem('user')
+          try {
+            localStorage.removeItem('authToken')
+            localStorage.removeItem('user')
+          } catch (e) {
+            console.warn('⚠️ Failed to clear localStorage')
+          }
         }
         
         return Promise.reject(error)
@@ -79,7 +118,12 @@ class ApiFailoverService {
   }
 
   private initializeHealthMonitoring() {
-    setInterval(async () => {
+    // Clear any existing interval to prevent multiple intervals
+    if (this.healthCheckInterval) {
+      clearInterval(this.healthCheckInterval)
+    }
+    
+    this.healthCheckInterval = setInterval(async () => {
       await this.checkAndFailover()
     }, 60000)
   }
@@ -109,7 +153,6 @@ class ApiFailoverService {
         console.log(`✅ Failing over to ${nextService.name}`)
         this.currentServiceIndex = nextIndex
         this.axiosInstance = this.createAxiosInstance(nextService)
-        this.setupInterceptors()
         updateServiceUrls(nextService)
         this.failoverAttempts = 0
         return true
@@ -150,6 +193,24 @@ class ApiFailoverService {
 
   public removeAuthToken() {
     delete this.axiosInstance.defaults.headers.common['Authorization']
+  }
+
+  public cleanup() {
+    // Eject interceptors to prevent memory leaks
+    if (this.requestInterceptorId !== null) {
+      this.axiosInstance.interceptors.request.eject(this.requestInterceptorId)
+      this.requestInterceptorId = null
+    }
+    if (this.responseInterceptorId !== null) {
+      this.axiosInstance.interceptors.response.eject(this.responseInterceptorId)
+      this.responseInterceptorId = null
+    }
+    
+    // Clear health check interval to prevent memory leaks
+    if (this.healthCheckInterval) {
+      clearInterval(this.healthCheckInterval)
+      this.healthCheckInterval = null
+    }
   }
 }
 

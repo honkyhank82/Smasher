@@ -4,6 +4,7 @@
 $ErrorActionPreference = "Continue"
 $results = @{}
 $errorDetails = @()
+$jobFailures = $false
 $API_URL = "https://smasher-api.fly.dev"
 
 Write-Host "========================================" -ForegroundColor Cyan
@@ -52,9 +53,40 @@ cd server
 
 # STEP 3: Machine Status
 Write-Host "`n=== MACHINE STATUS ===" -ForegroundColor Yellow
-$statusJob = Start-Job { fly status 2>&1 }
-$status = Wait-Job $statusJob -Timeout 45 | Receive-Job
-Remove-Job $statusJob -Force -EA SilentlyContinue
+$statusJob = Start-Job -Name "statusJob" {
+    try {
+        fly status 2>&1
+    } catch {
+        $_
+        throw
+    }
+}
+try {
+    $waited = Wait-Job -Job $statusJob -Timeout 45
+    if (-not $waited) {
+        Write-Host "❌ fly status job timed out" -ForegroundColor Red
+        Stop-Job -Job $statusJob -Force -EA SilentlyContinue
+        $errorDetails += @{Type="Machine Status"; Message="fly status timed out"; Severity="ERROR"}
+        $status = $null
+        $jobFailures = $true
+    } else {
+        try {
+            $status = Receive-Job -Job $statusJob -ErrorAction Stop
+            if (-not $status) {
+                Write-Host "❌ fly status returned empty output" -ForegroundColor Red
+                $errorDetails += @{Type="Machine Status"; Message="fly status returned empty output"; Severity="ERROR"}
+                $jobFailures = $true
+            }
+        } catch {
+            Write-Host "❌ fly status job error: $($_.Exception.Message)" -ForegroundColor Red
+            $errorDetails += @{Type="Machine Status"; Message="fly status job error: $($_.Exception.Message)"; Severity="ERROR"}
+            $status = $null
+            $jobFailures = $true
+        }
+    }
+} finally {
+    Remove-Job -Job $statusJob -Force -EA SilentlyContinue
+}
 
 if ($status -match "running") {
     $machineState = "RUNNING ✅"
@@ -73,9 +105,41 @@ $results.Machines = $machineState
 
 # STEP 4: Log Analysis
 Write-Host "`n=== LOG ANALYSIS ===" -ForegroundColor Yellow
-$logsJob = Start-Job { fly logs --lines 50 2>&1 }
-$logs = Wait-Job $logsJob -Timeout 45 | Receive-Job
-Remove-Job $logsJob -Force -EA SilentlyContinue
+$logsJob = Start-Job -Name "logsJob" {
+    try {
+        fly logs --lines 50 2>&1
+    } catch {
+        $_
+        throw
+    }
+}
+try {
+    $waitedLogs = Wait-Job -Job $logsJob -Timeout 45
+    if (-not $waitedLogs) {
+        Write-Host "❌ fly logs job timed out" -ForegroundColor Red
+        Stop-Job -Job $logsJob -Force -EA SilentlyContinue
+        $errorDetails += @{Type="Log Analysis"; Message="fly logs timed out"; Severity="ERROR"}
+        $logs = @()
+        $jobFailures = $true
+    } else {
+        try {
+            $logs = Receive-Job -Job $logsJob -ErrorAction Stop
+            if (-not $logs -or $logs.Count -eq 0) {
+                Write-Host "❌ fly logs returned empty output" -ForegroundColor Red
+                $errorDetails += @{Type="Log Analysis"; Message="fly logs returned empty output"; Severity="ERROR"}
+                $jobFailures = $true
+                $logs = @()
+            }
+        } catch {
+            Write-Host "❌ fly logs job error: $($_.Exception.Message)" -ForegroundColor Red
+            $errorDetails += @{Type="Log Analysis"; Message="fly logs job error: $($_.Exception.Message)"; Severity="ERROR"}
+            $logs = @()
+            $jobFailures = $true
+        }
+    }
+} finally {
+    Remove-Job -Job $logsJob -Force -EA SilentlyContinue
+}
 
 $errorLines = $logs | Select-String "error|ERROR" -Context 2,2
 $warningLines = $logs | Select-String "warning|WARN" -Context 2,2

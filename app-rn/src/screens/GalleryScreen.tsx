@@ -170,8 +170,12 @@ export const GalleryScreen = ({ navigation }: any) => {
   };
 
 
-  const handleDeleteMedia = (index: number) => {
-    const item = media[index];
+  const handleDeleteMedia = (id: string | number) => {
+    const item = media.find(m => m.id === id);
+    if (!item) {
+      Alert.alert('Error', 'Media item not found');
+      return;
+    }
     Alert.alert(
       `Delete ${item.type === 'photo' ? 'Photo' : 'Video'}`,
       `Are you sure you want to delete this ${item.type}?`,
@@ -183,7 +187,7 @@ export const GalleryScreen = ({ navigation }: any) => {
           onPress: async () => {
             try {
               await api.post('/media/delete', { mediaId: item.id });
-              const newMedia = media.filter((_, i) => i !== index);
+              const newMedia = media.filter(m => m.id !== id);
               setMedia(newMedia);
               Alert.alert('Success', `${item.type === 'photo' ? 'Photo' : 'Video'} deleted`);
             } catch (error) {
@@ -214,9 +218,9 @@ export const GalleryScreen = ({ navigation }: any) => {
         <View style={styles.grid}>
           {media.map((item, index) => (
             <TouchableOpacity
-              key={index}
+              key={item.id}
               style={styles.photoContainer}
-              onLongPress={() => handleDeleteMedia(index)}
+              onLongPress={() => handleDeleteMedia(item.id)}
             >
               {item.type === 'photo' ? (
                 <Image source={{ uri: item.uri }} style={styles.photo} />
@@ -233,7 +237,7 @@ export const GalleryScreen = ({ navigation }: any) => {
               )}
               <TouchableOpacity
                 style={styles.deleteButton}
-                onPress={() => handleDeleteMedia(index)}
+                onPress={() => handleDeleteMedia(item.id)}
               >
                 <Text style={styles.deleteButtonText}>×</Text>
               </TouchableOpacity>

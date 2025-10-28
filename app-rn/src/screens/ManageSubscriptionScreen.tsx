@@ -15,11 +15,11 @@ import { usePremium } from '../contexts/PremiumContext';
 export const ManageSubscriptionScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { subscriptionStatus, refreshSubscriptionStatus, isPremium } = usePremium();
   const [loading, setLoading] = useState(false);
-  const [canceling, setCanceling] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     refreshSubscriptionStatus();
-  }, []);
+  }, [refreshSubscriptionStatus]);
 
   const handleManageSubscription = async () => {
     try {
@@ -60,7 +60,7 @@ export const ManageSubscriptionScreen: React.FC<{ navigation: any }> = ({ naviga
 
   const confirmCancel = async () => {
     try {
-      setCanceling(true);
+      setIsProcessing(true);
       await subscriptionService.cancelSubscription();
       await refreshSubscriptionStatus();
       Alert.alert(
@@ -71,13 +71,13 @@ export const ManageSubscriptionScreen: React.FC<{ navigation: any }> = ({ naviga
       console.error('Error canceling subscription:', error);
       Alert.alert('Error', 'Could not cancel subscription');
     } finally {
-      setCanceling(false);
+      setIsProcessing(false);
     }
   };
 
   const handleReactivate = async () => {
     try {
-      setCanceling(true);
+      setIsProcessing(true);
       await subscriptionService.reactivateSubscription();
       await refreshSubscriptionStatus();
       Alert.alert(
@@ -88,7 +88,7 @@ export const ManageSubscriptionScreen: React.FC<{ navigation: any }> = ({ naviga
       console.error('Error reactivating subscription:', error);
       Alert.alert('Error', 'Could not reactivate subscription');
     } finally {
-      setCanceling(false);
+      setIsProcessing(false);
     }
   };
 
@@ -158,9 +158,9 @@ export const ManageSubscriptionScreen: React.FC<{ navigation: any }> = ({ naviga
           <TouchableOpacity
             style={styles.reactivateButton}
             onPress={handleReactivate}
-            disabled={canceling}
-          >
-            {canceling ? (
+            disabled={isProcessing}
+        >
+            {isProcessing ? (
               <ActivityIndicator color="#fff" />
             ) : (
               <Text style={styles.reactivateButtonText}>Reactivate Subscription</Text>
@@ -197,9 +197,9 @@ export const ManageSubscriptionScreen: React.FC<{ navigation: any }> = ({ naviga
         <TouchableOpacity
           style={styles.cancelButton}
           onPress={handleCancelSubscription}
-          disabled={canceling}
+          disabled={isProcessing}
         >
-          {canceling ? (
+          {isProcessing ? (
             <ActivityIndicator color="#8B0000" />
           ) : (
             <Text style={styles.cancelButtonText}>Cancel Subscription</Text>

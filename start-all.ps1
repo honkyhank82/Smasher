@@ -14,6 +14,15 @@ param(
 
 Write-Host "Starting Smasher..." -ForegroundColor Cyan
 
+# Enforce 5GB working directory cap before starting (separate from audit script)
+$capScript = Join-Path $PSScriptRoot 'enforce-size-cap.ps1'
+if (Test-Path $capScript) {
+  Write-Host "Preflight: enforcing 5GB cap (AgeDays=7)..." -ForegroundColor Yellow
+  & $capScript -CapGB 5 -AgeDays 7
+} else {
+  Write-Host "Preflight: enforce-size-cap.ps1 not found; skipping size enforcement" -ForegroundColor Yellow
+}
+
 if (-not $Remote) {
   # Detect IP (prefer active Wi-Fi/Ethernet, exclude APIPA 169.254.x.x)
   $ip = (

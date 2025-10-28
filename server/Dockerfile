@@ -33,11 +33,9 @@ RUN npm ci --only=production
 # Copy built files from builder
 COPY --from=builder /app/dist ./dist
 
-# List what we have
-RUN echo "=== Files in dist ===" && find dist -type f -name "*.js" | head -20
 
 # Expose port
 EXPOSE 3001
 
-# Start with node - try both possible paths
-CMD sh -c "if [ -f dist/main.js ]; then node dist/main.js; else node dist/src/main.js; fi"
+# Start the application deterministically
+CMD ["node", "dist/main.js"]

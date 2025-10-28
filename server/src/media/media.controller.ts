@@ -1,4 +1,5 @@
 import { Body, Controller, Post, Get, UseGuards, BadRequestException } from '@nestjs/common';
+import * as path from 'path';
 import { AuthGuard } from '@nestjs/passport';
 import { MediaService } from './media.service';
 import { CreateSignedUploadDto, CreateSignedDownloadDto } from './dto/signed-url.dto';
@@ -7,6 +8,24 @@ import { CurrentUser } from '../auth/current-user.decorator';
 @Controller('media')
 export class MediaController {
   constructor(private readonly mediaService: MediaService) {}
+
+  private sanitizeFileName(name: string): string {
+    const raw = typeof name === 'string' ? name : '';
+    // Strip directory components and traversal patterns
+    let base = path.basename(raw).replace(/\.\.(\\|\/)?/g, '');
+    // Remove path separators and control chars
+    base = base.replace(/[\\\/]/g, '').replace(/[\0-\x1F]+/g, '');
+    // Replace unsafe characters
+    base = base.replace(/[^a-zA-Z0-9._-]/g, '_');
+    // Enforce max length
+    const MAX_LEN = 100;
+    base = base.slice(0, MAX_LEN);
+    // Fallback if empty or invalid
+    if (!base || base === '.' || base === '..') {
+      base = 'file';
+    }
+    return base;
+  }
 
   @Post('signed-upload')
   @UseGuards(AuthGuard('jwt'))
@@ -25,7 +44,8 @@ export class MediaController {
     // Generate unique key for the file
     const timestamp = Date.now();
     const mediaFolder = isVideo ? 'videos' : 'photos';
-    const key = `users/${user.userId}/${mediaFolder}/${timestamp}-${body.fileName}`;
+    const safeFileName = this.sanitizeFileName(body.fileName);
+    const key = `users/${user.userId}/${mediaFolder}/${timestamp}-${safeFileName}`;
     const result = await this.mediaService.createSignedUploadUrl(key, body.fileType);
     return {
       uploadUrl: result.url,

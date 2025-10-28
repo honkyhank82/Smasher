@@ -3,12 +3,30 @@ import { Link } from 'react-router-dom'
 import '../styles/home.css'
 
 export default function Home() {
-  const [user, setUser] = useState<any>(null)
+  interface User {
+    name?: string
+  }
+
+  const [user, setUser] = useState<User | null>(null)
 
   useEffect(() => {
     const userData = localStorage.getItem('user')
     if (userData) {
-      setUser(JSON.parse(userData))
+      try {
+        const parsed = JSON.parse(userData)
+        const isValid = parsed && typeof parsed === 'object' && (parsed.name === undefined || typeof parsed.name === 'string')
+        if (isValid) {
+          setUser(parsed as User)
+        } else {
+          console.warn('Invalid user data in localStorage; clearing')
+          localStorage.removeItem('user')
+          setUser(null)
+        }
+      } catch (e) {
+        console.error('Failed to parse user from localStorage', e)
+        localStorage.removeItem('user')
+        setUser(null)
+      }
     }
   }, [])
 

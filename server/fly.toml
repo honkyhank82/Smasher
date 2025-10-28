@@ -12,7 +12,6 @@ primary_region = 'iad'
 [env]
   NODE_ENV = 'production'
   PORT = '3001'
-  DATABASE_URL = 'postgres://smasher_api:1Nw31O7O9O5rZZc@smasher-db.flycast:5432/smasher_api?sslmode=disable'
 
 [http_service]
   internal_port = 3001
@@ -27,11 +26,11 @@ primary_region = 'iad'
     timeout = '10s'
     grace_period = '30s'
     method = 'GET'
-    path = '/health'
+    path = '/health/live'
 
 # Removed legacy [[services]] block to avoid conflicts with http_service
 
 [[vm]]
   cpu_kind = 'shared'
   cpus = 1
-  memory_mb = 512
+  memory_mb = 1024

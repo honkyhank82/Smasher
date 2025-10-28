@@ -197,9 +197,11 @@ export class GeoService {
     return degrees * (Math.PI / 180);
   }
 
-  private calculateAge(user: any): number {
+  private calculateAge(user: any): number | null {
     if (!user.birthdate) {
-      return 25;
+      const configuredDefault = process.env.DEFAULT_AGE;
+      const defaultAge = configuredDefault ? parseInt(configuredDefault, 10) : NaN;
+      return Number.isFinite(defaultAge) ? defaultAge : null;
     }
     const birthDate = new Date(user.birthdate);
     const today = new Date();

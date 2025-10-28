@@ -1,35 +1,70 @@
-# Navigate to project root
-Set-Location "d:\Dev\smasher"
+param(
+  [string]$Root = "d:\\Dev\\smasher",
+  [switch]$DryRun,
+  [int]$AgeDays = 0,
+  [switch]$IncludeNodeModules,
+  [switch]$Verbose
+)
 
-Write-Host "🧹 Cleaning up project..." -ForegroundColor Green
+Set-Location $Root
 
-# Remove node_modules (can be reinstalled with npm install)
-Get-ChildItem -Path "." -Filter "node_modules" -Recurse -Directory | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
-Write-Host "✅ Removed node_modules"
+Write-Host "🧹 Cleanup starting at $Root" -ForegroundColor Green
 
-# Remove build artifacts
-Get-ChildItem -Path "." -Filter "dist" -Recurse -Directory | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
-Get-ChildItem -Path "." -Filter "build" -Recurse -Directory | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
-Write-Host "✅ Removed dist and build folders"
+function Remove-Target {
+  param([string]$Path, [switch]$IsDirectory)
+  if (Test-Path $Path) {
+    if ($DryRun) {
+      Write-Host "DRY-RUN: Would remove $Path" -ForegroundColor Yellow
+    } else {
+      if ($IsDirectory) {
+        Remove-Item -Path $Path -Recurse -Force -ErrorAction SilentlyContinue
+      } else {
+        Remove-Item -Path $Path -Force -ErrorAction SilentlyContinue
+      }
+      if ($Verbose) { Write-Host "Removed $Path" -ForegroundColor DarkGray }
+    }
+  }
+}
 
-# Remove log files
-Get-ChildItem -Path "." -Filter "*.log" -Recurse -File | Remove-Item -Force -ErrorAction SilentlyContinue
-Write-Host "✅ Removed log files"
+function Should-Remove {
+  param([System.IO.FileSystemInfo]$Item)
+  if ($AgeDays -le 0) { return $true }
+  $cutoff = (Get-Date).AddDays(-$AgeDays)
+  return ($Item.LastWriteTime -lt $cutoff)
+}
 
-# Remove cache folders
-Remove-Item -Path ".\.cache" -Recurse -Force -ErrorAction SilentlyContinue
-Remove-Item -Path ".\.gradle" -Recurse -Force -ErrorAction SilentlyContinue
-Remove-Item -Path ".\.expo" -Recurse -Force -ErrorAction SilentlyContinue
-Write-Host "✅ Removed cache folders"
+# Build artifacts (dist/build)
+Get-ChildItem -Path . -Recurse -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -in @('dist','build') } | ForEach-Object {
+  if (Should-Remove $_) { Remove-Target -Path $_.FullName -IsDirectory }
+}
+Write-Host "✅ Build artifacts cleaned (dist/build)" -ForegroundColor Green
 
-# Remove APK/AAB build files
-Get-ChildItem -Path "." -Filter "*.apk" -Recurse -File | Remove-Item -Force -ErrorAction SilentlyContinue
-Get-ChildItem -Path "." -Filter "*.aab" -Recurse -File | Remove-Item -Force -ErrorAction SilentlyContinue
-Write-Host "✅ Removed APK/AAB files"
+# Logs
+Get-ChildItem -Path . -Recurse -File -Filter '*.log' -ErrorAction SilentlyContinue | Where-Object { Should-Remove $_ } | ForEach-Object { Remove-Target -Path $_.FullName }
+Write-Host "✅ Log files cleaned (*.log)" -ForegroundColor Green
 
-# Remove lock files (optional - comment out if you want to keep)
-# Remove-Item -Path ".\package-lock.json" -Force -ErrorAction SilentlyContinue
-# Get-ChildItem -Path "." -Filter "package-lock.json" -Recurse -File | Remove-Item -Force -ErrorAction SilentlyContinue
+# Caches
+@('.\.cache','.\.gradle','.\.expo','app-rn\\android\\app\\build','app-rn\\android\\.cxx') | ForEach-Object { Remove-Target -Path $_ -IsDirectory }
+Write-Host "✅ Cache folders cleaned (.cache/.gradle/.expo, Android build/.cxx)" -ForegroundColor Green
 
-Write-Host "`n✨ Cleanup complete!" -ForegroundColor Green
-Write-Host "Project size reduced. Run 'npm install' to reinstall dependencies if needed."
+# APK/AAB
+Get-ChildItem -Path . -Recurse -File -ErrorAction SilentlyContinue | Where-Object { $_.Extension -in @('.apk','.aab') -and (Should-Remove $_) } | ForEach-Object { Remove-Target -Path $_.FullName }
+Write-Host "✅ APK/AAB files cleaned" -ForegroundColor Green
+
+# HPROF (Android heap dumps)
+Get-ChildItem -Path . -Recurse -File -ErrorAction SilentlyContinue -Filter '*.hprof' | Where-Object { Should-Remove $_ } | ForEach-Object { Remove-Target -Path $_.FullName }
+Write-Host "✅ HPROF dumps cleaned" -ForegroundColor Green
+
+# Optional: node_modules
+if ($IncludeNodeModules) {
+  Get-ChildItem -Path . -Recurse -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -eq 'node_modules' -and (Should-Remove $_) } | ForEach-Object { Remove-Target -Path $_.FullName -IsDirectory }
+  Write-Host "✅ node_modules removed (opt-in)" -ForegroundColor Green
+} else {
+  Write-Host "ℹ️ Skipped node_modules (use -IncludeNodeModules to remove)" -ForegroundColor Yellow
+}
+
+# Report summary
+$totalBytes = (Get-ChildItem -Force -Recurse -File | Measure-Object -Property Length -Sum).Sum
+$totalMB = [math]::Round($totalBytes/1MB,2)
+Write-Host "✨ Cleanup complete. Current working directory size: ${totalMB} MB" -ForegroundColor Green
+Write-Host "Run 'npm install' in app folders if node_modules were removed."

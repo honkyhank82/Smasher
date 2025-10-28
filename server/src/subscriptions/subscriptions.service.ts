@@ -195,12 +195,47 @@ export class SubscriptionsService {
     }
 
     this.logger.log(`Checkout completed for user ${userId}, subscription: ${session.subscription}`);
+
+    // If there's a subscription ID, ensure it's persisted (fallback for delayed subscription.created events)
+    if (session.subscription) {
+      const subscriptionId = typeof session.subscription === 'string' 
+        ? session.subscription 
+        : session.subscription.id;
+
+      // Check if subscription already exists
+      const existingSubscription = await this.subscriptionRepository.findOne({
+        where: { stripeSubscriptionId: subscriptionId }
+      });
+
+      if (!existingSubscription) {
+        this.logger.warn(`Subscription ${subscriptionId} not found, creating from checkout session`);
+        
+        try {
+          // Fetch the full subscription from Stripe
+          const stripeSubscription = await this.stripe.subscriptions.retrieve(subscriptionId);
+          
+          // Create subscription using the same logic as handleSubscriptionCreated
+          await this.createSubscriptionFromStripe(stripeSubscription);
+          
+          this.logger.log(`Subscription ${subscriptionId} created from checkout session`);
+        } catch (error) {
+          this.logger.error(`Failed to create subscription from checkout session: ${error.message}`, error.stack);
+        }
+      }
+    }
   }
 
   /**
    * Handle subscription created
    */
   private async handleSubscriptionCreated(stripeSubscription: Stripe.Subscription) {
+    await this.createSubscriptionFromStripe(stripeSubscription);
+  }
+
+  /**
+   * Create subscription record from Stripe subscription data
+   */
+  private async createSubscriptionFromStripe(stripeSubscription: Stripe.Subscription) {
     const userId = stripeSubscription.metadata?.userId;
     if (!userId) {
       this.logger.error('No userId in subscription metadata');

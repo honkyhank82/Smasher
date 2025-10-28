@@ -1,10 +1,12 @@
-﻿import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { createHash } from 'crypto';
 import { google } from 'googleapis';
 
 /**
  * Interface for the decrypted integrity token response
  */
+export interface IntegrityTokenPayload {
+  requestDetails: {
     timestampMillis: string;
     requestHash?: string;
   };
@@ -34,6 +36,7 @@ export interface IntegrityVerificationResult {
 
 export class IntegrityService {
   private readonly packageName = process.env.ANDROID_PACKAGE_NAME || 'com.smasherapp';
+  private readonly logger = new Logger(IntegrityService.name);
 
   /**
    * Compute SHA-256 hash of request data

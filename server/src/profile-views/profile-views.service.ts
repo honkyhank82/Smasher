@@ -124,7 +124,27 @@ export class ProfileViewsService {
   }
 
   private getMediaUrl(key: string): string {
-    // This should match your R2 public URL or use signed URLs
-    return key;
+    try {
+      // Check if public base URL is configured
+      const publicBaseUrl = process.env.PUBLIC_MEDIA_BASE_URL;
+      if (publicBaseUrl) {
+        // Construct public URL with proper encoding
+        return `${publicBaseUrl.replace(/\/$/, '')}/${encodeURIComponent(key)}`;
+      }
+      
+      // Fallback: construct R2 public URL if account and bucket are configured
+      const r2AccountId = process.env.R2_ACCOUNT_ID;
+      const r2Bucket = process.env.S3_BUCKET || 'smasher-media';
+      
+      if (r2AccountId) {
+        return `https://${r2AccountId}.r2.cloudflarestorage.com/${r2Bucket}/${encodeURIComponent(key)}`;
+      }
+      
+      // If no configuration available, return empty string to avoid broken URLs
+      return '';
+    } catch (error) {
+      // Handle any encoding or URL construction errors
+      return '';
+    }
   }
 }

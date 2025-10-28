@@ -1,47 +1,34 @@
 import { Controller, Post, Body, Logger, HttpException, HttpStatus } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { IntegrityService } from './integrity.service';
+import { SubmitScoreDto } from './dto/submit-score.dto';
+import { ProcessPurchaseDto } from './dto/process-purchase.dto';
+import { VerifyActionDto } from './dto/verify-action.dto';
+import { ScoreSubmission } from './score-submission.entity';
 
-/**
- * DTO for score submission with integrity token
- */
-export class SubmitScoreDto {
-  score: number;
-  userId: string;
-  integrityToken: string;
-}
-
-/**
- * DTO for purchase with integrity token
- */
-export class ProcessPurchaseDto {
-  itemId: string;
-  amount: number;
-  userId: string;
-  integrityToken: string;
-}
-
-/**
- * DTO for generic action with integrity token
- */
-export class VerifyActionDto {
-  actionType: string;
-  actionData: string;
-  integrityToken: string;
-}
 
 @Controller('integrity')
 export class IntegrityController {
   private readonly logger = new Logger(IntegrityController.name);
 
-  constructor(private readonly integrityService: IntegrityService) {}
+  constructor(
+    private readonly integrityService: IntegrityService,
+    @InjectRepository(ScoreSubmission)
+    private readonly scoreRepo: Repository<ScoreSubmission>,
+  ) {}
 
   /**
    * Example 1: Verify and submit game score
    */
   @Post('submit-score')
   async submitScore(@Body() dto: SubmitScoreDto) {
-    // Reconstruct the request data exactly as it was on the client
-    const requestData = `score=${dto.score}&userId=${dto.userId}`;
+    // Reconstruct request data deterministically using URLSearchParams
+    const params = new URLSearchParams();
+    // Fixed key order, only include defined values
+    if (dto.score !== undefined && dto.score !== null) params.append('score', String(dto.score));
+    if (dto.userId) params.append('userId', dto.userId);
+    const requestData = params.toString();
 
     // Verify integrity token with request hash
     const verification = await this.integrityService.verifyIntegrityWithRequestHash(
@@ -76,8 +63,15 @@ export class IntegrityController {
 
     // Integrity verified - proceed with score submission
     this.logger.log('Score submission verified', { userId: dto.userId, score: dto.score });
+    // Persist score to database
+    try {
+      const record = this.scoreRepo.create({ userId: dto.userId, score: dto.score });
+      await this.scoreRepo.save(record);
+    } catch (err) {
+      this.logger.error('Failed to persist score submission', { userId: dto.userId, error: err?.message || String(err) });
+      throw new HttpException({ message: 'Failed to save score' }, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
-    // TODO: Save score to database
     return {
       success: true,
       message: 'Score submitted successfully',
@@ -90,8 +84,12 @@ export class IntegrityController {
    */
   @Post('process-purchase')
   async processPurchase(@Body() dto: ProcessPurchaseDto) {
-    // Reconstruct the request data
-    const requestData = `itemId=${dto.itemId}&amount=${dto.amount.toFixed(2)}&userId=${dto.userId}`;
+    // Reconstruct request data deterministically
+    const params = new URLSearchParams();
+    if (dto.itemId) params.append('itemId', dto.itemId);
+    if (dto.amount !== undefined && dto.amount !== null) params.append('amount', dto.amount.toFixed(2));
+    if (dto.userId) params.append('userId', dto.userId);
+    const requestData = params.toString();
 
     // Verify integrity token
     const verification = await this.integrityService.verifyIntegrityWithRequestHash(
@@ -145,8 +143,11 @@ export class IntegrityController {
    */
   @Post('verify-action')
   async verifyAction(@Body() dto: VerifyActionDto) {
-    // Reconstruct the request data
-    const requestData = `action=${dto.actionType}&data=${dto.actionData}`;
+    // Reconstruct request data deterministically
+    const params = new URLSearchParams();
+    if (dto.actionType) params.append('action', dto.actionType);
+    if (dto.actionData) params.append('data', dto.actionData);
+    const requestData = params.toString();
 
     // Verify integrity token
     const verification = await this.integrityService.verifyIntegrityWithRequestHash(

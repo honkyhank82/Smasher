@@ -12,6 +12,15 @@ param(
 Write-Host "🚀 Starting Smasher Development Environment..." -ForegroundColor Cyan
 Write-Host ""
 
+# Preflight: enforce 5GB cap (separate tool; not part of audit script)
+$capScript = Join-Path $PSScriptRoot 'enforce-size-cap.ps1'
+if (Test-Path $capScript) {
+  Write-Host "📦 Preflight: enforcing 5GB cap (AgeDays=7)..." -ForegroundColor Yellow
+  & $capScript -CapGB 5 -AgeDays 7
+} else {
+  Write-Host "⚠️  Preflight: enforce-size-cap.ps1 not found; skipping size enforcement" -ForegroundColor Yellow
+}
+
 if (-not $Remote) {
   Write-Host "📡 Detecting IP address..." -ForegroundColor Yellow
   $ip = (

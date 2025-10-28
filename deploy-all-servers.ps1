@@ -1,4 +1,11 @@
-#Requires -RunAsAdministrator
+<#
+Note on privileges:
+- This script performs cloud deployments (Fly.io, Render, Vercel), runs npm commands,
+  and makes web requests. None of these operations require local administrator rights.
+- If a future step truly needs elevation, isolate that specific command and
+  perform a conditional escalation around only that minimal operation.
+-- Removed unconditional "#Requires -RunAsAdministrator" to avoid forcing elevation.
+#>
 
 <#
 .SYNOPSIS
