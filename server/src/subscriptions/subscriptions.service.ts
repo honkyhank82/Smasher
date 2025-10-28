@@ -26,7 +26,7 @@ export class SubscriptionsService {
       this.stripe = new Stripe(stripeSecretKey, {
         apiVersion: '2025-09-30.clover',
       });
-      this.priceId = process.env.STRIPE_PRICE_ID || 'price_1SKS4jRCd67aHvYR8IRdmc1C';
+      this.priceId = process.env.STRIPE_PRICE_ID || 'price_1SNBIbCKpcCZj0lLEYh12CC5';
       this.logger.log('Subscriptions service initialized successfully');
     } catch (error) {
       this.logger.error('Failed to initialize SubscriptionsService', error);

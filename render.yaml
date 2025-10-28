@@ -17,6 +17,8 @@ services:
         fromSecret: stripe_secret_key
       - key: STRIPE_WEBHOOK_SECRET
         fromSecret: stripe_webhook_secret
+      - key: STRIPE_PRICE_ID
+        value: price_1SNBIbCKpcCZj0lLEYh12CC5
       - key: JWT_SECRET
         fromSecret: jwt_secret
       - key: RESEND_API_KEY
