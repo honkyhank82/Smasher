@@ -1,3 +1,29 @@
+## 📄 License
+
+**Personal Use Only License**
+
+This software is provided **STRICTLY FOR PERSONAL, NON-COMMERCIAL USE ONLY**.
+
+### ✅ **Permitted:**
+- Personal use on your own devices
+- Testing and evaluation for personal projects
+- Learning and experimentation
+
+### ❌ **PROHIBITED:**
+- Any commercial use or business applications
+- Redistribution, resale, or licensing to third parties
+- Use in any commercial product or service
+- Modification for commercial purposes
+- Hosting as a service for others
+- Use in any production environment serving customers
+
+**By using this software, you agree to these terms.**
+
+---
+
+*For commercial licensing or enterprise use, please contact smashermain@gmail.com.*
+
+
 # 🔥 SMASHER - Meet Gay Men Nearby
 
 **A free app to meet, chat, and connect with gay men around you.**
