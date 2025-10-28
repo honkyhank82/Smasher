@@ -92,8 +92,8 @@ android {
         applicationId 'com.smasher.app'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 15
-        versionName "1.0.15"
+        versionCode 16
+        versionName "1.0.16"
 
         buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
     }
@@ -105,10 +105,18 @@ android {
             keyPassword 'android'
         }
         release {
-            storeFile file('smasher-release.keystore')
-            storePassword '7bc0cb9114b0254464cba627c7f9b085'
-            keyAlias 'a86ce9b7b0ae202edb223ef33d555369'
-            keyPassword 'c89d0c8041ac9a1c650e0369c4d59b59'
+            // Load from gradle.properties if present, otherwise from environment variables
+            if (project.hasProperty('SMASHER_UPLOAD_STORE_FILE')) {
+                storeFile file(SMASHER_UPLOAD_STORE_FILE)
+                storePassword SMASHER_UPLOAD_STORE_PASSWORD
+                keyAlias SMASHER_UPLOAD_KEY_ALIAS
+                keyPassword SMASHER_UPLOAD_KEY_PASSWORD
+            } else if (System.getenv('SMASHER_UPLOAD_STORE_FILE')) {
+                storeFile file(System.getenv('SMASHER_UPLOAD_STORE_FILE'))
+                storePassword System.getenv('SMASHER_UPLOAD_STORE_PASSWORD')
+                keyAlias System.getenv('SMASHER_UPLOAD_KEY_ALIAS')
+                keyPassword System.getenv('SMASHER_UPLOAD_KEY_PASSWORD')
+            }
         }
     }
     buildTypes {

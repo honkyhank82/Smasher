@@ -2,7 +2,7 @@
   "expo": {
     "name": "SMASHER",
     "slug": "smasher-app",
-    "version": "1.0.15",
+    "version": "1.0.16",
     "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -11,29 +11,13 @@
       "resizeMode": "contain",
       "backgroundColor": "#000000"
     },
-    "ios": {
-      "supportsTablet": false,
-      "bundleIdentifier": "com.smasher.app",
-      "buildNumber": "15",
-      "icon": "./assets/icon.png",
-      "infoPlist": {
-        "NSCameraUsageDescription": "Smasher needs access to your camera to take profile photos",
-        "NSPhotoLibraryUsageDescription": "Smasher needs access to your photo library to upload photos",
-        "NSLocationWhenInUseUsageDescription": "Smasher uses your location to show nearby users",
-        "NSLocationAlwaysUsageDescription": "Smasher uses your location to show nearby users",
-        "NSMicrophoneUsageDescription": "Smasher needs access to your microphone for video messages",
-        "UIBackgroundModes": ["remote-notification"]
-      },
-      "associatedDomains": ["applinks:smasher.app"],
-      "usesAppleSignIn": false
-    },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#000000"
       },
       "package": "com.smasher.app",
-      "versionCode": 15,
+      "versionCode": 16,
       "permissions": [
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",
