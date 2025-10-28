@@ -33,11 +33,12 @@ export class MediaController {
     @CurrentUser() user: { userId: string },
     @Body() body: { fileName: string; fileType: string; mediaType?: 'photo' | 'video' }
   ) {
-    // Validate file type
+    // Validate file type strictly: mediaType must match fileType
     const isVideo = body.mediaType === 'video' || body.fileType.startsWith('video/');
     const isPhoto = body.mediaType === 'photo' || body.fileType.startsWith('image/');
-    
-    if (!isVideo && !isPhoto) {
+    if ((!isVideo && !isPhoto) ||
+        (body.mediaType === 'video' && !body.fileType.startsWith('video/')) ||
+        (body.mediaType === 'photo' && !body.fileType.startsWith('image/'))) {
       throw new BadRequestException('Only images and videos are allowed');
     }
 
@@ -65,6 +66,10 @@ export class MediaController {
     @CurrentUser() user: { userId: string },
     @Body() body: { fileName: string; fileType: string; mediaType: 'photo' | 'video'; fileData: string }
   ) {
+    const MAX_BASE64_SIZE = 50 * 1024 * 1024; // 50MB
+    if (body.fileData && body.fileData.length > MAX_BASE64_SIZE) {
+      throw new BadRequestException('File too large');
+    }
     return this.mediaService.uploadMediaBase64(user.userId, body.fileName, body.fileType, body.mediaType, body.fileData);
   }
 

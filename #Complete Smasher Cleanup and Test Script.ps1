@@ -1,5 +1,8 @@
 # Smasher Complete App Functionality Test Script
 # Runs all tests first, then provides detailed error summary
+param(
+  [string]$ProjectPath = (Split-Path -Parent $PSScriptRoot)
+)
 
 $ErrorActionPreference = "Continue"
 $results = @{}
@@ -11,7 +14,11 @@ Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "SMASHER COMPLETE APP TEST" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 
-cd d:\Dev\smasher
+if (-not (Test-Path $ProjectPath)) {
+  Write-Host "❌ ProjectPath does not exist: $ProjectPath" -ForegroundColor Red
+  throw "Invalid ProjectPath"
+}
+Set-Location -Path $ProjectPath
 
 # STEP 1: Configuration Check
 Write-Host "`n=== CONFIGURATION CHECK ===" -ForegroundColor Yellow

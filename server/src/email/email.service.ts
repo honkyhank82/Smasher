@@ -42,8 +42,12 @@ export class EmailService {
   }
 
   async sendVerificationCode(to: string, code: string): Promise<boolean> {
-    // Always log the code in development for easy testing
-    this.logger.log(`📧 VERIFICATION CODE for ${to}: ${code}`);
+    // Log verification code only in non-production environments or when explicitly enabled
+    const isDev = process.env.NODE_ENV === 'development';
+    const debugFlag = String(process.env.EMAIL_DEBUG).toLowerCase() === 'true';
+    if (isDev || debugFlag) {
+      this.logger.log(`📧 VERIFICATION CODE for ${to}: ${code}`);
+    }
     
     if (!this.hasKey() || !this.resend) {
       this.logger.warn(`⚠️  Email not sent - RESEND_API_KEY not configured. Use the code above.`);
