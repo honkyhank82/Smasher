@@ -19,10 +19,9 @@ A brand new React web app with the same features as your mobile app:
 **Location**: `d:\Dev\smasher\app-web`
 
 ### 2. Multi-Server Failover ✅
-Your backend automatically switches between 3 servers if one goes down:
+Your backend automatically switches between 2 servers if one goes down:
 1. Fly.io (Primary) - Your main server
-2. Railway (Secondary) - Automatic backup
-3. Render (Tertiary) - Final fallback
+2. Render (Secondary) - Automatic backup
 
 **Zero downtime. Users don't notice.**
 
@@ -67,7 +66,7 @@ Choose based on your need:
 ### Step 2: Prepare Your Environment
 
 You'll need:
-- [ ] PostgreSQL database URL (create on Railway, AWS RDS, or DigitalOcean)
+- [ ] PostgreSQL database URL (create on Render, AWS RDS, or DigitalOcean)
 - [ ] JWT Secret (random 32+ character string)
 - [ ] Resend API key (for email verification)
 - [ ] Cloudflare R2 credentials (for photo storage)
@@ -221,12 +220,7 @@ Menu options:
 - URL: https://smasher-api.fly.dev
 - Region: US East (iad)
 
-**Secondary Server** (Railway)
-- Status: 🔧 Ready to deploy
-- URL: https://smasher-production.up.railway.app
-- Will be deployed in step 4
-
-**Tertiary Server** (Render)
+**Secondary Server** (Render)
 - Status: 🔧 Ready to deploy
 - URL: https://smasher.onrender.com
 - Optional backup
@@ -253,11 +247,9 @@ Menu options:
 
 # View logs
 fly logs
-railway logs
 
 # Test specific server
 curl https://smasher-api.fly.dev/health
-curl https://smasher-production.up.railway.app/health
 curl https://smasher.onrender.com/health
 ```
 
@@ -286,10 +278,9 @@ curl https://smasher.onrender.com/health
 
 ## Costs
 
-**First Month**: ~$30-50
+**First Month**: ~$10-35
 - Fly.io: $5-10
-- Railway: $10-20
-- Railway PostgreSQL: $15
+- Render: Free-7
 - Vercel: Free-5
 
 **Ongoing**: ~$50-150/month (scales with usage)
@@ -302,7 +293,6 @@ curl https://smasher.onrender.com/health
 
 ### Official Documentation
 - Fly.io: https://fly.io/docs
-- Railway: https://docs.railway.app
 - Render: https://render.com/docs
 - Vercel: https://vercel.com/docs
 
@@ -325,7 +315,6 @@ Before you start, make sure you have:
 
 ### Accounts & Credentials
 - [ ] Fly.io account (https://fly.io)
-- [ ] Railway account (https://railway.app)
 - [ ] Render account (https://render.com)
 - [ ] Vercel account (https://vercel.com)
 - [ ] GitHub account with repo

@@ -7,29 +7,22 @@ export const BACKEND_SERVICES = [
   {
     name: 'Fly.io Primary',
     apiUrl: 'https://smasher-api.fly.dev',
-    wsUrl: 'https://smasher-api.fly.dev',
+    wsUrl: 'wss://smasher-api.fly.dev',
     priority: 1,
     healthCheck: '/health'
   },
   {
     name: 'Fly.io Secondary Region',
     apiUrl: 'https://smasher-api-backup.fly.dev',
-    wsUrl: 'https://smasher-api-backup.fly.dev',
+    wsUrl: 'wss://smasher-api-backup.fly.dev',
     priority: 2,
-    healthCheck: '/health'
-  },
-  {
-    name: 'Railway Backup',
-    apiUrl: 'https://smasher-production.up.railway.app',
-    wsUrl: 'https://smasher-production.up.railway.app',
-    priority: 3,
     healthCheck: '/health'
   },
   {
     name: 'Render Backup',
     apiUrl: 'https://smasher.onrender.com',
-    wsUrl: 'https://smasher.onrender.com',
-    priority: 4,
+    wsUrl: 'wss://smasher.onrender.com',
+    priority: 3,
     healthCheck: '/health'
   }
 ];

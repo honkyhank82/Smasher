@@ -13,17 +13,10 @@ export const BACKEND_SERVICES = [
     healthCheck: '/health'
   },
   {
-    name: 'Railway Backup',
-    apiUrl: 'https://smasher-production.up.railway.app',
-    wsUrl: 'wss://smasher-production.up.railway.app',
-    priority: 2,
-    healthCheck: '/health'
-  },
-  {
     name: 'Render Backup',
     apiUrl: 'https://smasher.onrender.com',
     wsUrl: 'wss://smasher.onrender.com',
-    priority: 3,
+    priority: 2,
     healthCheck: '/health'
   }
 ];

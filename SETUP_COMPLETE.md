@@ -17,19 +17,18 @@ Deploy with: `vercel --prod`
 ### 2. ✅ Automatic Multi-Server Failover
 **Backend Servers**:
 1. **Fly.io (Primary)** - https://smasher-api.fly.dev
-2. **Railway (Secondary)** - https://smasher-production.up.railway.app
-3. **Render (Tertiary)** - https://smasher.onrender.com
+2. **Render (Secondary)** - https://smasher.onrender.com
 
 Health checks every 60 seconds. Automatic switch on server failure.
 
 ### 3. ✅ Shared PostgreSQL Database
-All three backends connect to the same database:
+Both backends connect to the same database:
 - No data sync needed
 - Instant failover
 - Single source of truth
 
 **Setup options**:
-- Railway Managed PostgreSQL (recommended)
+- Render Managed PostgreSQL (recommended)
 - AWS RDS PostgreSQL
 - DigitalOcean Database
 
@@ -73,9 +72,8 @@ Same failover system as web app.
 
 # Or deploy individually:
 # 1: Fly.io
-# 2: Railway
-# 3: Render
-# 4: Vercel (Web App)
+# 2: Render
+# 3: Vercel (Web App)
 ```
 
 ---
@@ -101,12 +99,12 @@ Same failover system as web app.
                   │
     ┌─────────────┼─────────────┐
     │             │             │
-┌───▼───┐    ┌───▼────┐    ┌──▼────┐
-│Fly.io │    │Railway │    │Render │
-│Primary│    │2ndary  │    │3rdary │
-└───┬───┘    └───┬────┘    └──┬────┘
-    │            │            │
-    └────────────┼────────────┘
+┌───▼───┐         ┌──▼────┐
+│Fly.io │         │Render │
+│Primary│         │Secondary │
+└───┬───┘         └──┬────┘
+    │                │
+    └────────────┬───┘
                  │
            ┌─────▼──────────┐
            │ Shared PostgreSQL
@@ -125,7 +123,6 @@ Same failover system as web app.
 | `app-web/` | Web app source code |
 | `server/render.yaml` | Render deployment config |
 | `server/render.json` | Render build config |
-| `server/railway.json` | Railway deployment config |
 | `deploy-all-servers.ps1` | Multi-server deployment script |
 | `setup-all.ps1` | Complete setup script |
 | `MULTI_SERVER_DEPLOYMENT.md` | Detailed deployment guide |
@@ -153,7 +150,7 @@ app-web/
 .\deploy-all-servers.ps1
 # Select option 7: Setup Shared Database
 
-# Choose Railway Managed PostgreSQL
+# Choose Managed PostgreSQL (e.g., Render, AWS RDS, DigitalOcean)
 # Copy DATABASE_URL
 ```
 
@@ -175,26 +172,11 @@ fly deploy
 
 **URL**: https://smasher-api.fly.dev
 
-### Step 3: Deploy Railway (Secondary)
+### Step 3: Deploy Render (Secondary)
 
 ```powershell
 .\deploy-all-servers.ps1
-# Select option 2: Deploy to Railway
-
-# Or manually:
-railway login
-cd server
-railway link
-railway up
-```
-
-**URL**: https://smasher-production.up.railway.app
-
-### Step 4: Deploy Render (Tertiary)
-
-```powershell
-.\deploy-all-servers.ps1
-# Select option 3: Deploy to Render
+# Select option 2: Deploy to Render
 
 # Or manually via Vercel dashboard at render.com
 ```
@@ -254,11 +236,6 @@ fly secrets set DATABASE_URL="postgresql://..."
 # ... repeat for others
 ```
 
-**Railway**:
-```bash
-railway variables set JWT_SECRET="your-secret"
-```
-
 **Render**:
 1. Dashboard → Environment
 2. Add variables manually
@@ -276,7 +253,6 @@ railway variables set JWT_SECRET="your-secret"
 
 # Or manually
 curl https://smasher-api.fly.dev/health
-curl https://smasher-production.up.railway.app/health
 curl https://smasher.onrender.com/health
 ```
 
@@ -286,11 +262,6 @@ curl https://smasher.onrender.com/health
 ```bash
 fly logs
 fly logs --follow
-```
-
-**Railway**:
-```bash
-railway logs
 ```
 
 **Render**:
@@ -309,7 +280,7 @@ railway logs
 
 2. **Check Web App**:
    - Refresh page
-   - Should show "Connected to Railway"
+   - Should show "Connected to Render"
    - No errors for user
 
 3. **Verify Mobile App**:
@@ -336,7 +307,6 @@ railway logs
 1. Go to https://uptimerobot.com
 2. Create monitor for each endpoint:
    - https://smasher-api.fly.dev/health
-   - https://smasher-production.up.railway.app/health
    - https://smasher.onrender.com/health
 3. Set alert email
 
@@ -361,16 +331,14 @@ railway logs
 | Service | Price | Notes |
 |---------|-------|-------|
 | Fly.io | $5-30 | Shared VM, scales |
-| Railway | $5-30 | Shared VM, scales |
-| Railway DB | $15-50 | Managed PostgreSQL |
 | Render | Free-7 | Sleeps after 15 min inactivity |
 | Vercel | Free-20 | Edge functions optional |
-| **Total** | **$30-140** | Scales with usage |
+| **Total** | **$10-57** | Scales with usage |
 
 ### Cost Optimization
 
-1. Use Railway PostgreSQL (shared across all)
-2. Start with Fly.io + Railway (drop Render if budget tight)
+1. Use a managed PostgreSQL (e.g., Render) shared across all
+2. Start with Fly.io + Render
 3. Use Vercel free tier for web app
 4. Monitor usage on dashboards
 
@@ -382,7 +350,6 @@ railway logs
 - [ ] Create `server/.env` with credentials
 - [ ] Setup shared PostgreSQL database
 - [ ] Deploy to Fly.io (primary)
-- [ ] Deploy to Railway (secondary)
 - [ ] Deploy to Render (tertiary)
 - [ ] Deploy web app to Vercel
 - [ ] Test failover by stopping each server
@@ -414,16 +381,13 @@ cd server && npm run build         # Build backend
 cd app-web && npm run build        # Build web app
 fly deploy                         # Deploy to Fly.io
 vercel --prod                      # Deploy to Vercel
-railway up                         # Deploy to Railway
 
 # Monitoring
 fly logs                           # Fly.io logs
-railway logs                       # Railway logs
 curl https://smasher-api.fly.dev/health  # Health check
 
 # Secrets
 fly secrets set KEY=VALUE          # Set Fly.io secret
-railway variables set KEY=VALUE    # Set Railway var
 ```
 
 ---

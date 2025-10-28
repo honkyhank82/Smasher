@@ -2,7 +2,7 @@
 
 <#
 .SYNOPSIS
-Deploy to all backup servers (Railway and Render) with Fly.io as primary
+Deploy to Render backup with Fly.io as primary (no Railway)
 .DESCRIPTION
 This script deploys the backend to multiple platforms with automatic failover
 #>
@@ -22,13 +22,12 @@ function Show-Menu {
   Write-Host "========================================`n" -ForegroundColor Cyan
   Write-Host "Select deployment option:" -ForegroundColor Green
   Write-Host "1. Deploy Backend to Fly.io (Primary)"
-  Write-Host "2. Deploy Backend to Railway (Secondary)"
-  Write-Host "3. Deploy Backend to Render (Tertiary)"
-  Write-Host "4. Deploy Web App to Vercel"
-  Write-Host "5. Deploy to ALL servers"
-  Write-Host "6. Check server health"
-  Write-Host "7. Setup Shared Database"
-  Write-Host "8. Configure Environment Variables"
+  Write-Host "2. Deploy Backend to Render (Backup)"
+  Write-Host "3. Deploy Web App to Vercel"
+  Write-Host "4. Deploy to ALL (Fly + Render + Web)"
+  Write-Host "5. Check server health"
+  Write-Host "6. Setup Shared Database"
+  Write-Host "7. Configure Environment Variables"
   Write-Host "0. Exit`n"
 }
 
@@ -48,25 +47,6 @@ function Deploy-Flyio {
   Write-Host "[URL] https://smasher-api.fly.dev" -ForegroundColor Cyan
 }
 
-function Deploy-Railway {
-  Write-Host "`n[DEPLOY] Deploying to Railway (Secondary)..." -ForegroundColor Green
-  
-  if (-not (Get-Command railway -ErrorAction SilentlyContinue)) {
-    Write-Host "[ERROR] Railway CLI not found. Install with: npm i -g @railway/cli" -ForegroundColor Red
-    return
-  }
-  
-  Set-Location $serverDir
-  
-  Write-Host "[INFO] Linking to Railway project..." -ForegroundColor Yellow
-  railway link
-  
-  Write-Host "[INFO] Building and deploying..." -ForegroundColor Yellow
-  railway up
-  
-  Write-Host "[OK] Railway deployment complete!" -ForegroundColor Green
-  Write-Host "[URL] https://smasher-production.up.railway.app" -ForegroundColor Cyan
-}
 
 function Deploy-Render {
   Write-Host "`n[DEPLOY] Deploying to Render (Tertiary)..." -ForegroundColor Green
@@ -112,7 +92,6 @@ function Check-ServerHealth {
   
   $servers = @(
     @{ name = "Fly.io (Primary)"; url = "https://smasher-api.fly.dev/health" },
-    @{ name = "Railway (Secondary)"; url = "https://smasher-production.up.railway.app/health" },
     @{ name = "Render (Tertiary)"; url = "https://smasher.onrender.com/health" }
   )
   
@@ -134,26 +113,13 @@ function Setup-SharedDatabase {
   Write-Host "`n[DB] Setting up Shared PostgreSQL Database..." -ForegroundColor Cyan
   
   Write-Host "`n[OPTIONS] Database Setup Options:" -ForegroundColor Yellow
-  Write-Host "1. Railway Managed PostgreSQL (Recommended)"
-  Write-Host "2. AWS RDS PostgreSQL"
-  Write-Host "3. Railway - Create new service`n"
+  Write-Host "1. AWS RDS PostgreSQL (Recommended)"
+  Write-Host "2. Managed PostgreSQL (any provider)"`n
   
-  $choice = Read-Host "Select option (1-3)"
+  $choice = Read-Host "Select option (1-2)"
   
   switch ($choice) {
     "1" {
-      Write-Host "`n[SETUP] Railway PostgreSQL Setup:" -ForegroundColor Green
-      Write-Host "1. Go to https://railway.app/dashboard" -ForegroundColor White
-      Write-Host "2. Create new project" -ForegroundColor White
-      Write-Host "3. Add PostgreSQL database" -ForegroundColor White
-      Write-Host "4. Copy DATABASE_URL from variables" -ForegroundColor White
-      Write-Host "5. Add to Fly.io secrets: fly secrets set DATABASE_URL=<url>" -ForegroundColor White
-      Write-Host "6. Add to Railway service environment" -ForegroundColor White
-      Write-Host "7. Add to Render service environment" -ForegroundColor White
-      
-      Start-Process "https://railway.app/dashboard"
-    }
-    "2" {
       Write-Host "`n[SETUP] AWS RDS Setup:" -ForegroundColor Green
       Write-Host "1. Go to https://console.aws.amazon.com/rds" -ForegroundColor White
       Write-Host "2. Create new database instance (PostgreSQL 14+)" -ForegroundColor White
@@ -163,19 +129,12 @@ function Setup-SharedDatabase {
       
       Start-Process "https://console.aws.amazon.com/rds"
     }
-    "3" {
-      Write-Host "`n[INFO] Creating Railway PostgreSQL...`n" -ForegroundColor Yellow
-      
-      if (-not (Get-Command railway -ErrorAction SilentlyContinue)) {
-        Write-Host "[ERROR] Railway CLI not found. Install with: npm i -g @railway/cli" -ForegroundColor Red
-        return
-      }
-      
-      Set-Location $serverDir
-      railway link
-      railway add --service postgres
-      
-      Write-Host "`n[OK] PostgreSQL created! Copy the DATABASE_URL from Railway dashboard" -ForegroundColor Green
+    "2" {
+      Write-Host "`n[SETUP] Managed PostgreSQL (any provider):" -ForegroundColor Green
+      Write-Host "1. Create a PostgreSQL 14+ instance on your provider" -ForegroundColor White
+      Write-Host "2. Get the connection string (DATABASE_URL)" -ForegroundColor White
+      Write-Host "3. Set on Fly.io: fly secrets set DATABASE_URL=<url>" -ForegroundColor White
+      Write-Host "4. Set on Render: Service settings > Environment" -ForegroundColor White
     }
   }
 }
@@ -201,7 +160,6 @@ function Configure-Env {
     Write-Host "  Example: $($var.sample)" -ForegroundColor Gray
     Write-Host "  Set on:" -ForegroundColor Gray
     Write-Host "    - Fly.io: fly secrets set $($var.name)=value" -ForegroundColor Gray
-    Write-Host "    - Railway: railway variables" -ForegroundColor Gray
     Write-Host "    - Render: Service settings > Environment" -ForegroundColor Gray
   }
   
@@ -222,11 +180,6 @@ function Deploy-All {
   Deploy-Flyio
   
   Write-Host "`n[WAIT] Waiting for Fly.io to stabilize..." -ForegroundColor Yellow
-  Start-Sleep -Seconds 30
-  
-  Deploy-Railway
-  
-  Write-Host "`n[WAIT] Waiting for Railway to stabilize..." -ForegroundColor Yellow
   Start-Sleep -Seconds 30
   
   Deploy-Render
@@ -254,13 +207,12 @@ while ($true) {
   
   switch ($choice) {
     "1" { Deploy-Flyio }
-    "2" { Deploy-Railway }
-    "3" { Deploy-Render }
-    "4" { Deploy-WebApp }
-    "5" { Deploy-All }
-    "6" { Check-ServerHealth }
-    "7" { Setup-SharedDatabase }
-    "8" { Configure-Env }
+    "2" { Deploy-Render }
+    "3" { Deploy-WebApp }
+    "4" { Deploy-All }
+    "5" { Check-ServerHealth }
+    "6" { Setup-SharedDatabase }
+    "7" { Configure-Env }
     "0" { 
       Write-Host "Goodbye!" -ForegroundColor Cyan
       exit 0

@@ -124,7 +124,6 @@ function Install-CLIs {
   
   $tools = @(
     @{ name = "Fly CLI"; cmd = "fly"; install = "npm install -g flyctl" },
-    @{ name = "Railway CLI"; cmd = "railway"; install = "npm install -g @railway/cli" },
     @{ name = "Vercel CLI"; cmd = "vercel"; install = "npm install -g vercel" }
   )
   
@@ -145,7 +144,7 @@ function Show-Menu {
   Write-Host "  SMASHER Complete Setup" -ForegroundColor Magenta
   Write-Host "========================================`n" -ForegroundColor Cyan
   Write-Host "Select what to setup:" -ForegroundColor Green
-  Write-Host "1. Install CLI tools (Fly, Railway, Vercel)"
+  Write-Host "1. Install CLI tools (Fly, Vercel)"
   Write-Host "2. Setup environment variables"
   Write-Host "3. Setup backend only"
   Write-Host "4. Setup mobile app only"

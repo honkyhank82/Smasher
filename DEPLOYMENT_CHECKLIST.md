@@ -5,14 +5,13 @@
 ### Infrastructure Setup
 - [ ] Create Cloudflare R2 account and bucket
 - [ ] Create Resend account and get API key
-- [ ] Create Railway account
 - [ ] Create Render account
 - [ ] Create Vercel account
 - [ ] Have GitHub repo ready (for deployments)
 
 ### Database Setup (FIRST - All servers depend on this)
 - [ ] Choose database provider:
-  - [ ] Railway Managed PostgreSQL (recommended)
+  - [ ] Render Managed PostgreSQL (recommended)
   - [ ] AWS RDS PostgreSQL
   - [ ] DigitalOcean Database
 - [ ] Create PostgreSQL 14+ instance
@@ -39,7 +38,6 @@
 # Choose option 1
 ```
 - [ ] Fly CLI installed
-- [ ] Railway CLI installed
 - [ ] Vercel CLI installed
 
 ### 2. Setup Backend
@@ -117,57 +115,7 @@ curl https://smasher-api.fly.dev/health
 
 ---
 
-### Phase 2: Railway (Secondary Server)
-
-**Authenticate**:
-```bash
-railway login
-```
-- [ ] Railway CLI authenticated
-
-**Create Project**:
-```bash
-cd server
-railway link
-railway add --service postgres
-```
-- [ ] Project linked
-- [ ] PostgreSQL service created
-- [ ] DATABASE_URL available in Railway dashboard
-
-**Set Environment Variables**:
-
-```bash
-railway variables set DATABASE_URL="postgresql://..."
-railway variables set JWT_SECRET="your-secret"
-railway variables set RESEND_API_KEY="re_xxxxx"
-railway variables set R2_ACCOUNT_ID="..."
-railway variables set R2_ACCESS_KEY_ID="..."
-railway variables set R2_SECRET_ACCESS_KEY="..."
-railway variables set FROM_EMAIL="noreply@smasher.app"
-railway variables set NODE_ENV=production
-railway variables set PORT=3001
-```
-- [ ] All environment variables set
-
-**Deploy**:
-```bash
-railway up
-```
-- [ ] Build succeeds
-- [ ] Deployment completes
-- [ ] App is running
-
-**Test**:
-```bash
-curl https://smasher-production.up.railway.app/health
-```
-- [ ] Health endpoint returns 200
-- [ ] Database connected
-
----
-
-### Phase 3: Render (Tertiary Server - Optional)
+### Phase 2: Render (Secondary Server)
 
 **Setup via Dashboard**:
 1. Go to https://dashboard.render.com
@@ -254,7 +202,6 @@ vercel --prod
 ```
 
 - [ ] Fly.io: HEALTHY ✅
-- [ ] Railway: HEALTHY ✅
 - [ ] Render: HEALTHY ✅ (if deployed)
 
 ### 2. Test Authentication
@@ -312,7 +259,7 @@ fly scale count 0
 
 **On Web App**:
 - [ ] Browser shows "Checking connection..."
-- [ ] Within 60 seconds: "Connected to Railway"
+- [ ] Within 60 seconds: "Connected to Render"
 - [ ] No data loss
 - [ ] Can still use app
 
@@ -340,7 +287,6 @@ fly scale count 1
 1. Go to https://uptimerobot.com
 2. Create monitor for each endpoint:
    - [ ] https://smasher-api.fly.dev/health
-   - [ ] https://smasher-production.up.railway.app/health
    - [ ] https://smasher.onrender.com/health (if deployed)
 3. Set email alerts
 
@@ -393,8 +339,7 @@ export const BACKEND_SERVICES = [
 ```
 
 - [ ] Primary URL matches Fly.io
-- [ ] Secondary URL matches Railway
-- [ ] Tertiary URL matches Render
+- [ ] Secondary URL matches Render
 
 **Rebuild and Deploy**:
 ```bash
@@ -444,7 +389,6 @@ eas build --platform android --profile production
   ```bash
   cd server
   fly deploy
-  railway up
   ```
 - [ ] Deploy web app:
   ```bash
@@ -469,11 +413,6 @@ vercel rollback
 ```bash
 fly releases
 fly releases rollback [VERSION]
-```
-
-### Rollback Railway
-```bash
-railway rollback
 ```
 
 ---
@@ -502,7 +441,6 @@ railway rollback
 
 # Deploy specific
 fly deploy                    # Fly.io
-railway up                   # Railway
 vercel --prod                # Web App
 
 # Check health
@@ -515,11 +453,9 @@ vercel --prod                # Web App
 ```bash
 # Stop all servers (emergency)
 fly scale count 0
-railway service list (then pause)
 
 # View logs
 fly logs --follow
-railway logs
 
 # Connect to database
 psql postgresql://...

@@ -119,8 +119,8 @@ PORT=3001
 NODE_ENV=production
 
 Get DATABASE_URL:
-  1. Go to railway.app
-  2. Create new PostgreSQL service
+  1. Go to render.com
+  2. Create a Managed PostgreSQL service
   3. Copy connection URL from variables
 
 ================================================================================
@@ -139,16 +139,15 @@ Check Health:
 
 View Logs:
   fly logs --follow                    (Fly.io)
-  railway logs                          (Railway)
+  Render dashboard → Logs                (Render)
 
 Manual Deployment:
   fly deploy                            (Fly.io)
-  railway up                            (Railway)
   vercel --prod                         (Web app)
 
 Test Servers:
   curl https://smasher-api.fly.dev/health
-  curl https://smasher-production.up.railway.app/health
+  curl https://smasher.onrender.com/health
 
 ================================================================================
 TROUBLESHOOTING
@@ -160,7 +159,7 @@ TROUBLESHOOTING
 
 "Can't find CLI tools"
   → Run setup-all.ps1 and choose option 1
-  → Or: npm install -g flyctl @railway/cli vercel
+  → Or: npm install -g flyctl vercel
 
 "Database connection fails"
   → Check DATABASE_URL format
@@ -168,7 +167,7 @@ TROUBLESHOOTING
   → Verify host is accessible
 
 "Deploy fails"
-  → Check logs: fly logs or railway logs
+  → Check logs: fly logs or Render dashboard logs
   → Verify .env file exists in server/
   → Run: npm run build (to test locally)
 
@@ -206,7 +205,7 @@ After Deployment:
 
 2. Test Failover
    ✓ Stop Fly.io: fly scale count 0
-   ✓ Refresh web app (should switch to Railway)
+   ✓ Refresh web app (should switch to Render)
    ✓ Restart Fly.io: fly scale count 1
    ✓ Refresh web app (should switch back)
 
@@ -216,7 +215,7 @@ After Deployment:
 
 4. Monitor Ongoing
    ✓ Setup UptimeRobot (free): uptimerobot.com
-   ✓ Monitor database: Railway dashboard
+   ✓ Monitor database: Render dashboard
    ✓ Monitor costs: Each platform has dashboard
 
 ================================================================================
@@ -226,12 +225,10 @@ COSTS
 Monthly Estimates (scales with usage):
 
   Fly.io:          $5-30/mo
-  Railway:         $5-30/mo  
-  Railway DB:      $15-50/mo
   Render:          Free-7/mo
   Vercel:          Free-20/mo
   ──────────────────────────
-  Total:           $30-150/mo
+  Total:           $10-57/mo
 
 Free tier: Good for 0-1000 monthly active users
 
@@ -243,7 +240,7 @@ NEED HELP?
 2. READ: DEPLOYMENT_CHECKLIST.md (step by step)
 3. READ: MULTI_SERVER_DEPLOYMENT.md (full reference)
 4. SEARCH: Troubleshooting section in docs
-5. CHECK: Server logs (fly logs, railway logs)
+5. CHECK: Server logs (fly logs)
 
 ================================================================================
 YOU'RE ALL SET! 🎉

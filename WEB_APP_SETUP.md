@@ -224,7 +224,7 @@ npm run preview
    fly scale count 0
    ```
 
-2. **Refresh web app**: Should switch to Railway
+2. **Refresh web app**: Should switch to Render
 
 3. **Restart primary**:
    ```bash

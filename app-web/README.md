@@ -53,8 +53,7 @@ vercel --prod
 The app automatically connects to the best available backend server:
 
 1. **Fly.io (Primary)** - https://smasher-api.fly.dev
-2. **Railway (Secondary)** - https://smasher-production.up.railway.app
-3. **Render (Tertiary)** - https://smasher.onrender.com
+2. **Render (Secondary)** - https://smasher.onrender.com
 
 Health checks run every 60 seconds. If a server is down, the app automatically switches to the next available one.
 

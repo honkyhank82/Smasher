@@ -21,16 +21,16 @@
                           │
           ┌───────────────┼───────────────┐
           │               │               │
-    ┌─────▼────┐    ┌────▼──────┐   ┌───▼───────┐
-    │  Fly.io  │    │  Railway   │   │  Render   │
-    │(Primary) │    │(Secondary) │   │(Tertiary) │
-    └─────┬────┘    └────┬──────┘   └───┬───────┘
-          │               │               │
-          └───────────────┼───────────────┘
+    ┌─────▼────┐                 ┌───▼───────┐
+    │  Fly.io  │                 │  Render   │
+    │(Primary) │                 │(Secondary)│
+    └─────┬────┘                 └───┬───────┘
+          │                           │
+          └───────────────┬───────────┘
                           │
                     ┌─────▼──────────────┐
                     │ Shared PostgreSQL  │
-                    │  (Railway/AWS RDS) │
+                    │  (Render/AWS RDS)  │
                     └────────────────────┘
 ```
 
@@ -49,32 +49,7 @@ cd server
 fly deploy
 ```
 
-### 2. Railway (Secondary Server)
-
-Setup first time:
-```powershell
-npm install -g @railway/cli
-railway login
-cd server
-railway link
-railway add --service postgres  # Create shared database
-railway up
-```
-
-Environment variables:
-```
-NODE_ENV=production
-DATABASE_URL=<shared-database-url>
-JWT_SECRET=<same-as-fly-io>
-RESEND_API_KEY=<same-as-fly-io>
-R2_ACCOUNT_ID=<same>
-R2_ACCESS_KEY_ID=<same>
-R2_SECRET_ACCESS_KEY=<same>
-```
-
-**URL**: https://smasher-production.up.railway.app
-
-### 3. Render (Tertiary Server)
+### 2. Render (Secondary Server)
 
 Setup first time:
 1. Go to https://dashboard.render.com
@@ -84,19 +59,19 @@ Setup first time:
    - **Root Directory**: `server`
    - **Build Command**: `npm ci && npm run build`
    - **Start Command**: `npm run start:prod`
-   - **Environment**: Add all variables (same as Railway)
+   - **Environment**: Add all variables (same as Fly.io)
 5. Deploy
 
 **URL**: https://smasher.onrender.com
 
 ### 4. Shared PostgreSQL Database
 
-**Option A: Railway PostgreSQL (Recommended)**
+**Option A: Render PostgreSQL (Recommended)**
 ```
-1. Create new project on Railway
-2. Add PostgreSQL service
+1. Create new service on Render
+2. Add Managed PostgreSQL
 3. Copy DATABASE_URL
-4. Use same URL for all three servers
+4. Use same URL for both servers
 ```
 
 **Option B: AWS RDS**
@@ -218,13 +193,12 @@ Run the interactive deployment:
 
 Menu options:
 - 1: Deploy to Fly.io
-- 2: Deploy to Railway
-- 3: Deploy to Render
-- 4: Deploy Web App
-- 5: Deploy ALL (builds once, deploys to all)
-- 6: Check server health
-- 7: Setup shared database
-- 8: Configure environment variables
+- 2: Deploy to Render
+- 3: Deploy Web App
+- 4: Deploy ALL (builds once, deploys to all)
+- 5: Check server health
+- 6: Setup shared database
+- 7: Configure environment variables
 
 ## Monitoring & Debugging
 
@@ -233,7 +207,6 @@ Menu options:
 ```bash
 # In browser
 https://smasher-api.fly.dev/health/detailed
-https://smasher-production.up.railway.app/health/detailed
 https://smasher.onrender.com/health/detailed
 ```
 
@@ -243,11 +216,6 @@ https://smasher.onrender.com/health/detailed
 ```bash
 fly logs
 fly logs --follow
-```
-
-**Railway**:
-```bash
-railway logs
 ```
 
 **Render**:
@@ -278,7 +246,7 @@ SELECT COUNT(*) FROM "user";
    ```
 
 2. **Check client behavior**:
-   - Web app should show "Connecting to Railway"
+   - Web app should show "Connecting to Render"
    - Mobile app will auto-switch
    - No errors to user
 
@@ -293,9 +261,8 @@ Edit `app-rn/src/config/api.ts` to change priority order:
 ```typescript
 export const BACKEND_SERVICES = [
   // ... adjust priority numbers
-  { priority: 1, name: 'Railway', ... },    // Temporarily primary
+  { priority: 1, name: 'Render', ... },    // Temporarily primary
   { priority: 2, name: 'Fly.io', ... },
-  { priority: 3, name: 'Render', ... },
 ]
 ```
 
@@ -306,16 +273,14 @@ export const BACKEND_SERVICES = [
 | Service | Price | Notes |
 |---------|-------|-------|
 | Fly.io API | $5-30/mo | Shared VM, auto-scales |
-| Railway API | $5-30/mo | Shared VM, auto-scales |
-| Railway PostgreSQL | $15-50/mo | Managed database |
 | Render API | $7/mo | Shared tier |
 | Vercel Web | Free-20/mo | Serverless hosting |
 | **Total** | **~$50-150/mo** | Scales with usage |
 
 ### Cost Optimization
 
-1. Use Railway PostgreSQL (shared across all)
-2. Use Fly.io + Railway (drop Render if budget tight)
+1. Use a managed PostgreSQL (e.g., Render) shared across all
+2. Use Fly.io + Render
 3. Monitor usage on dashboard
 4. Set scaling limits to prevent surprise bills
 
@@ -326,7 +291,7 @@ export const BACKEND_SERVICES = [
 1. Check DATABASE_URL is accessible
 2. Verify JWT_SECRET is set
 3. Check Resend API key
-4. Review logs: `fly logs`, `railway logs`
+4. Review logs: `fly logs`
 
 ### Database connection errors
 
@@ -344,9 +309,9 @@ export const BACKEND_SERVICES = [
 
 ## Next Steps
 
-1. **Deploy backend to Railway** (if not already done)
-2. **Setup shared PostgreSQL**
-3. **Deploy to Render** (for triple redundancy)
+1. **Setup shared PostgreSQL**
+2. **Deploy to Fly.io**
+3. **Deploy to Render** (for redundancy)
 4. **Deploy web app to Vercel**
 5. **Test failover** by stopping each server
 6. **Monitor health** dashboards

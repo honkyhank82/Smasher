@@ -35,7 +35,7 @@ services:
     startCommand: cd server && npm run start:prod
     
     domains:
-      - smasher-production.up.railway.app
+      - smasher.onrender.com
     
     resources:
       cpu: 500m
