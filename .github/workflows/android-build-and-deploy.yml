@@ -152,6 +152,6 @@ jobs:
             exit 0
           fi
           bundle install --path vendor/bundle
-          bundle exec fastlane android deploy json_key: "google-play-service-account.json"
+          bundle exec fastlane android deploy json_key:"google-play-service-account.json"
         env:
           GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
