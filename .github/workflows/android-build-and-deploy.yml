@@ -147,7 +147,11 @@ jobs:
             echo "No GOOGLE_PLAY_SERVICE_ACCOUNT_JSON secret provided; skipping Play deployment"
             exit 0
           fi
+          if [ ! -f "google-play-service-account.json" ]; then
+            echo "Google Play service account JSON file not found; skipping Play deployment"
+            exit 0
+          fi
           bundle install --path vendor/bundle
-          bundle exec fastlane android deploy json_key: "$GITHUB_WORKSPACE/app-rn/google-play-service-account.json"
+          bundle exec fastlane android deploy json_key: "google-play-service-account.json"
         env:
           GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
