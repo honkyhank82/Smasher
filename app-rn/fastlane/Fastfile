@@ -1,0 +1,22 @@
+default_platform(:android)
+
+platform :android do
+  desc "Build the Android AAB"
+  lane :build do
+    gradle(task: 'bundle', build_type: 'Release', project_dir: 'android')
+  end
+
+  desc "Deploy the AAB to Google Play (alpha by default). Expects json_key option or app-rn/google-play-service-account.json"
+  lane :deploy do |options|
+    json_key = options[:json_key] || File.join(Dir.pwd, 'google-play-service-account.json')
+
+    supply(
+      json_key: json_key,
+      aab: File.join('android', 'app', 'build', 'outputs', 'bundle', 'release', 'app-release.aab'),
+      track: 'alpha',
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      release_status: 'draft'
+    )
+  end
+end

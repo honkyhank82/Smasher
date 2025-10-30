@@ -5,7 +5,7 @@ services:
     rootDir: server
     repo: https://github.com/honkyhank82/Smasher
     branch: master
-    
+
     envVars:
       - key: NODE_ENV
         value: production
@@ -35,21 +35,21 @@ services:
         value: smasher-media
       - key: R2_PUBLIC_URL
         value: https://r2.smasher.app
-    
+
     healthCheckPath: /health
     buildCommand: npm ci && npm run build
     startCommand: npm run start:prod
-    
+
     domains:
       - smasher.onrender.com
-    
+
     resources:
       cpu: 500m
       memory: 512MB
       disk: 1GB
-    
+
     autoDeploy: true
-    
+
     # Node runtime does not require explicit Docker volumes
 
 databases:

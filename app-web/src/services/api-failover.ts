@@ -1,8 +1,14 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
-import { BACKEND_SERVICES, checkServiceHealth, updateServiceUrls, API_TIMEOUT } from '../config/api'
+import { BACKEND_SERVICES, checkServiceHealth, updateServiceUrls, API_TIMEOUT, MAX_RETRIES } from '../config/api'
 
-// Maximum number of retries per request
-const MAX_RETRIES = 3
+// Extend AxiosRequestConfig to track retry counts per request
+declare module 'axios' {
+  export interface AxiosRequestConfig {
+    __retryCount?: number
+  }
+}
+
+// MAX_RETRIES imported from config/api to keep a single source of truth
 
 class ApiFailoverService {
   private currentServiceIndex: number = 0

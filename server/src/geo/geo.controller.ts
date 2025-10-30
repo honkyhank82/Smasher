@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Req } from '@nestjs/common';
+import { Request } from 'express';
 import { IsNumber, Min, Max } from 'class-validator';
 import { GeoService } from './geo.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -31,7 +32,7 @@ export class GeoController {
 
   @Post('update-location')
   async updateLocation(
-    @Request() req: AuthenticatedRequest,
+    @Req() req: AuthenticatedRequest,
     @Body() body: LocationDto,
   ) {
     await this.geoService.updateLocation(req.user.userId, body.latitude, body.longitude);
@@ -39,7 +40,7 @@ export class GeoController {
   }
 
   @Get('nearby')
-  async getNearbyUsers(@Request() req: AuthenticatedRequest) {
+  async getNearbyUsers(@Req() req: AuthenticatedRequest) {
     const users = await this.geoService.getNearbyUsers(req.user.userId);
     return users;
   }

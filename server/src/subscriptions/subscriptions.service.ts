@@ -33,10 +33,18 @@ export class SubscriptionsService {
     }
   }
 
+  /** Ensure Stripe client and price ID are initialized */
+  private ensureStripeInitialized(): void {
+    if (!this.stripe || !this.priceId) {
+      throw new BadRequestException('Stripe not initialized: missing STRIPE_SECRET_KEY or STRIPE_PRICE_ID');
+    }
+  }
+
   /**
    * Create a Stripe checkout session for a user to subscribe
    */
   async createCheckoutSession(userId: string, successUrl: string, cancelUrl: string) {
+    this.ensureStripeInitialized();
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException('User not found');
@@ -97,6 +105,7 @@ export class SubscriptionsService {
    * Create a portal session for managing subscription
    */
   async createPortalSession(userId: string, returnUrl: string) {
+    this.ensureStripeInitialized();
     const subscription = await this.subscriptionRepository.findOne({
       where: { userId },
       order: { createdAt: 'DESC' },
@@ -147,6 +156,7 @@ export class SubscriptionsService {
    * Handle Stripe webhook events
    */
   async handleWebhook(event: Stripe.Event) {
+    this.ensureStripeInitialized();
     this.logger.log(`Processing webhook event: ${event.type}`);
 
     try {
@@ -259,8 +269,8 @@ export class SubscriptionsService {
       currency: stripeSubscription.items.data[0].price.currency.toUpperCase(),
       interval: stripeSubscription.items.data[0].price.recurring?.interval || 'month',
       status: stripeSubscription.status as any,
-      currentPeriodStart: new Date((stripeSubscription as any).current_period_start * 1000),
-      currentPeriodEnd: new Date((stripeSubscription as any).current_period_end * 1000),
+      currentPeriodStart: new Date((stripeSubscription.current_period_start as number) * 1000),
+      currentPeriodEnd: new Date((stripeSubscription.current_period_end as number) * 1000),
       cancelAt: stripeSubscription.cancel_at ? new Date(stripeSubscription.cancel_at * 1000) : null,
       canceledAt: stripeSubscription.canceled_at ? new Date(stripeSubscription.canceled_at * 1000) : null,
       trialStart: stripeSubscription.trial_start ? new Date(stripeSubscription.trial_start * 1000) : null,
@@ -272,7 +282,7 @@ export class SubscriptionsService {
 
     // Update user premium status
     user.isPremium = stripeSubscription.status === 'active' || stripeSubscription.status === 'trialing';
-    user.premiumExpiresAt = new Date((stripeSubscription as any).current_period_end * 1000);
+    user.premiumExpiresAt = new Date((stripeSubscription.current_period_end as number) * 1000);
     await this.userRepository.save(user);
 
     this.logger.log(`Subscription created for user ${userId}`);
@@ -293,8 +303,8 @@ export class SubscriptionsService {
 
     // Update subscription
     subscription.status = stripeSubscription.status as any;
-    subscription.currentPeriodStart = new Date((stripeSubscription as any).current_period_start * 1000);
-    subscription.currentPeriodEnd = new Date((stripeSubscription as any).current_period_end * 1000);
+    subscription.currentPeriodStart = new Date((stripeSubscription.current_period_start as number) * 1000);
+    subscription.currentPeriodEnd = new Date((stripeSubscription.current_period_end as number) * 1000);
     subscription.cancelAt = stripeSubscription.cancel_at ? new Date(stripeSubscription.cancel_at * 1000) : null;
     subscription.canceledAt = stripeSubscription.canceled_at ? new Date(stripeSubscription.canceled_at * 1000) : null;
     subscription.cancelAtPeriodEnd = stripeSubscription.cancel_at_period_end;
@@ -305,7 +315,7 @@ export class SubscriptionsService {
     const user = await this.userRepository.findOne({ where: { id: subscription.userId } });
     if (user) {
       user.isPremium = stripeSubscription.status === 'active' || stripeSubscription.status === 'trialing';
-      user.premiumExpiresAt = new Date((stripeSubscription as any).current_period_end * 1000);
+      user.premiumExpiresAt = new Date((stripeSubscription.current_period_end as number) * 1000);
       await this.userRepository.save(user);
     }
 
@@ -345,12 +355,12 @@ export class SubscriptionsService {
    * Handle successful payment
    */
   private async handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
-    if (!(invoice as any).subscription) {
+    if (!invoice.subscription) {
       return;
     }
-
+    const subscriptionId = typeof invoice.subscription === 'string' ? invoice.subscription : invoice.subscription.id;
     const subscription = await this.subscriptionRepository.findOne({
-      where: { stripeSubscriptionId: (invoice as any).subscription as string },
+      where: { stripeSubscriptionId: subscriptionId },
     });
 
     if (subscription) {
@@ -362,12 +372,12 @@ export class SubscriptionsService {
    * Handle failed payment
    */
   private async handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
-    if (!(invoice as any).subscription) {
+    if (!invoice.subscription) {
       return;
     }
-
+    const subscriptionId = typeof invoice.subscription === 'string' ? invoice.subscription : invoice.subscription.id;
     const subscription = await this.subscriptionRepository.findOne({
-      where: { stripeSubscriptionId: (invoice as any).subscription as string },
+      where: { stripeSubscriptionId: subscriptionId },
     });
 
     if (subscription) {
@@ -393,6 +403,7 @@ export class SubscriptionsService {
    * Cancel subscription at period end
    */
   async cancelSubscription(userId: string) {
+    this.ensureStripeInitialized();
     const subscription = await this.subscriptionRepository.findOne({
       where: { userId, status: 'active' },
     });
@@ -409,7 +420,7 @@ export class SubscriptionsService {
     );
 
     subscription.cancelAtPeriodEnd = true;
-    subscription.cancelAt = new Date((updatedSubscription as any).current_period_end * 1000);
+    subscription.cancelAt = new Date((updatedSubscription.current_period_end as number) * 1000);
     await this.subscriptionRepository.save(subscription);
 
     this.logger.log(`Subscription ${subscription.id} will cancel at period end`);
@@ -420,6 +431,7 @@ export class SubscriptionsService {
    * Reactivate a canceled subscription
    */
   async reactivateSubscription(userId: string) {
+    this.ensureStripeInitialized();
     const subscription = await this.subscriptionRepository.findOne({
       where: { userId, cancelAtPeriodEnd: true },
     });

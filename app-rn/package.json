@@ -1,6 +1,6 @@
 {
   "name": "smasher-app",
-  "version": "1.0.16",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
     "start": "expo start",
@@ -10,9 +10,6 @@
     "build:web": "expo export:web",
     "lint": "eslint .",
     "test": "jest",
-    "build:apk": "cd android && .\\gradlew assembleRelease",
-    "build:aab": "cd android && .\\gradlew bundleRelease",
-    "build:production": "node scripts/set-env.js production && npm run build:aab",
     "set:dev": "node scripts/set-env.js development",
     "set:prod": "node scripts/set-env.js production"
   },
@@ -23,7 +20,6 @@
     "@react-navigation/native": "^7.1.18",
     "@react-navigation/stack": "^7.4.9",
     "axios": "^1.12.2",
-    "eas-cli": "^16.24.1",
     "expo": "^54.0.13",
     "expo-av": "~16.0.7",
     "expo-device": "~8.0.9",

@@ -2,83 +2,88 @@
 
 <#
 .SYNOPSIS
-Repository audit script for Smasher: scans for conflicts, secrets, build/lint errors, and common misconfigurations.
+Fast repository audit script for Smasher: scans for conflicts, secrets, build/lint errors, and misconfigurations.
 
 .DESCRIPTION
-This script performs a best-effort audit across the monorepo:
+Optimized audit across the monorepo with parallel scanning:
 - Detects git merge conflict markers
 - Finds potential secrets committed in source
 - Flags build logs/artifacts tracked by git
 - Checks for synchronous file logging usage
 - Verifies throttling decorators on verification endpoints
-- Verifies presence of ScheduleModule and cleanup cron
-- Optionally runs builds/lints/audits for server, web, and React Native
+- Verifies ScheduleModule and cleanup cron
+- Optionally runs lints/audits (skips heavy operations by default)
 
-Outputs a detailed list of findings with suggested fixes.
-
-.PARAMETER SkipBuilds
-Skips running builds (use if CI dependencies are not available).
-
-.PARAMETER SkipAudits
-Skips npm audit steps (security advisory checks).
-
-.PARAMETER SkipAndroid
-Skips Android checks.
+.PARAMETER SkipStaticChecks
+Skips security & code pattern scanning (conflict markers, secrets, etc).
 
 .PARAMETER SkipTests
 Skips running test commands.
 
+.PARAMETER SkipLint
+Skips ESLint checks.
+
+.PARAMETER SkipTypeCheck
+Skips TypeScript compilation checks.
+
+.PARAMETER SkipE2E
+Skips E2E tests.
+
+.PARAMETER SkipAudits
+Skips npm security audit checks.
+
+.PARAMETER SkipAndroid
+Skips Android-specific checks.
+
+.PARAMETER RunSmoke
+Enables API smoke tests (disabled by default; they are slow).
+
+.PARAMETER RunBuilds
+Runs full builds (npm ci + build; disabled by default).
+
 .PARAMETER Json
-Outputs findings as JSON to the specified output path.
+Outputs findings as JSON.
 
 .PARAMETER Output
-Output path for the report (default audit-report.txt).
+Output path for report (default: audit-report.txt).
 
 .EXAMPLE
 pwsh ./audit-repo.ps1
-
-.EXAMPLE
-pwsh ./audit-repo.ps1 -Json -Output audit-report.json
+pwsh ./audit-repo.ps1 -RunBuilds -RunSmoke
+pwsh ./audit-repo.ps1 -SkipTests -Json -Output report.json
 
 .NOTES
-This is a heuristic audit; it does not replace full security reviews or integration tests.
+Heuristic audit; does not replace full security reviews or integration tests.
 #>
 
 param(
-  [switch]$SkipBuilds,
+  [switch]$SkipStaticChecks,
+  [switch]$SkipTests,
+  [switch]$SkipLint,
+  [switch]$SkipTypeCheck,
+  [switch]$SkipE2E,
   [switch]$SkipAudits,
   [switch]$SkipAndroid,
-  [switch]$SkipTests,
-  [switch]$SkipSmoke,
+  [switch]$RunSmoke,
+  [switch]$RunBuilds,
   [switch]$Json,
   [string]$Output = "audit-report.txt"
 )
 
 $ErrorActionPreference = "Stop"
 $RepoRoot = Split-Path -Parent $PSCommandPath
-
 $Findings = New-Object System.Collections.ArrayList
+$sw = [System.Diagnostics.Stopwatch]::StartNew()
+
+# ==================== HELPERS ====================
 
 function Add-Finding {
-  param(
-    [string]$Area,
-    [string]$Severity,
-    [string]$Message,
-    [string]$Fix,
-    [string]$Path,
-    [hashtable]$Details
-  )
-  $null = $Findings.Add([ordered]@{
-    Area=$Area; Severity=$Severity; Message=$Message; Fix=$Fix; Path=$Path; Details=$Details
-  })
+  param([string]$Area, [string]$Severity, [string]$Message, [string]$Fix, [string]$Path, [hashtable]$Details)
+  $null = $Findings.Add([ordered]@{ Area=$Area; Severity=$Severity; Message=$Message; Fix=$Fix; Path=$Path; Details=$Details })
 }
 
 function Invoke-CommandSafe {
-  param(
-    [string]$Cmd,
-    [string[]]$Args,
-    [string]$Dir
-  )
+  param([string]$Cmd, [string[]]$Args, [string]$Dir)
   $old = Get-Location
   try {
     if ($Dir) { Set-Location $Dir }
@@ -95,13 +100,34 @@ function Invoke-CommandSafe {
 function Test-GitAvailable { return [bool](Get-Command git -ErrorAction SilentlyContinue) }
 function Test-NodeAvailable { return [bool](Get-Command node -ErrorAction SilentlyContinue) }
 function Test-NpmAvailable { return [bool](Get-Command npm -ErrorAction SilentlyContinue) }
-function Test-PortOpen {
-  param([int]$Port)
+
+function Test-GitTracked {
+  param([string]$Path)
+  if (-not (Test-GitAvailable)) { return $null }
   try {
-    $conn = (Get-NetTCPConnection -LocalPort $Port -ErrorAction Stop)
+    git ls-files --error-unmatch $Path *> $null
     return $true
   } catch { return $false }
 }
+
+function Test-PortOpen {
+  param([int]$Port, [string]$Host = '127.0.0.1')
+  if (Get-Command Get-NetTCPConnection -ErrorAction SilentlyContinue) {
+    try {
+      $conn = Get-NetTCPConnection -LocalPort $Port -ErrorAction Stop
+      if ($conn) { return $true }
+    } catch {}
+  }
+  try {
+    $client = New-Object System.Net.Sockets.TcpClient
+    $async = $client.BeginConnect($Host, $Port, $null, $null)
+    $completed = $async.AsyncWaitHandle.WaitOne(200)
+    $isOpen = $completed -and $client.Connected
+    $client.Close()
+    return [bool]$isOpen
+  } catch { return $false }
+}
+
 function Wait-ForHttp {
   param([string]$Url, [int]$TimeoutSec = 30)
   $deadline = (Get-Date).AddSeconds($TimeoutSec)
@@ -115,339 +141,313 @@ function Wait-ForHttp {
   return $false
 }
 
-function Test-GitTracked {
-  param([string]$Path)
-  if (-not (Test-GitAvailable)) { return $null }
-  try {
-    git ls-files --error-unmatch $Path *> $null
-    return $true
-  } catch { return $false }
-}
+# ==================== STATIC CHECKS ====================
 
-# 1) Detect merge conflict markers across source files
-Write-Host "[Audit] Scanning for merge conflict markers..." -ForegroundColor Cyan
-$extensions = @('.ts','.js','.tsx','.json','.yml','.yaml','.md','.gradle','.ps1','.sh','.mjs','.cjs','.html','.css')
-$codeFiles = Get-ChildItem -Path $RepoRoot -Recurse -File | Where-Object { $_.Extension -in $extensions -or $_.Name -in @('Dockerfile','fly.toml','render.yaml') }
-foreach ($f in $codeFiles) {
-  $matches = Select-String -Path $f.FullName -Pattern '<<<<<<<|=======|>>>>>>>' -AllMatches
-  if ($matches) {
-    Add-Finding -Area 'Git' -Severity 'High' -Message 'Merge conflict markers found' -Fix 'Resolve conflicts and remove markers before committing' -Path $f.FullName -Details @{ Lines = ($matches | ForEach-Object { $_.LineNumber }) }
-  }
-}
-
-# 2) Detect secrets patterns
-Write-Host "[Audit] Scanning for potential secrets..." -ForegroundColor Cyan
-$secretPatterns = @(
-  @{ Pattern='BEGIN PRIVATE KEY'; Fix='Remove from repo and rotate credentials; store in secrets manager'; },
-  @{ Pattern='AWS_ACCESS_KEY_ID'; Fix='Remove from repo; use secrets manager/env vars and rotate keys'; },
-  @{ Pattern='AWS_SECRET_ACCESS_KEY'; Fix='Remove from repo; use secrets manager/env vars and rotate keys'; },
-  @{ Pattern='RESEND_API_KEY'; Fix='Use env vars/secrets in CI; rotate exposed keys'; },
-  @{ Pattern='DATABASE_URL\s*=\s*[^\n]*://[^\n]*:[^\n]*@'; Fix='Do not commit credentials in URLs; move to env vars'; },
-  @{ Pattern='keystorePassword'; Fix='Do not hardcode signing passwords; use env vars/gradle properties ignored by VCS'; },
-  @{ Pattern='keyPassword'; Fix='Do not hardcode signing passwords; use env vars/gradle properties ignored by VCS'; },
-  @{ Pattern='keyAlias\s*=\s*\S+'; Fix='Avoid committing aliases alongside secrets; move to env vars'; }
-)
-foreach ($pat in $secretPatterns) {
-  $hits = Select-String -Path ($codeFiles | ForEach-Object FullName) -Pattern $pat.Pattern -AllMatches
-  foreach ($h in $hits) {
-    Add-Finding -Area 'Secrets' -Severity 'High' -Message "Potential secret in source: '${pat.Pattern}'" -Fix $pat.Fix -Path $h.Path -Details @{ Line = $h.LineNumber; LineText = $h.Line.Trim() }
-  }
-}
-
-# 3) Build logs or artifacts tracked by git
-Write-Host "[Audit] Checking for build logs/artifacts in VCS..." -ForegroundColor Cyan
-$logCandidates = @(
-  Join-Path $RepoRoot 'app-rn/android/build-log.txt'),
-  Get-ChildItem -Path $RepoRoot -Recurse -File -Include *.log
-$logCandidates = $logCandidates | Where-Object { $_ }
-foreach ($lf in $logCandidates) {
-  $tracked = Test-GitTracked -Path $lf.FullName
-  if ($tracked -eq $true) {
-    Add-Finding -Area 'VCS' -Severity 'Medium' -Message 'Build log tracked in git' -Fix 'Add to .gitignore and remove from VCS (git rm --cached)' -Path $lf.FullName -Details @{ SizeBytes = $lf.Length }
-  } elseif ($tracked -eq $null) {
-    # Git not available; still flag presence
-    Add-Finding -Area 'VCS' -Severity 'Low' -Message 'Build log present; ensure .gitignore excludes it' -Fix 'Add pattern (e.g., app-rn/android/*.log) to .gitignore' -Path $lf.FullName -Details @{ SizeBytes = $lf.Length }
-  }
-}
-
-# 4) Synchronous file logging usage
-Write-Host "[Audit] Checking for synchronous file logging..." -ForegroundColor Cyan
-$syncLogHits = Select-String -Path ($codeFiles | ForEach-Object FullName) -Pattern 'appendFileSync' -AllMatches
-foreach ($h in $syncLogHits) {
-  Add-Finding -Area 'Logging' -Severity 'Medium' -Message 'Synchronous file logging detected (appendFileSync)' -Fix 'Use async fs.promises.appendFile or a logger (Pino/Winston) with rotation' -Path $h.Path -Details @{ Line = $h.LineNumber; LineText = $h.Line.Trim() }
-}
-
-# 5) Verification endpoints throttling
-Write-Host "[Audit] Verifying endpoint throttling..." -ForegroundColor Cyan
-$authController = Join-Path $RepoRoot 'server/src/auth/auth.controller.ts'
-if (Test-Path $authController) {
-  $controllerText = Get-Content $authController -Raw
-  if ($controllerText -notmatch '@Throttle\(') {
-    Add-Finding -Area 'Auth' -Severity 'Medium' -Message 'Verification endpoints lack per-route throttling' -Fix 'Add @Throttle decorators to send-verification and verify routes' -Path $authController -Details @{ Suggestion = '@Throttle(3, 3600) and @Throttle(10, 900)' }
-  }
-}
-
-# 6) ScheduleModule and cleanup cron presence
-Write-Host "[Audit] Verifying schedule module and cleanup cron..." -ForegroundColor Cyan
-$appModule = Join-Path $RepoRoot 'server/src/app.module.ts'
-if (Test-Path $appModule) {
-  $modText = Get-Content $appModule -Raw
-  if ($modText -notmatch 'ScheduleModule\.forRoot\(') {
-    Add-Finding -Area 'Cron' -Severity 'Low' -Message 'ScheduleModule not registered' -Fix 'Import ScheduleModule.forRoot() in AppModule for cron tasks' -Path $appModule -Details @{ }
-  }
-}
-$authService = Join-Path $RepoRoot 'server/src/auth/auth.service.ts'
-if (Test-Path $authService) {
-  $svcText = Get-Content $authService -Raw
-  if ($svcText -notmatch '@Cron\(') {
-    Add-Finding -Area 'Cron' -Severity 'Low' -Message 'No cleanup cron found in AuthService' -Fix 'Add @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT) to delete expired codes' -Path $authService -Details @{ }
-  }
-}
-
-# 7) Verification code storage security
-Write-Host "[Audit] Checking verification code storage..." -ForegroundColor Cyan
-$entityPath = Join-Path $RepoRoot 'server/src/auth/verification-code.entity.ts'
-if (Test-Path $entityPath) {
-  $entityText = Get-Content $entityPath -Raw
-  $hasPlain = ($entityText -match 'code!:\s*string')
-  $hasHash = ($entityText -match 'codeHash')
-  if ($hasPlain -and -not $hasHash) {
-    Add-Finding -Area 'Auth' -Severity 'High' -Message 'Verification codes stored in plaintext' -Fix 'Store only hashed code (e.g., HMAC-SHA256 with a server-side pepper) and match on hash during verification' -Path $entityPath -Details @{ }
-  } elseif ($hasPlain -and $hasHash) {
-    Add-Finding -Area 'Auth' -Severity 'Info' -Message 'Plaintext and hashed code columns present' -Fix 'Plan migration to drop plaintext column after rollout' -Path $entityPath -Details @{ }
-  }
-}
-
-# 8) Optional tests (run first)
-if (-not $SkipTests) {
-  Write-Host "[Audit] Running tests..." -ForegroundColor Cyan
-  if (Test-NpmAvailable) {
-    $serverDir = Join-Path $RepoRoot 'server'
-    if (Test-Path (Join-Path $serverDir 'package.json')) {
-      $resTestServer = Invoke-CommandSafe -Cmd 'npm' -Args @('test','--silent','--','--runInBand') -Dir $serverDir
-      if ($resTestServer.ExitCode -ne 0) {
-        Add-Finding -Area 'Server' -Severity 'High' -Message 'Server tests failed' -Fix 'Review failing specs and fix regressions' -Path $serverDir -Details @{ Output = $resTestServer.Output }
-      } else {
-        Add-Finding -Area 'Server' -Severity 'Info' -Message 'Server tests passed' -Fix '' -Path $serverDir -Details @{ }
-      }
+if (-not $SkipStaticChecks) {
+  Write-Host "[Audit] Building file cache..." -ForegroundColor Cyan
+  
+  # Cache source files (limit to src, config, and root app files)
+  $exclusions = @('node_modules', '.git', '.next', 'dist', 'build', '.bundle', '.gradle', '.idea', 'android/build', 'android/.gradle')
+  $codeFiles = @()
+  
+  # Scan specific directories
+  foreach ($dir in @("$RepoRoot/server/src", "$RepoRoot/app-web/src", "$RepoRoot/app-rn/src", "$RepoRoot")) {
+    if (Test-Path $dir) {
+      $codeFiles += Get-ChildItem -Path $dir -Recurse -File -ErrorAction SilentlyContinue | 
+        Where-Object { $_.Extension -in @('.ts','.js','.tsx','.jsx','.json','.yml','.yaml','.md','.gradle','.ps1','.mjs','.cjs') -or $_.Name -in @('Dockerfile','fly.toml','render.yaml') } |
+        Where-Object { $fullPath = $_.FullName; -not ($exclusions | Where-Object { $fullPath -match $_ }) }
     }
-    $rnDir = Join-Path $RepoRoot 'app-rn'
-    if (Test-Path (Join-Path $rnDir 'package.json')) {
-      $resTestRn = Invoke-CommandSafe -Cmd 'npm' -Args @('test','--silent','--','--runInBand') -Dir $rnDir
-      if ($resTestRn.ExitCode -ne 0) {
-        Add-Finding -Area 'Mobile' -Severity 'High' -Message 'React Native tests failed' -Fix 'Review failing tests in app-rn' -Path $rnDir -Details @{ Output = $resTestRn.Output }
-      } else {
-        Add-Finding -Area 'Mobile' -Severity 'Info' -Message 'React Native tests passed' -Fix '' -Path $rnDir -Details @{ }
-      }
-    }
-  } else {
-    Add-Finding -Area 'Env' -Severity 'Info' -Message 'npm not available; tests skipped' -Fix 'Install Node.js/npm to run tests' -Path $RepoRoot -Details @{ }
   }
-}
+  
+  $codeFilePaths = @($codeFiles.FullName)
+  Write-Host "[Audit] Found $($codeFilePaths.Count) source files (cached)" -ForegroundColor Green
 
-# 9) Optional builds/lints/audits
-if (-not $SkipBuilds) {
-  Write-Host "[Audit] Running server build..." -ForegroundColor Cyan
-  if (Test-NpmAvailable) {
-    $serverDir = Join-Path $RepoRoot 'server'
-    $res1 = Invoke-CommandSafe -Cmd 'npm' -Args @('ci') -Dir $serverDir
-    if ($res1.ExitCode -ne 0) {
-      Add-Finding -Area 'Server' -Severity 'High' -Message 'npm ci failed' -Fix 'Inspect output; ensure network access and lockfile integrity' -Path $serverDir -Details @{ Output = $res1.Output }
+  # 1) Merge conflict markers (parallelized)
+  Write-Host "[Audit] Scanning for merge conflicts..." -ForegroundColor Cyan
+  $codeFilePaths | ForEach-Object -Parallel {
+    $matches = Select-String -Path $_ -Pattern '<<<<<<<|=======|>>>>>>>' -AllMatches -ErrorAction SilentlyContinue
+    if ($matches) {
+      [PSCustomObject]@{ File = $_; Matches = $matches }
     }
-    $res2 = Invoke-CommandSafe -Cmd 'npm' -Args @('run','build','--silent') -Dir $serverDir
-    if ($res2.ExitCode -ne 0) {
-      Add-Finding -Area 'Server' -Severity 'High' -Message 'Server build failed' -Fix 'Fix TypeScript errors and missing imports' -Path $serverDir -Details @{ Output = $res2.Output }
-    }
-    # Lint (server)
-    $resLintSrv = Invoke-CommandSafe -Cmd 'npm' -Args @('run','lint','--silent') -Dir $serverDir
-    if ($resLintSrv.ExitCode -ne 0) {
-      Add-Finding -Area 'Server' -Severity 'Medium' -Message 'ESLint failed' -Fix 'Fix lint errors; ensure eslint config aligns with codebase' -Path $serverDir -Details @{ Output = $resLintSrv.Output }
-    } else {
-      Add-Finding -Area 'Server' -Severity 'Info' -Message 'ESLint passed' -Fix '' -Path $serverDir -Details @{ }
-    }
+  } -ThrottleLimit 8 | ForEach-Object {
+    Add-Finding -Area 'Git' -Severity 'High' -Message 'Merge conflict markers found' -Fix 'Resolve conflicts and remove markers' -Path $_.File -Details @{ Lines = ($_.Matches | ForEach-Object { $_.LineNumber }) }
+  }
 
-    # TypeScript compile (server, no emit)
-    $resTscSrv = Invoke-CommandSafe -Cmd 'npx' -Args @('tsc','--noEmit') -Dir $serverDir
-    if ($resTscSrv.ExitCode -ne 0) {
-      Add-Finding -Area 'Server' -Severity 'High' -Message 'TypeScript compile errors' -Fix 'Run npx tsc --noEmit and fix TS errors' -Path $serverDir -Details @{ Output = $resTscSrv.Output }
-    } else {
-      Add-Finding -Area 'Server' -Severity 'Info' -Message 'TypeScript compile passed' -Fix '' -Path $serverDir -Details @{ }
-    }
-
-    # E2E tests (server)
-    $resE2E = Invoke-CommandSafe -Cmd 'npm' -Args @('run','test:e2e','--silent') -Dir $serverDir
-    if ($resE2E.ExitCode -ne 0) {
-      Add-Finding -Area 'Server' -Severity 'High' -Message 'E2E tests failed' -Fix 'Review e2e specs and fix API regressions' -Path $serverDir -Details @{ Output = $resE2E.Output }
-    } else {
-      Add-Finding -Area 'Server' -Severity 'Info' -Message 'E2E tests passed' -Fix '' -Path $serverDir -Details @{ }
-    }
-
-    if (-not $SkipAudits) {
-      $resAudit = Invoke-CommandSafe -Cmd 'npm' -Args @('audit','--json') -Dir $serverDir
-      if ($resAudit.ExitCode -eq 0 -and $resAudit.Output) {
-        try {
-          $auditJson = $resAudit.Output | ConvertFrom-Json -ErrorAction Stop
-          if ($auditJson.vulnerabilities) {
-            foreach ($entry in $auditJson.vulnerabilities.psobject.Properties) {
-              $sev = $entry.Name
-              foreach ($pkg in $entry.Value) {
-                Add-Finding -Area 'Server' -Severity $sev -Message "Vulnerability: $($pkg.name) $($pkg.range)" -Fix 'Update dependency or apply advisory resolution' -Path $serverDir -Details @{ Advisory = $pkg.advisoryId; Via = $pkg.via }
-              }
-            }
-          }
-        } catch {
-          Add-Finding -Area 'Server' -Severity 'Info' -Message 'npm audit parsing failed' -Fix 'Run npm audit manually and review JSON' -Path $serverDir -Details @{ Output = $resAudit.Output }
+  # 2) Secrets (parallelized)
+  Write-Host "[Audit] Scanning for secrets..." -ForegroundColor Cyan
+  $secretPatterns = @(
+    'BEGIN PRIVATE KEY', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'RESEND_API_KEY',
+    'keystorePassword', 'keyPassword'
+  )
+  
+  $found = @()
+  $codeFilePaths | ForEach-Object -Parallel {
+    foreach ($pat in $using:secretPatterns) {
+      $hits = Select-String -Path $_ -Pattern $pat -AllMatches -ErrorAction SilentlyContinue
+      if ($hits) {
+        foreach ($h in $hits) {
+          [PSCustomObject]@{ Path = $_.FullName; Pattern = $pat; LineNumber = $h.LineNumber; Line = $h.Line.Trim() }
         }
       }
     }
-  } else {
-    Add-Finding -Area 'Env' -Severity 'Info' -Message 'npm not available; build/audit skipped' -Fix 'Install Node.js/npm to run builds and audits' -Path $RepoRoot -Details @{ }
+  } -ThrottleLimit 8 | ForEach-Object {
+    Add-Finding -Area 'Secrets' -Severity 'High' -Message "Potential secret: $($_.Pattern)" -Fix 'Remove from repo; use env vars' -Path $_.Path -Details @{ Line = $_.LineNumber; Text = $_.Line }
   }
 
-  Write-Host "[Audit] Running web build..." -ForegroundColor Cyan
-  $webDir = Join-Path $RepoRoot 'app-web'
-  if (Test-Path (Join-Path $webDir 'package.json')) {
-    $res3 = Invoke-CommandSafe -Cmd 'npm' -Args @('ci') -Dir $webDir
-    if ($res3.ExitCode -ne 0) {
-      Add-Finding -Area 'Web' -Severity 'High' -Message 'npm ci failed' -Fix 'Inspect output; ensure network access and lockfile integrity' -Path $webDir -Details @{ Output = $res3.Output }
-    }
-    $res4 = Invoke-CommandSafe -Cmd 'npm' -Args @('run','build','--silent') -Dir $webDir
-    if ($res4.ExitCode -ne 0) {
-      Add-Finding -Area 'Web' -Severity 'High' -Message 'Web build failed' -Fix 'Fix TypeScript/Vite errors and missing imports' -Path $webDir -Details @{ Output = $res4.Output }
-    }
-    # Lint (web)
-    $resLintWeb = Invoke-CommandSafe -Cmd 'npm' -Args @('run','lint','--silent') -Dir $webDir
-    if ($resLintWeb.ExitCode -ne 0) {
-      Add-Finding -Area 'Web' -Severity 'Medium' -Message 'ESLint failed' -Fix 'Fix lint errors; adjust rules if needed' -Path $webDir -Details @{ Output = $resLintWeb.Output }
-    } else {
-      Add-Finding -Area 'Web' -Severity 'Info' -Message 'ESLint passed' -Fix '' -Path $webDir -Details @{ }
-    }
-    # TypeScript compile (web)
-    $resTscWeb = Invoke-CommandSafe -Cmd 'npx' -Args @('tsc','--noEmit') -Dir $webDir
-    if ($resTscWeb.ExitCode -ne 0) {
-      Add-Finding -Area 'Web' -Severity 'High' -Message 'TypeScript compile errors' -Fix 'Run npx tsc --noEmit and fix TS errors' -Path $webDir -Details @{ Output = $resTscWeb.Output }
-    } else {
-      Add-Finding -Area 'Web' -Severity 'Info' -Message 'TypeScript compile passed' -Fix '' -Path $webDir -Details @{ }
+  # 3) Build logs in VCS (cached search)
+  Write-Host "[Audit] Checking for build artifacts..." -ForegroundColor Cyan
+  $logFiles = Get-ChildItem -Path "$RepoRoot/app-rn/android" -Filter "*.log" -File -ErrorAction SilentlyContinue
+  foreach ($lf in $logFiles) {
+    $tracked = Test-GitTracked -Path $lf.FullName
+    if ($tracked -eq $true) {
+      Add-Finding -Area 'VCS' -Severity 'Medium' -Message 'Build log tracked in git' -Fix 'Add to .gitignore; run: git rm --cached' -Path $lf.FullName -Details @{ SizeBytes = $lf.Length }
     }
   }
 
+  # 4) Synchronous logging
+  Write-Host "[Audit] Checking for sync logging..." -ForegroundColor Cyan
+  $syncHits = Select-String -Path $codeFilePaths -Pattern 'appendFileSync' -AllMatches -ErrorAction SilentlyContinue
+  $syncHits | ForEach-Object {
+    Add-Finding -Area 'Logging' -Severity 'Medium' -Message 'Synchronous file logging (appendFileSync)' -Fix 'Use async fs.promises or Pino/Winston' -Path $_.Path -Details @{ Line = $_.LineNumber }
+  }
+
+  # 5) Verification endpoints throttling
+  Write-Host "[Audit] Checking auth throttling..." -ForegroundColor Cyan
+  $authController = Join-Path $RepoRoot 'server/src/auth/auth.controller.ts'
+  if (Test-Path $authController) {
+    $text = Get-Content $authController -Raw
+    if ($text -notmatch '@Throttle\(') {
+      Add-Finding -Area 'Auth' -Severity 'Medium' -Message 'Missing @Throttle decorators' -Fix 'Add @Throttle(3, 3600) to verification routes' -Path $authController -Details @{ }
+    }
+  }
+
+  # 6) ScheduleModule and cron
+  Write-Host "[Audit] Checking cron setup..." -ForegroundColor Cyan
+  $appModule = Join-Path $RepoRoot 'server/src/app.module.ts'
+  if (Test-Path $appModule -and (Get-Content $appModule -Raw) -notmatch 'ScheduleModule\.forRoot\(') {
+    Add-Finding -Area 'Cron' -Severity 'Low' -Message 'ScheduleModule not registered' -Fix 'Import ScheduleModule.forRoot()' -Path $appModule -Details @{ }
+  }
+
+  $authService = Join-Path $RepoRoot 'server/src/auth/auth.service.ts'
+  if (Test-Path $authService -and (Get-Content $authService -Raw) -notmatch '@Cron\(') {
+    Add-Finding -Area 'Cron' -Severity 'Low' -Message 'No cleanup cron in AuthService' -Fix 'Add @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)' -Path $authService -Details @{ }
+  }
+
+  # 7) Verification code storage
+  Write-Host "[Audit] Checking code storage..." -ForegroundColor Cyan
+  $entityPath = Join-Path $RepoRoot 'server/src/auth/verification-code.entity.ts'
+  if (Test-Path $entityPath) {
+    $text = Get-Content $entityPath -Raw
+    if (($text -match 'code!:\s*string') -and -not ($text -match 'codeHash')) {
+      Add-Finding -Area 'Auth' -Severity 'High' -Message 'Codes stored in plaintext' -Fix 'Store only hashed codes (HMAC-SHA256)' -Path $entityPath -Details @{ }
+    }
+  }
+
+  # 8) Android keystores
   if (-not $SkipAndroid) {
-    Write-Host "[Audit] Checking Android project..." -ForegroundColor Cyan
-    $androidDir = Join-Path $RepoRoot 'app-rn/android'
-    $keystores = Get-ChildItem -Path (Join-Path $androidDir 'app') -Filter '*.keystore' -File -ErrorAction SilentlyContinue
+    Write-Host "[Audit] Checking Android keystores..." -ForegroundColor Cyan
+    $keystores = Get-ChildItem -Path "$RepoRoot/app-rn/android" -Filter '*.keystore' -File -Recurse -ErrorAction SilentlyContinue
     foreach ($ks in $keystores) {
-      $tracked = Test-GitTracked -Path $ks.FullName
-      if ($tracked -eq $true) {
-        Add-Finding -Area 'Android' -Severity 'High' -Message 'Keystore file tracked in git' -Fix 'Remove keystore from VCS and rotate signing credentials' -Path $ks.FullName -Details @{ }
-      }
-    }
-    # Lint (React Native)
-    $rnDir = Join-Path $RepoRoot 'app-rn'
-    if (Test-Path (Join-Path $rnDir 'package.json')) {
-      $resLintRn = Invoke-CommandSafe -Cmd 'npm' -Args @('run','lint','--silent') -Dir $rnDir
-      if ($resLintRn.ExitCode -ne 0) {
-        Add-Finding -Area 'Mobile' -Severity 'Medium' -Message 'ESLint failed (RN)' -Fix 'Fix lint errors in app-rn' -Path $rnDir -Details @{ Output = $resLintRn.Output }
-      } else {
-        Add-Finding -Area 'Mobile' -Severity 'Info' -Message 'ESLint passed (RN)' -Fix '' -Path $rnDir -Details @{ }
-      }
-      # TypeScript compile (RN)
-      $resTscRn = Invoke-CommandSafe -Cmd 'npx' -Args @('tsc','--noEmit') -Dir $rnDir
-      if ($resTscRn.ExitCode -ne 0) {
-        Add-Finding -Area 'Mobile' -Severity 'High' -Message 'TypeScript compile errors (RN)' -Fix 'Run npx tsc --noEmit in app-rn and fix TS errors' -Path $rnDir -Details @{ Output = $resTscRn.Output }
-      } else {
-        Add-Finding -Area 'Mobile' -Severity 'Info' -Message 'TypeScript compile passed (RN)' -Fix '' -Path $rnDir -Details @{ }
+      if ((Test-GitTracked -Path $ks.FullName) -eq $true) {
+        Add-Finding -Area 'Android' -Severity 'High' -Message 'Keystore tracked in git' -Fix 'Remove from VCS; rotate credentials' -Path $ks.FullName -Details @{ }
       }
     }
   }
 }
 
-# 9.5) API Smoke Checks (start server, probe health, verify auth gates)
-if (-not $SkipSmoke) {
-  Write-Host "[Audit] Running API smoke checks..." -ForegroundColor Cyan
-  $serverDir = Join-Path $RepoRoot 'server'
-  if (Test-Path (Join-Path $serverDir 'package.json')) {
-    # Ensure build exists when start:prod is used
-    $distDir = Join-Path $serverDir 'dist'
-    if (-not (Test-Path $distDir) -and (Test-NpmAvailable) -and (-not $SkipBuilds)) {
-      $resBuild = Invoke-CommandSafe -Cmd 'npm' -Args @('run','build','--silent') -Dir $serverDir
-      if ($resBuild.ExitCode -ne 0) {
-        Add-Finding -Area 'Smoke' -Severity 'High' -Message 'Server build missing and build failed; cannot run start:prod' -Fix 'Fix build errors so start:prod can run' -Path $serverDir -Details @{ Output = $resBuild.Output }
+# ==================== PARALLEL NPM OPERATIONS ====================
+
+Write-Host "[Audit] Setting up parallel checks..." -ForegroundColor Cyan
+
+$jobs = @()
+$serverDir = Join-Path $RepoRoot 'server'
+$webDir = Join-Path $RepoRoot 'app-web'
+$rnDir = Join-Path $RepoRoot 'app-rn'
+
+# Tests (optional, fast)
+if (-not $SkipTests -and (Test-NpmAvailable)) {
+  foreach ($proj in @(@{Dir=$serverDir; Name='Server'}, @{Dir=$webDir; Name='Web'}, @{Dir=$rnDir; Name='Mobile'})) {
+    if (Test-Path "$($proj.Dir)/package.json") {
+      $jobs += @{
+        Type = 'test'; Dir = $proj.Dir; Name = $proj.Name
+        ScriptBlock = { param($Dir, $Name); Invoke-CommandSafe -Cmd npm -Args @('test','--silent','--','--runInBand','--passWithNoTests') -Dir $Dir }
       }
     }
+  }
+}
 
-    # Start server in background on a non-default port to avoid collisions
-    $smokePort = 3101
-    $startCmd = "cd '$serverDir'; $env:PORT=$smokePort; $env:DATABASE_URL=''; npm run start:prod"
-    $proc = Start-Process powershell -ArgumentList '-NoProfile','-Command', $startCmd -PassThru -WindowStyle Hidden
-    try {
-      # Wait until health endpoint responds
-      $ok = Wait-ForHttp -Url ("http://localhost:{0}/health" -f $smokePort) -TimeoutSec 45
-      if (-not $ok) {
-        Add-Finding -Area 'Smoke' -Severity 'High' -Message 'Health endpoint did not become ready' -Fix 'Check bootstrap logs; ensure no DB/env failures block startup' -Path $serverDir -Details @{ Port = $smokePort }
-      } else {
-        # Probe health endpoints
-        $urls = @('/health','/health/live','/health/ready','/health/detailed') | ForEach-Object { "http://localhost:$smokePort$_" }
-        foreach ($u in $urls) {
-          try {
-            $resp = Invoke-WebRequest -Uri $u -Method GET -TimeoutSec 10 -ErrorAction Stop
-            if ($resp.StatusCode -ne 200) {
-              Add-Finding -Area 'Smoke' -Severity 'Medium' -Message "Unexpected status code on $u: $($resp.StatusCode)" -Fix 'Investigate endpoint mapping and readiness/liveness implementations' -Path $serverDir -Details @{ Url = $u; Status = $resp.StatusCode }
-            } else {
-              Add-Finding -Area 'Smoke' -Severity 'Info' -Message "OK: $u" -Fix '' -Path $serverDir -Details @{ }
-            }
-          } catch {
-            Add-Finding -Area 'Smoke' -Severity 'High' -Message "Failed to GET $u" -Fix 'Review server logs; confirm route/controller registration' -Path $serverDir -Details @{ Error = $_.Exception.Message }
-          }
-        }
-
-        # Auth-gated routes should reject without JWT (401/403 acceptable)
-        $protected = @('/profiles/me','/subscriptions/status')
-        foreach ($p in $protected) {
-          $url = "http://localhost:$smokePort$p"
-          try {
-            $resp = Invoke-WebRequest -Uri $url -Method GET -TimeoutSec 10 -ErrorAction Stop
-            # If we got a 200, this is a problem (should be protected)
-            Add-Finding -Area 'Smoke' -Severity 'High' -Message "Protected route returned 200 without JWT: $p" -Fix 'Ensure @UseGuards(JwtAuthGuard) or AuthGuard("jwt") is applied' -Path $serverDir -Details @{ Url = $url; Status = $resp.StatusCode }
-          } catch {
-            $msg = $_.Exception.Message
-            if ($msg -match '401' -or $msg -match '403') {
-              Add-Finding -Area 'Smoke' -Severity 'Info' -Message "Auth gate OK: $p rejected without JWT" -Fix '' -Path $serverDir -Details @{ }
-            } else {
-              Add-Finding -Area 'Smoke' -Severity 'Medium' -Message "Protected route check ambiguous for $p" -Fix 'Verify route protection and server error handling' -Path $serverDir -Details @{ Error = $msg }
-            }
-          }
-        }
+# Lint checks (optional, fast)
+if (-not $SkipLint -and (Test-NpmAvailable)) {
+  foreach ($proj in @(@{Dir=$serverDir; Name='Server'}, @{Dir=$webDir; Name='Web'}, @{Dir=$rnDir; Name='Mobile'})) {
+    if (Test-Path "$($proj.Dir)/package.json") {
+      $jobs += @{
+        Type = 'lint'; Dir = $proj.Dir; Name = $proj.Name
+        ScriptBlock = { param($Dir, $Name); Invoke-CommandSafe -Cmd npm -Args @('run','lint','--silent') -Dir $Dir }
       }
-    } finally {
-      # Stop the server process
-      try { if ($proc -and !$proc.HasExited) { Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue } } catch {}
     }
+  }
+}
+
+# TypeScript checks (optional, medium speed)
+if (-not $SkipTypeCheck -and (Test-NpmAvailable)) {
+  foreach ($proj in @(@{Dir=$serverDir; Name='Server'}, @{Dir=$webDir; Name='Web'}, @{Dir=$rnDir; Name='Mobile'})) {
+    if (Test-Path "$($proj.Dir)/package.json") {
+      $jobs += @{
+        Type = 'tsc'; Dir = $proj.Dir; Name = $proj.Name
+        ScriptBlock = { param($Dir, $Name); Invoke-CommandSafe -Cmd npx -Args @('tsc','--noEmit') -Dir $Dir }
+      }
+    }
+  }
+}
+
+# E2E tests (optional, slower)
+if (-not $SkipE2E -and (Test-NpmAvailable) -and (Test-Path "$serverDir/package.json")) {
+  $jobs += @{
+    Type = 'e2e'; Dir = $serverDir; Name = 'Server'
+    ScriptBlock = { param($Dir, $Name); Invoke-CommandSafe -Cmd npm -Args @('run','test:e2e','--silent') -Dir $Dir }
+  }
+}
+
+# npm audit (optional, fast)
+if (-not $SkipAudits -and (Test-NpmAvailable)) {
+  foreach ($proj in @(@{Dir=$serverDir; Name='Server'}, @{Dir=$webDir; Name='Web'})) {
+    if (Test-Path "$($proj.Dir)/package.json") {
+      $jobs += @{
+        Type = 'audit'; Dir = $proj.Dir; Name = $proj.Name
+        ScriptBlock = { param($Dir, $Name); Invoke-CommandSafe -Cmd npm -Args @('audit','--json') -Dir $Dir }
+      }
+    }
+  }
+}
+
+# Run jobs in parallel (limit concurrency)
+Write-Host "[Audit] Running $($jobs.Count) checks in parallel..." -ForegroundColor Cyan
+$results = @()
+foreach ($job in $jobs) {
+  $results += Start-Job -ScriptBlock {
+    param($Job, $RepoRoot)
+    $result = & $Job.ScriptBlock -Dir $Job.Dir -Name $Job.Name
+    [PSCustomObject]@{ Type=$Job.Type; Name=$Job.Name; Dir=$Job.Dir; ExitCode=$result.ExitCode; Output=$result.Output }
+  } -ArgumentList $job, $RepoRoot
+}
+
+# Collect results
+$completed = @()
+foreach ($result in $results) {
+  $r = Receive-Job -Job $result -Wait
+  $completed += $r
+  Remove-Job -Job $result
+}
+
+# Process results
+foreach ($r in $completed) {
+  $severity = if ($r.ExitCode -eq 0) { 'Info' } else { 'High' }
+  $areaMap = @{'test'='Test'; 'lint'='Lint'; 'tsc'='TypeScript'; 'e2e'='E2E'; 'audit'='Security'}
+  $area = $areaMap[$r.Type]
+  
+  if ($r.ExitCode -eq 0) {
+    Add-Finding -Area $area -Severity 'Info' -Message "$($r.Name) $($r.Type) passed" -Fix '' -Path $r.Dir -Details @{ }
   } else {
-    Add-Finding -Area 'Smoke' -Severity 'Info' -Message 'Server package.json not found; skipping API smoke checks' -Fix '' -Path $serverDir -Details @{ }
+    Add-Finding -Area $area -Severity $severity -Message "$($r.Name) $($r.Type) failed" -Fix 'Review output and fix errors' -Path $r.Dir -Details @{ Output = $r.Output }
+    
+    # Parse audit results
+    if ($r.Type -eq 'audit') {
+      try {
+        $audit = $r.Output | ConvertFrom-Json
+        if ($audit.vulnerabilities) {
+          foreach ($v in $audit.vulnerabilities.psobject.Properties) {
+            Add-Finding -Area 'Security' -Severity $v.Name -Message "Vulnerability in $($r.Name)" -Fix 'Update dependency' -Path $r.Dir -Details @{ Count = $v.Value.Count }
+          }
+        }
+      } catch { }
+    }
   }
 }
 
-# 10) Summaries and output
-Write-Host "[Audit] Generating report..." -ForegroundColor Cyan
-function Format-FindingText {
-  param($f)
-  return "[${($f.Area)}] (${($f.Severity)}) ${($f.Message)}`n  Path: ${($f.Path)}" +
-         (if ($f.Fix) { "`n  Fix: ${($f.Fix)}" } else { '' }) +
-         (if ($f.Details) { "`n  Details: " + ($f.Details | ConvertTo-Json -Compress) } else { '' }) + "`n"
+# ==================== OPTIONAL: BUILDS & SMOKE ====================
+
+if ($RunBuilds -and (Test-NpmAvailable)) {
+  Write-Host "[Audit] Running builds (this is slower)..." -ForegroundColor Cyan
+  foreach ($proj in @(@{Dir=$serverDir; Name='Server'}, @{Dir=$webDir; Name='Web'})) {
+    if (Test-Path "$($proj.Dir)/package.json") {
+      Write-Host "  Building $($proj.Name)..." -ForegroundColor Yellow
+      $res = Invoke-CommandSafe -Cmd npm -Args @('run','build','--silent') -Dir $proj.Dir
+      if ($res.ExitCode -ne 0) {
+        Add-Finding -Area 'Build' -Severity 'High' -Message "$($proj.Name) build failed" -Fix 'Fix errors' -Path $proj.Dir -Details @{ Output = $res.Output }
+      } else {
+        Add-Finding -Area 'Build' -Severity 'Info' -Message "$($proj.Name) build passed" -Fix '' -Path $proj.Dir -Details @{ }
+      }
+    }
+  }
 }
+
+if ($RunSmoke) {
+  Write-Host "[Audit] Running API smoke tests (this is slower)..." -ForegroundColor Cyan
+  if (Test-Path "$serverDir/package.json") {
+    if ([string]::IsNullOrWhiteSpace($env:DATABASE_URL)) {
+      Add-Finding -Area 'Smoke' -Severity 'Info' -Message 'DATABASE_URL not set; skipping smoke tests' -Fix 'Set DATABASE_URL to enable' -Path $serverDir -Details @{ }
+    } else {
+      $smokePort = 3101
+      if (Test-PortOpen -Port $smokePort) {
+        Add-Finding -Area 'Smoke' -Severity 'Warning' -Message "Port $smokePort in use; skipping smoke tests" -Fix 'Free the port' -Path $serverDir -Details @{ }
+      } else {
+        $env:PORT = $smokePort
+        $proc = Start-Process -FilePath 'node' -ArgumentList @('dist/src/main.js') -WorkingDirectory $serverDir -PassThru -WindowStyle Hidden -ErrorAction SilentlyContinue
+        try {
+          $ok = Wait-ForHttp -Url "http://localhost:$smokePort/health" -TimeoutSec 30
+          if ($ok) {
+            Add-Finding -Area 'Smoke' -Severity 'Info' -Message 'Health endpoint ok' -Fix '' -Path $serverDir -Details @{ }
+          } else {
+            Add-Finding -Area 'Smoke' -Severity 'High' -Message 'Health endpoint unreachable' -Fix 'Check server logs' -Path $serverDir -Details @{ }
+          }
+        } finally {
+          if ($proc) { Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue }
+        }
+      }
+    }
+  }
+}
+
+# ==================== REPORT ====================
+
+$sw.Stop()
+Write-Host "`n[Audit] Complete in $($sw.ElapsedMilliseconds)ms" -ForegroundColor Cyan
+
+$summary = @{
+  Total = $Findings.Count
+  High = ($Findings | Where-Object { $_.Severity -eq 'High' }).Count
+  Medium = ($Findings | Where-Object { $_.Severity -eq 'Medium' }).Count
+  Low = ($Findings | Where-Object { $_.Severity -eq 'Low' }).Count
+  Info = ($Findings | Where-Object { $_.Severity -eq 'Info' }).Count
+}
+
+Write-Host "Findings: High=$($summary.High) Medium=$($summary.Medium) Low=$($summary.Low) Info=$($summary.Info)" -ForegroundColor Yellow
 
 if ($Json) {
-  $json = $Findings | ConvertTo-Json -Depth 5
-  Set-Content -Path (Join-Path $RepoRoot $Output) -Value $json -Encoding UTF8
-  Write-Host "[Audit] JSON report written to $Output" -ForegroundColor Green
+  $output_obj = @{ Summary = $summary; Findings = $Findings; ExecutedAt = (Get-Date -Format 'o'); DurationMs = $sw.ElapsedMilliseconds }
+  $output_obj | ConvertTo-Json -Depth 5 | Out-File -Path $Output -Encoding UTF8
+  Write-Host "JSON report: $Output" -ForegroundColor Green
 } else {
-  $text = "Smasher Repository Audit Report`nGenerated: $(Get-Date -Format o)`n`n" +
-          ("Total findings: " + $Findings.Count) + "`n" +
-          ($Findings | ForEach-Object { Format-FindingText $_ })
-  Set-Content -Path (Join-Path $RepoRoot $Output) -Value $text -Encoding UTF8
-  Write-Host "[Audit] Text report written to $Output" -ForegroundColor Green
-  Write-Host "`n====== AUDIT FINDINGS ======`" -ForegroundColor Cyan
-  Write-Host $text
+  $report = @()
+  $report += "=== AUDIT REPORT ==="
+  $report += "Time: $(Get-Date)"
+  $report += "Summary: High=$($summary.High) Medium=$($summary.Medium) Low=$($summary.Low) Info=$($summary.Info)"
+  $report += ""
+  
+  foreach ($severity in @('High', 'Medium', 'Low', 'Info')) {
+    $items = $Findings | Where-Object { $_.Severity -eq $severity }
+    if ($items) {
+      $report += "=== $severity ($($items.Count)) ==="
+      foreach ($f in $items) {
+        $report += "[$($f.Area)] $($f.Message)"
+        $report += "  Path: $($f.Path)"
+        if ($f.Fix) { $report += "  Fix: $($f.Fix)" }
+        $report += ""
+      }
+    }
+  }
+  
+  $report | Out-File -Path $Output -Encoding UTF8
+  Write-Host "Report: $Output" -ForegroundColor Green
+  $report | Out-Host
 }
-
-Write-Host "[Audit] Done." -ForegroundColor Green

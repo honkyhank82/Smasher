@@ -39,12 +39,22 @@ export const GalleryScreen = ({ navigation }: any) => {
   const loadMedia = async () => {
     try {
       const response = await api.get('/media/my-media');
-      setMedia(response.data.map((item: any) => ({
-        id: item.id,
-        uri: item.url,
-        type: item.type,
-        isProfilePicture: item.isProfilePicture,
-      })));
+      const data = response?.data;
+      if (!Array.isArray(data)) {
+        console.warn('Unexpected media response shape', data);
+        setMedia([]);
+        return;
+      }
+      const mapped = data
+        .filter((item: any) => item && typeof item === 'object')
+        .map((item: any) => ({
+          id: String(item.id),
+          uri: String(item.url || ''),
+          type: item.type === 'video' ? 'video' : 'photo',
+          isProfilePicture: Boolean(item.isProfilePicture),
+        }))
+        .filter((m: MediaItem) => m.id && m.uri && (m.type === 'photo' || m.type === 'video'));
+      setMedia(mapped);
     } catch (error) {
       console.error('Failed to load media:', error);
     } finally {
@@ -119,6 +129,9 @@ export const GalleryScreen = ({ navigation }: any) => {
         fileData: base64Data,
       });
 
+      if (!uploadResponse?.data?.id || !uploadResponse?.data?.url) {
+        throw new Error('Invalid upload response: missing id or url');
+      }
       console.log('✓ Upload successful');
       console.log('Media ID:', uploadResponse.data.id);
       console.log('=== UPLOAD COMPLETE ===');

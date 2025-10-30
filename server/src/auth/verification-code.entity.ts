@@ -9,12 +9,9 @@ export class VerificationCode {
   @Index('idx_verification_email')
   email!: string;
 
-  @Column({ type: 'varchar', length: 10 })
-  code!: string; // Deprecated: plaintext storage; will be phased out
-
-  @Column({ type: 'varchar', length: 255, name: 'code_hash', nullable: true })
+  @Column({ type: 'varchar', length: 255, name: 'code_hash', nullable: false })
   @Index('idx_verification_codehash')
-  codeHash?: string;
+  codeHash!: string;
 
   @Column({ type: 'timestamp', name: 'expires_at' })
   @Index('idx_verification_expires')

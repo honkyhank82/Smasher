@@ -1,10 +1,17 @@
 param(
-  [string]$Root = "d:\\Dev\\smasher",
+  [string]$Root,
   [switch]$DryRun,
   [int]$AgeDays = 0,
   [switch]$IncludeNodeModules,
   [switch]$Verbose
 )
+
+if (-not $PSBoundParameters.ContainsKey('Root') -or [string]::IsNullOrWhiteSpace($Root)) {
+  $Root = $PSScriptRoot
+  if (-not $Root) {
+    $Root = Split-Path -Parent $MyInvocation.MyCommand.Definition
+  }
+}
 
 Set-Location $Root
 

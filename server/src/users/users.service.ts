@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { Profile } from '../profiles/profile.entity';
 import * as bcrypt from 'bcryptjs';
+import { Block } from '../blocks/block.entity';
 
 @Injectable()
 export class UsersService {
@@ -12,6 +13,8 @@ export class UsersService {
     private readonly users: Repository<User>,
     @InjectRepository(Profile)
     private readonly profiles: Repository<Profile>,
+    @InjectRepository(Block)
+    private readonly blocks: Repository<Block>,
   ) {}
 
   async createUser(email: string, passwordHash: string, consents?: { age?: Date; tos?: Date; birthdate?: Date | null }): Promise<User> {
@@ -156,22 +159,69 @@ export class UsersService {
     // TODO: Add other privacy settings fields to Profile entity and update them here
   }
 
-  async getBlockedUsers(userId: string): Promise<any[]> {
-    // TODO: Implement blocked users table
-    // For now, return empty array
-    return [];
+  async getBlockedUsers(userId: string): Promise<string[]> {
+    const records = await this.blocks.find({
+      where: { blocker: { id: userId } },
+      relations: ['blocked'],
+      select: { id: true },
+    });
+    // Map to blocked user IDs
+    const ids: string[] = [];
+    for (const rec of records) {
+      // rec.blocked should be loaded due to relations
+      const blockedId = (rec as any).blocked?.id as string | undefined;
+      if (blockedId) ids.push(blockedId);
+    }
+    return ids;
   }
 
   async blockUser(userId: string, targetUserId: string): Promise<void> {
-    // TODO: Implement blocked users table
-    // For now, just log
-    console.log(`User ${userId} blocked user ${targetUserId}`);
+    const uid = (userId ?? '').trim();
+    const tid = (targetUserId ?? '').trim();
+    if (!uid || !tid) {
+      throw new BadRequestException('Invalid user IDs');
+    }
+    if (uid === tid) {
+      throw new BadRequestException('Cannot block yourself');
+    }
+
+    // Ensure target user exists
+    const target = await this.users.findOne({ where: { id: tid } });
+    if (!target) {
+      throw new BadRequestException('Target user not found');
+    }
+
+    await this.blocks.manager.transaction(async (tm) => {
+      const existing = await tm.findOne(Block, {
+        where: { blocker: { id: uid }, blocked: { id: tid } },
+      });
+      if (existing) {
+        // No-op if already blocked
+        return;
+      }
+      const record = tm.create(Block, {
+        blocker: { id: uid } as any,
+        blocked: { id: tid } as any,
+      });
+      await tm.save(Block, record);
+    });
+    // TODO: Invalidate caches or emit events for blocking changes
   }
 
   async unblockUser(userId: string, targetUserId: string): Promise<void> {
-    // TODO: Implement blocked users table
-    // For now, just log
-    console.log(`User ${userId} unblocked user ${targetUserId}`);
+    const uid = (userId ?? '').trim();
+    const tid = (targetUserId ?? '').trim();
+    if (!uid || !tid) {
+      throw new BadRequestException('Invalid user IDs');
+    }
+
+    const result = await this.blocks.manager.transaction(async (tm) => {
+      return tm.delete(Block, { blocker: { id: uid } as any, blocked: { id: tid } as any });
+    });
+    if (!result.affected || result.affected === 0) {
+      throw new BadRequestException('Block not found');
+    }
+    // TODO: Invalidate caches or emit events for blocking changes
   }
 
   async changeEmail(userId: string, newEmail: string, password: string): Promise<void> {

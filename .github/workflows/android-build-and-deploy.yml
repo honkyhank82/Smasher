@@ -1,0 +1,148 @@
+name: Android CI — Build & Deploy
+
+on:
+  push:
+    branches: [ master ]
+    tags: ['v*', 'release/*']
+  workflow_dispatch: {}
+
+jobs:
+  build-and-deploy:
+    name: Build AAB and optionally deploy to Play
+    runs-on: ubuntu-latest
+    env:
+      # these are populated from repository secrets below
+      SMASHER_UPLOAD_STORE_PASSWORD: ${{ secrets.SMASHER_UPLOAD_STORE_PASSWORD }}
+      SMASHER_UPLOAD_KEY_ALIAS: ${{ secrets.SMASHER_UPLOAD_KEY_ALIAS }}
+      SMASHER_UPLOAD_KEY_PASSWORD: ${{ secrets.SMASHER_UPLOAD_KEY_PASSWORD }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper/
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Install Ruby and Bundler
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.1
+          bundler-cache: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Prepare Android keystore
+        run: |
+          if [ -z "${KEYSTORE_BASE64}" ]; then
+            echo "No KEYSTORE_BASE64 secret provided; skipping keystore preparation"
+            exit 0
+          fi
+          mkdir -p "$GITHUB_WORKSPACE/app-rn/keystore"
+          echo "$KEYSTORE_BASE64" | base64 -d > "$GITHUB_WORKSPACE/app-rn/keystore/masher-release.keystore"
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+
+      - name: Write Google Play service account (if provided)
+        run: |
+          if [ -z "${GOOGLE_PLAY_SERVICE_ACCOUNT_JSON}" ]; then
+            echo "No GOOGLE_PLAY_SERVICE_ACCOUNT_JSON secret provided; skipping write"
+            exit 0
+          fi
+          echo "$GOOGLE_PLAY_SERVICE_ACCOUNT_JSON" | base64 -d > $GITHUB_WORKSPACE/app-rn/google-play-service-account.json
+        env:
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+
+      - name: Set signing env vars for Gradle
+        run: |
+          echo "SMASHER_UPLOAD_STORE_FILE=$GITHUB_WORKSPACE/app-rn/keystore/masher-release.keystore" >> $GITHUB_ENV
+          echo "SMASHER_UPLOAD_STORE_PASSWORD=${{ secrets.SMASHER_UPLOAD_STORE_PASSWORD }}" >> $GITHUB_ENV
+          echo "SMASHER_UPLOAD_KEY_ALIAS=${{ secrets.SMASHER_UPLOAD_KEY_ALIAS }}" >> $GITHUB_ENV
+          echo "SMASHER_UPLOAD_KEY_PASSWORD=${{ secrets.SMASHER_UPLOAD_KEY_PASSWORD }}" >> $GITHUB_ENV
+
+      - name: Install project dependencies
+        working-directory: app-rn
+        run: |
+          npm ci
+
+      - name: Build Android AAB (bundleRelease)
+        working-directory: app-rn/android
+        run: |
+          ./gradlew bundleRelease --no-daemon
+
+      - name: Check for generated AAB
+        id: check_aab_exists
+        run: |
+          AAB_PATH="$(pwd)/app/build/outputs/bundle/release/app-release.aab"
+          echo "Checking $AAB_PATH"
+          if [ -f "$AAB_PATH" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "aab_path=$AAB_PATH" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload AAB artifact
+        if: steps.check_aab_exists.outputs.exists == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release.aab
+          path: ${{ steps.check_aab_exists.outputs.aab_path }}
+
+      - name: Determine release tag
+        id: release_tag
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=build-${GITHUB_RUN_NUMBER}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create draft GitHub release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.release_tag.outputs.tag }}
+          release_name: ${{ steps.release_tag.outputs.tag }}
+          draft: true
+          prerelease: false
+          body: "Automated build artifact from GitHub Actions"
+
+      - name: Upload AAB to release
+        if: steps.check_aab_exists.outputs.exists == 'true'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.check_aab_exists.outputs.aab_path }}
+          asset_name: app-release.aab
+          asset_content_type: application/octet-stream
+
+      - name: Run Fastlane deploy lane (upload to Play)
+        working-directory: app-rn
+        run: |
+          if [ -z "${GOOGLE_PLAY_SERVICE_ACCOUNT_JSON}" ]; then
+            echo "No GOOGLE_PLAY_SERVICE_ACCOUNT_JSON secret provided; skipping Play deployment"
+            exit 0
+          fi
+          bundle install --path vendor/bundle
+          bundle exec fastlane android deploy json_key: "$GITHUB_WORKSPACE/app-rn/google-play-service-account.json"
+        env:
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}

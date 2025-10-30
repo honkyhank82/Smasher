@@ -203,9 +203,14 @@ foreach ($test in $authTests.GetEnumerator()) {
         Write-Host "✅ $($test.Key)" -ForegroundColor Green
         $authPassed++
     } catch {
-        if ($_.Exception.Response.StatusCode -eq 400 -or $_.Exception.Response.StatusCode -eq 404) {
-            Write-Host "⚠️ $($test.Key): Endpoint exists" -ForegroundColor Yellow
+        if ($_.Exception.Response.StatusCode -eq 404) {
+            Write-Host "⚠️ $($test.Key): Endpoint exists (404)" -ForegroundColor Yellow
             $authPassed++
+        } elseif ($_.Exception.Response.StatusCode -eq 400) {
+            $body = $null
+            try { $body = ($_ | Out-String).Trim() } catch {}
+            Write-Host "❌ $($test.Key): Bad Request (400)" -ForegroundColor Red
+            $errorDetails += @{Type="Auth Endpoint"; Message="$($test.Key) returned 400 Bad Request"; Severity="ERROR"; Context=$body}
         } else {
             Write-Host "❌ $($test.Key)" -ForegroundColor Red
             $errorDetails += @{Type="Auth Endpoint"; Message="$($test.Key) failed: $($_.Exception.Message)"; Severity="ERROR"}
@@ -356,26 +361,38 @@ $results.Notifications = "$notifPassed/$($notifEndpoints.Count) protected"
 Write-Host "`n=== DATABASE & PERFORMANCE ===" -ForegroundColor Yellow
 try {
     $detailed = Invoke-RestMethod -Uri "$API_URL/health/detailed" -Method Get -TimeoutSec 30 -EA Stop
-    $dbStatus = $detailed.checks.database.status
-    $memStatus = $detailed.checks.memory.status
-    $cpuStatus = $detailed.checks.cpu.status
-    
-    Write-Host "✅ Database: $dbStatus ($($detailed.checks.database.responseTime))" -ForegroundColor Green
-    Write-Host "   Memory: $($detailed.checks.memory.usage) - $memStatus" -ForegroundColor White
-    Write-Host "   CPU: $($detailed.checks.cpu.usage) - $cpuStatus" -ForegroundColor White
-    Write-Host "   Heap: $($detailed.checks.memory.heapUsed)" -ForegroundColor White
-    
-    $results.Database = "✅ $($detailed.checks.database.responseTime)"
-    $results.Performance = "Mem:$($detailed.checks.memory.usage) CPU:$($detailed.checks.cpu.usage)"
-    
-    if ($dbStatus -ne "healthy") {
+    $hasChecks = $null -ne $detailed -and $null -ne $detailed.checks
+    $dbStatus = if ($hasChecks -and $null -ne $detailed.checks.database -and $null -ne $detailed.checks.database.status) { $detailed.checks.database.status } else { "unknown" }
+    $memStatus = if ($hasChecks -and $null -ne $detailed.checks.memory -and $null -ne $detailed.checks.memory.status) { $detailed.checks.memory.status } else { "unknown" }
+    $cpuStatus = if ($hasChecks -and $null -ne $detailed.checks.cpu -and $null -ne $detailed.checks.cpu.status) { $detailed.checks.cpu.status } else { "unknown" }
+
+    $dbRespTime = if ($hasChecks -and $null -ne $detailed.checks.database -and $null -ne $detailed.checks.database.responseTime) { $detailed.checks.database.responseTime } else { "N/A" }
+    $memUsage = if ($hasChecks -and $null -ne $detailed.checks.memory -and $null -ne $detailed.checks.memory.usage) { $detailed.checks.memory.usage } else { "N/A" }
+    $cpuUsage = if ($hasChecks -and $null -ne $detailed.checks.cpu -and $null -ne $detailed.checks.cpu.usage) { $detailed.checks.cpu.usage } else { "N/A" }
+    $heapUsed = if ($hasChecks -and $null -ne $detailed.checks.memory -and $null -ne $detailed.checks.memory.heapUsed) { $detailed.checks.memory.heapUsed } else { "N/A" }
+
+    Write-Host "✅ Database: $dbStatus ($dbRespTime)" -ForegroundColor Green
+    Write-Host "   Memory: $memUsage - $memStatus" -ForegroundColor White
+    Write-Host "   CPU: $cpuUsage - $cpuStatus" -ForegroundColor White
+    Write-Host "   Heap: $heapUsed" -ForegroundColor White
+
+    $results.Database = "✅ $dbRespTime"
+    $results.Performance = "Mem:$memUsage CPU:$cpuUsage"
+
+    if ($dbStatus -eq "unknown") {
+        $errorDetails += @{Type="Database"; Message="Database status unavailable in health response"; Severity="WARNING"}
+    } elseif ($dbStatus -ne "healthy") {
         $errorDetails += @{Type="Database"; Message="Database status: $dbStatus"; Severity="CRITICAL"}
     }
-    if ($memStatus -ne "healthy") {
-        $errorDetails += @{Type="Performance"; Message="Memory status: $memStatus ($($detailed.checks.memory.usage))"; Severity="WARNING"}
+    if ($memStatus -eq "unknown") {
+        $errorDetails += @{Type="Performance"; Message="Memory status unavailable ($memUsage)"; Severity="WARNING"}
+    } elseif ($memStatus -ne "healthy") {
+        $errorDetails += @{Type="Performance"; Message="Memory status: $memStatus ($memUsage)"; Severity="WARNING"}
     }
-    if ($cpuStatus -ne "healthy") {
-        $errorDetails += @{Type="Performance"; Message="CPU status: $cpuStatus ($($detailed.checks.cpu.usage))"; Severity="WARNING"}
+    if ($cpuStatus -eq "unknown") {
+        $errorDetails += @{Type="Performance"; Message="CPU status unavailable ($cpuUsage)"; Severity="WARNING"}
+    } elseif ($cpuStatus -ne "healthy") {
+        $errorDetails += @{Type="Performance"; Message="CPU status: $cpuStatus ($cpuUsage)"; Severity="WARNING"}
     }
 } catch {
     Write-Host "❌ Database check failed" -ForegroundColor Red
@@ -391,9 +408,13 @@ try {
     Write-Host "✅ WebSocket accessible" -ForegroundColor Green
     $results.WebSocket = "✅"
 } catch {
-    if ($_.Exception.Response.StatusCode -eq 400) {
-        Write-Host "✅ WebSocket exists" -ForegroundColor Green
+    if ($_.Exception.Response.StatusCode -eq 404) {
+        Write-Host "✅ WebSocket endpoint exists (404)" -ForegroundColor Green
         $results.WebSocket = "✅"
+    } elseif ($_.Exception.Response.StatusCode -eq 400) {
+        Write-Host "❌ WebSocket bad request (400)" -ForegroundColor Red
+        $errorDetails += @{Type="WebSocket"; Message="WebSocket returned 400 Bad Request"; Severity="ERROR"}
+        $results.WebSocket = "❌"
     } else {
         Write-Host "⚠️ WebSocket inconclusive" -ForegroundColor Yellow
         $errorDetails += @{Type="WebSocket"; Message="WebSocket test inconclusive: $($_.Exception.Message)"; Severity="WARNING"}

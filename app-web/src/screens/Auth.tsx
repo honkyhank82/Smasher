@@ -35,8 +35,14 @@ export default function Auth({ setIsAuthenticated }: AuthProps) {
 
     try {
       const response = await apiFailoverService.post('/auth/verify', { email, code })
+      if (!response?.data?.access_token) {
+        throw new Error('Invalid response: missing access_token')
+      }
       localStorage.setItem('authToken', response.data.access_token)
-      localStorage.setItem('user', JSON.stringify(response.data.user))
+      // Store minimal user info only if needed; avoid PII in localStorage
+      if (response?.data?.user?.userId) {
+        localStorage.setItem('userId', response.data.user.userId)
+      }
       apiFailoverService.setAuthToken(response.data.access_token)
       setIsAuthenticated(true)
     } catch (err: any) {

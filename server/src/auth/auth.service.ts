@@ -14,6 +14,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
+  private readonly pepper: string;
   constructor(
     private readonly users: UsersService,
     private readonly jwt: JwtService,
@@ -21,6 +22,15 @@ export class AuthService {
     @InjectRepository(VerificationCode)
     private readonly codes: Repository<VerificationCode>,
   ) {}
+
+  // Initialize and enforce required env vars
+  private initPepper() {
+    const envPepper = (process.env.VERIFICATION_CODE_PEPPER ?? '').trim();
+    if (!envPepper) {
+      throw new Error('Missing required env var VERIFICATION_CODE_PEPPER for verification code hashing');
+    }
+    this.pepper = envPepper;
+  }
 
   async register(params: {
     email: string;
@@ -97,6 +107,8 @@ export class AuthService {
 
   // Send a 6-digit verification code for passwordless login
   async sendVerification(email: string) {
+    // Ensure pepper is initialized
+    if (!this.pepper) { this.initPepper(); }
     const trimmedEmail = (email ?? '').trim();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!trimmedEmail || !emailRegex.test(trimmedEmail)) {
@@ -108,13 +120,10 @@ export class AuthService {
     const now = new Date();
     const codeToSend = randomInt(100000, 1000000).toString();
     const expiresAt = new Date(now.getTime() + 15 * 60_000);
-    const pepper = process.env.VERIFICATION_CODE_PEPPER || '';
-    const codeHash = createHmac('sha256', pepper).update(codeToSend).digest('hex');
+    const codeHash = createHmac('sha256', this.pepper).update(codeToSend).digest('hex');
 
     const newRecord = this.codes.create({
       email: normalizedEmail,
-      // Keep plaintext for legacy usages if needed; consider removing later
-      code: codeToSend,
       codeHash,
       expiresAt,
       used: false,
@@ -129,6 +138,8 @@ export class AuthService {
 
   // Verify code and issue JWT (create user if needed)
   async verify(email: string, code: string) {
+    // Ensure pepper is initialized
+    if (!this.pepper) { this.initPepper(); }
     const trimmedEmail = (email ?? '').trim();
     const trimmedCode = (code ?? '').trim();
     // Basic input validation to prevent invalid data reaching DB
@@ -142,8 +153,7 @@ export class AuthService {
 
     const normalizedEmail = trimmedEmail.toLowerCase();
     const now = new Date();
-    const pepper = process.env.VERIFICATION_CODE_PEPPER || '';
-    const codeHash = createHmac('sha256', pepper).update(trimmedCode).digest('hex');
+    const codeHash = createHmac('sha256', this.pepper).update(trimmedCode).digest('hex');
 
     // Atomically mark code as used if it is valid and unexpired (match by hash)
     const updateResult = await this.codes

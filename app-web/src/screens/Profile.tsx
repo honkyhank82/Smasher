@@ -28,6 +28,7 @@ export default function Profile({ setIsAuthenticated }: ProfileProps) {
   const [editing, setEditing] = useState(false)
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
+  const [ageError, setAgeError] = useState<string | null>(null)
   const [formData, setFormData] = useState<ProfileFormData>({
     name: '',
     age: '',
@@ -59,10 +60,17 @@ export default function Profile({ setIsAuthenticated }: ProfileProps) {
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
+      // Validate age before submitting
+      const ageNum = parseInt(formData.age, 10)
+      if (!Number.isFinite(ageNum) || !Number.isInteger(ageNum) || ageNum <= 0 || ageNum > 120) {
+        setAgeError('Please enter a valid age (1-120).')
+        return
+      }
+      setAgeError(null)
       // Convert form data to proper types for API
       const updateData = {
         name: formData.name,
-        age: parseInt(formData.age, 10), // Convert string back to number
+        age: ageNum, // validated integer
         bio: formData.bio,
       }
       
@@ -114,14 +122,15 @@ export default function Profile({ setIsAuthenticated }: ProfileProps) {
                   />
                 </div>
 
-                <div className="form-group">
-                  <label>Age</label>
-                  <input
-                    type="number"
-                    value={formData.age}
-                    onChange={(e) => setFormData({ ...formData, age: e.target.value })}
-                  />
-                </div>
+            <div className="form-group">
+              <label>Age</label>
+              <input
+                type="number"
+                value={formData.age}
+                onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+              />
+              {ageError && <div className="error-text">{ageError}</div>}
+            </div>
 
                 <div className="form-group">
                   <label>Bio</label>

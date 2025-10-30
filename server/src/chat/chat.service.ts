@@ -4,6 +4,23 @@ import { Repository } from 'typeorm';
 import { Message } from './message.entity';
 import { User } from '../users/user.entity';
 
+export interface Conversation {
+  id: string;
+  participants: string[];
+  lastMessage?: {
+    content: string;
+    createdAt: Date;
+    senderId: string;
+  };
+  updatedAt?: Date;
+  unreadCount?: number;
+  otherUser?: {
+    id: string;
+    displayName: string;
+    profilePicture: string | null;
+  };
+}
+
 @Injectable()
 export class ChatService {
   constructor(
@@ -13,7 +30,7 @@ export class ChatService {
     private userRepository: Repository<User>,
   ) {}
 
-  async getConversations(userId: string): Promise<any[]> {
+  async getConversations(userId: string): Promise<Conversation[]> {
     // Get all unique users that this user has chatted with
     const conversations = await this.messageRepository
       .createQueryBuilder('message')
@@ -32,7 +49,7 @@ export class ChatService {
       .getRawMany();
 
     // Get details for each conversation
-    const result: any[] = [];
+    const result: Conversation[] = [];
     for (const conv of conversations) {
       const otherUser = await this.userRepository.findOne({
         where: { id: conv.otherUserId },
@@ -61,11 +78,12 @@ export class ChatService {
       });
 
       result.push({
-        id: conv.otherUserId, // Using other user's ID as conversation ID
+        id: conv.otherUserId,
+        participants: [userId, conv.otherUserId],
         otherUser: {
           id: otherUser.id,
           displayName: otherUser.profile?.displayName || 'Anonymous',
-          profilePicture: null, // TODO: Add when media relation is ready
+          profilePicture: null,
         },
         lastMessage: lastMessage
           ? {
@@ -74,6 +92,7 @@ export class ChatService {
               senderId: lastMessage.sender.id,
             }
           : undefined,
+        updatedAt: lastMessage ? lastMessage.createdAt : undefined,
         unreadCount,
       });
     }
