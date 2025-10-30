@@ -2,9 +2,13 @@ name: Android CI — Build & Deploy
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, main ]
     tags: ['v*', 'release/*']
   workflow_dispatch: {}
+
+permissions:
+  contents: write
+  packages: read
 
 jobs:
   build-and-deploy:
@@ -109,6 +113,13 @@ jobs:
           name: gradle-build-log
           path: app-rn/android/gradle-build.log
 
+      - name: Upload Gradle problems report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gradle-problems-report
+          path: app-rn/android/build/reports/problems/problems-report.html
+
       - name: Upload AAB artifact
         if: steps.check_aab_exists.outputs.exists == 'true'
         uses: actions/upload-artifact@v4
@@ -116,37 +127,18 @@ jobs:
           name: app-release.aab
           path: ${{ steps.check_aab_exists.outputs.aab_path }}
 
-      - name: Determine release tag
-        id: release_tag
-        run: |
-          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
-            echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-          else
-            echo "tag=build-${GITHUB_RUN_NUMBER}" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Create draft GitHub release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.release_tag.outputs.tag }}
-          release_name: ${{ steps.release_tag.outputs.tag }}
-          draft: true
-          prerelease: false
-          body: "Automated build artifact from GitHub Actions"
-
-      - name: Upload AAB to release
+      - name: Create GitHub release
         if: steps.check_aab_exists.outputs.exists == 'true'
-        uses: actions/upload-release-asset@v1
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ github.run_number }}
+          name: Android Build v${{ github.run_number }}
+          draft: false
+          prerelease: false
+          files: ${{ steps.check_aab_exists.outputs.aab_path }}
+          body: "Automated Android AAB build from GitHub Actions"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.check_aab_exists.outputs.aab_path }}
-          asset_name: app-release.aab
-          asset_content_type: application/octet-stream
 
       - name: Run Fastlane deploy lane (upload to Play)
         working-directory: app-rn
