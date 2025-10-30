@@ -104,6 +104,10 @@ jobs:
             echo "aab_path=$AAB_PATH" >> $GITHUB_OUTPUT
           else
             echo "exists=false" >> $GITHUB_OUTPUT
+            echo "AAB not found! Listing build outputs directory:"
+            ls -la $(pwd)/app/build/outputs/bundle/ 2>/dev/null || echo "bundle directory doesn't exist"
+            echo "Full build directory:"
+            ls -la $(pwd)/app/build/ 2>/dev/null || echo "build directory doesn't exist"
           fi
 
       - name: Upload Gradle build log
@@ -141,6 +145,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run Fastlane deploy lane (upload to Play)
+        if: steps.check_aab_exists.outputs.exists == 'true'
         working-directory: app-rn
         run: |
           if [ -z "${GOOGLE_PLAY_SERVICE_ACCOUNT_JSON}" ]; then
