@@ -87,7 +87,8 @@ jobs:
       - name: Build Android AAB (bundleRelease)
         working-directory: app-rn/android
         run: |
-          ./gradlew bundleRelease --no-daemon
+          # Run Gradle with full warnings and stacktrace, capture output to a log for debugging
+          ./gradlew bundleRelease --no-daemon --warning-mode all --stacktrace 2>&1 | tee $GITHUB_WORKSPACE/app-rn/android/gradle-build.log
 
       - name: Check for generated AAB
         id: check_aab_exists
@@ -100,6 +101,13 @@ jobs:
           else
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Upload Gradle build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gradle-build-log
+          path: app-rn/android/gradle-build.log
 
       - name: Upload AAB artifact
         if: steps.check_aab_exists.outputs.exists == 'true'
