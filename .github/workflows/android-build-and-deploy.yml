@@ -110,6 +110,12 @@ jobs:
             ls -la $(pwd)/app/build/ 2>/dev/null || echo "build directory doesn't exist"
           fi
 
+      - name: Extract version
+        id: version
+        run: |
+          VERSION=$(grep '"version"' app-rn/package.json | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Upload Gradle build log
         if: always()
         uses: actions/upload-artifact@v4
@@ -156,12 +162,12 @@ jobs:
         if: steps.check_aab_exists.outputs.exists == 'true'
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v${{ github.run_number }}
-          name: Android Build v${{ github.run_number }}
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Android v${{ steps.version.outputs.version }}
           draft: false
           prerelease: false
           files: ${{ steps.check_aab_exists.outputs.aab_path }}
-          body: "Automated Android AAB build from GitHub Actions"
+          body: "Automated Android AAB build from GitHub Actions run ${{ github.run_number }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
