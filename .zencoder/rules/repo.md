@@ -178,6 +178,15 @@ EXPO_PUBLIC_API_URL (for mobile)
 
 ## QUICK COMMANDS
 
+### Auto-Sync (Complete Remote Workflow)
+```powershell
+# Start the auto-sync watcher (runs in background)
+powershell -ExecutionPolicy Bypass -NoProfile -File "d:\Dev\smasher\start-auto-sync.ps1"
+
+# After this, just edit files in VSCode - everything syncs automatically!
+# No manual commits or pushes needed
+```
+
 ### Backend Separation
 ```powershell
 # Add remote and push to new repo
@@ -204,7 +213,8 @@ git push origin vX.X.X
 ### Deployment
 - Backend: Auto-deploys on push to main (Render)
 - Web: Auto-deploys on Vercel (connected to GitHub)
-- Mobile: Manual EAS build or GitHub Actions
+- Mobile: Auto-deploys via GitHub Actions (triggered by auto-sync commits)
+- **Everything runs remotely** - just start auto-sync and edit files
 
 ---
 
@@ -222,6 +232,18 @@ This section tracks key decisions and past conversations.
 - Android releases now show correct versions (e.g., v2.0.2 instead of v1.0.15)
 - Configured GOOGLE_PLAY_SERVICE_ACCOUNT_JSON secret for Google Play deployment
 - Workflow now fully supports Android AAB builds and Play Store alpha track deployment
+
+### Session 3: Complete Remote Workflow Setup
+- **Implemented zero-local-execution workflow**
+- Created auto-sync system that automatically commits and pushes changes to GitHub
+- Configured VSCode to auto-save files (1 second delay)
+- Created background watcher script (`auto-sync.ps1`) that detects changes and auto-commits/pushes
+- Created startup script (`start-auto-sync.ps1`) to launch watcher
+- Updated `.vscode/settings.json` with auto-save configuration
+- Created `.vscode/tasks.json` for task runner integration
+- Documented entire workflow in `AUTO_SYNC_SETUP.md`
+
+**Workflow**: Edit file → Auto-save → Auto-commit → Auto-push → GitHub Actions runs remotely
 
 ---
 
