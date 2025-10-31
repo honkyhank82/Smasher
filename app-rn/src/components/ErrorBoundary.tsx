@@ -3,9 +3,14 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import * as Sentry from '@sentry/react-native';
 import { theme } from '../config/theme';
 
+interface ErrorFallbackProps {
+  error: Error;
+  resetError: () => void;
+}
+
 interface Props {
   children: ReactNode;
-  fallback?: (error: Error, resetError: () => void) => ReactNode;
+  fallback?: React.ComponentType<ErrorFallbackProps> | ReactNode | ((props: ErrorFallbackProps) => ReactNode);
 }
 
 interface State {
@@ -26,7 +31,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     // Log error to Sentry
-    Sentry.withScope(scope => {
+    Sentry.withScope((scope: Sentry.Scope) => {
       scope.setExtras({
         componentStack: errorInfo?.componentStack,
       });
@@ -75,7 +80,11 @@ export class ErrorBoundary extends Component<Props, State> {
 
     if (hasError && error) {
       if (fallback) {
-        return fallback(error, this.handleReset);
+        if (typeof fallback === 'function') {
+          const FallbackComponent = fallback as React.ComponentType<ErrorFallbackProps>;
+          return <FallbackComponent error={error} resetError={this.handleReset} />;
+        }
+        return fallback as ReactNode;
       }
 
       return (
@@ -147,6 +156,5 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: '600',
     fontSize: 16,
-    fontWeight: 'bold',
   },
 });
