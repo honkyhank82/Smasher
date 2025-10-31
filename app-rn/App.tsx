@@ -27,7 +27,20 @@ import * as Updates from 'expo-updates';
 import * as SystemUI from 'expo-system-ui';
 import * as Sentry from '@sentry/react-native';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
-import { ErrorBoundary } from './src/components/ErrorBoundary';
+import { ErrorBoundary as ErrorBoundaryComponent } from './src/components/ErrorBoundary';
+
+// Define ErrorFallbackProps interface
+interface ErrorFallbackProps {
+  error: Error;
+  resetError: () => void;
+}
+
+// Define ErrorBoundary props interface
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
+  fallback: React.ComponentType<ErrorFallbackProps>;
+  onError?: (error: Error, componentStack: string) => void;
+}
 import { AppError } from './src/utils/errorHandling';
 import { PremiumProvider } from './src/contexts/PremiumContext';
 import { AppNavigator } from './src/navigation/AppNavigator';
