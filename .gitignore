@@ -39,6 +39,11 @@ build/
 app-rn/android/build-log.txt
 app-rn/android/*.log
 
+# Keystore files (base64 goes in GitHub Secrets only)
+KEYSTORE_BASE64.txt
+*.keystore
+*.jks
+
 # Android heavy artifacts
 app-rn/android/app/build/
 app-rn/android/.cxx/
