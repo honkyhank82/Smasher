@@ -1,17 +1,25 @@
-import React, { useEffect, useCallback } from 'react';
-import { StatusBar, View, Text, Button, StyleSheet } from 'react-native';
+import React, { useEffect, useCallback, useRef } from 'react';
+import { StatusBar, View, Text, Button, StyleSheet, AppState, AppStateStatus, Platform } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as Updates from 'expo-updates';
 import * as SystemUI from 'expo-system-ui';
 import * as Sentry from '@sentry/react-native';
-import { AuthProvider } from './src/context/AuthContext';
+import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { PremiumProvider } from './src/contexts/PremiumContext';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
+import api from './src/services/api';
 import './src/config/i18n'; // Initialize i18n
+import { SENTRY_DSN, API_CONFIG } from '@env';
+import * as Application from 'expo-application';
+import * as Device from 'expo-device';
+import NetInfo from '@react-native-community/netinfo';
 
-// Import environment variables
-import { SENTRY_DSN } from '@env';
+// Types
+type AppError = Error & {
+  isOperational?: boolean;
+  statusCode?: number;
+};
 
 // Initialize Sentry
 if (!__DEV__) {
@@ -26,15 +34,107 @@ if (!__DEV__) {
 }
 
 // Custom error fallback component
-const ErrorFallback = ({ error, resetError }) => (
-  <View style={styles.errorContainer}>
-    <Text style={styles.errorTitle}>Something went wrong</Text>
-    <Text style={styles.errorText}>{error.message}</Text>
-    <Button onPress={resetError} title="Try again" />
-  </View>
-);
+const ErrorFallback = ({ error, resetError }: { error: AppError; resetError: () => void }) => {
+  const handleReportPress = async () => {
+    if (!__DEV__) {
+      const eventId = Sentry.captureException(error);
+      alert(`Error reported with ID: ${eventId}`);
+    } else {
+      alert('In development mode - error would be reported in production');
+    }
+    resetError();
+  };
+
+  return (
+    <View style={styles.errorContainer}>
+      <Text style={styles.errorTitle}>Something went wrong</Text>
+      <Text style={styles.errorText}>
+        {error.message || 'An unexpected error occurred'}
+      </Text>
+      <View style={styles.buttonContainer}>
+        <Button onPress={resetError} title="Try again" />
+        {!__DEV__ && (
+          <View style={styles.reportButton}>
+            <Button onPress={handleReportPress} title="Report Error" color="#ff3b30" />
+          </View>
+        )}
+      </View>
+    </View>
+  );
+};
+
+// App initialization function
+const initializeApp = async () => {
+  try {
+    // Initialize API service health checks
+    await api.checkServiceHealth();
+    
+    // Set up network monitoring
+    const unsubscribeNetInfo = NetInfo.addEventListener(state => {
+      console.log('Connection type:', state.type);
+      console.log('Is connected?', state.isConnected);
+      
+      if (state.isConnected) {
+        // Re-check service health when connection is restored
+        api.checkServiceHealth().catch(console.error);
+      }
+    });
+
+    return () => {
+      unsubscribeNetInfo();
+      api.cleanup();
+    };
+  } catch (error) {
+    console.error('App initialization error:', error);
+    Sentry.captureException(error);
+  }
+};
 
 function App() {
+  const appState = useRef(AppState.currentState);
+  const { isAuthenticated } = useAuth();
+  
+  // Initialize app
+  useEffect(() => {
+    const init = async () => {
+      const cleanup = await initializeApp();
+      return cleanup;
+    };
+    
+    let cleanup: (() => void) | undefined;
+    
+    init().then(cb => {
+      cleanup = cb;
+    });
+    
+    return () => {
+      if (cleanup) cleanup();
+    };
+  }, []);
+  
+  // Handle app state changes
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', async (nextAppState: AppStateStatus) => {
+      if (
+        appState.current.match(/inactive|background/) &&
+        nextAppState === 'active'
+      ) {
+        // App has come to the foreground
+        console.log('App has come to the foreground');
+        await checkForUpdates();
+        if (isAuthenticated) {
+          // Refresh user data or perform other foreground tasks
+        }
+      }
+      
+      appState.current = nextAppState;
+    });
+    
+    return () => {
+      subscription.remove();
+    };
+  }, [isAuthenticated]);
+  
   const checkForUpdates = useCallback(async () => {
     if (__DEV__) return;
     
@@ -110,8 +210,56 @@ function App() {
     return () => clearInterval(updateInterval);
   }, [checkForUpdates]);
 
+  // Global error handler
+  const handleGlobalError = useCallback((error: Error, isFatal?: boolean) => {
+    console.error('Global error handler:', error);
+    
+    // Skip non-fatal errors in development
+    if (__DEV__ && !isFatal) return;
+    
+    // Capture error in Sentry
+    if (!__DEV__) {
+      Sentry.captureException(error, {
+        level: isFatal ? 'fatal' : 'error',
+        tags: { component: 'App' }
+      });
+    }
+    
+    // Handle specific error types
+    if (error.name === 'NetworkError') {
+      // Show network error UI
+      console.warn('Network error occurred');
+    }
+  }, []);
+  
+  // Set up global error handler
+  useEffect(() => {
+    const defaultErrorHandler = ErrorUtils.getGlobalHandler();
+    
+    const errorHandler = (error: Error, isFatal?: boolean) => {
+      handleGlobalError(error, isFatal);
+      defaultErrorHandler(error, isFatal);
+    };
+    
+    ErrorUtils.setGlobalHandler(errorHandler);
+    
+    return () => {
+      ErrorUtils.setGlobalHandler(defaultErrorHandler);
+    };
+  }, [handleGlobalError]);
+
   return (
-    <ErrorBoundary fallback={ErrorFallback}>
+    <ErrorBoundary 
+      fallback={ErrorFallback}
+      onError={(error, componentStack) => {
+        if (!__DEV__) {
+          Sentry.withScope(scope => {
+            scope.setExtras({ componentStack });
+            Sentry.captureException(error);
+          });
+        }
+      }}
+    >
       <Sentry.TouchEventBoundary>
         <SafeAreaProvider>
           <StatusBar 
@@ -120,9 +268,9 @@ function App() {
             translucent={true}
           />
           <AuthProvider>
-          <PremiumProvider>
-            <AppNavigator />
-          </PremiumProvider>
+            <PremiumProvider>
+              <AppNavigator />
+            </PremiumProvider>
           </AuthProvider>
         </SafeAreaProvider>
       </Sentry.TouchEventBoundary>
@@ -139,15 +287,26 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   errorTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 15,
     color: '#333',
+    textAlign: 'center',
   },
   errorText: {
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 25,
     color: '#666',
+    fontSize: 16,
+    lineHeight: 22,
+    paddingHorizontal: 20,
+  },
+  buttonContainer: {
+    width: '80%',
+    maxWidth: 300,
+  },
+  reportButton: {
+    marginTop: 15,
   },
 });
 
