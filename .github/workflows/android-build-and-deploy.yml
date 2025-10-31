@@ -97,7 +97,7 @@ jobs:
       - name: Check for generated AAB
         id: check_aab_exists
         run: |
-          AAB_PATH="$(pwd)/app/build/outputs/bundle/release/app-release.aab"
+          AAB_PATH="$(pwd)/app-rn/android/app/build/outputs/bundle/release/app-release.aab"
           echo "Checking $AAB_PATH"
           if [ -f "$AAB_PATH" ]; then
             echo "exists=true" >> $GITHUB_OUTPUT
@@ -105,9 +105,9 @@ jobs:
           else
             echo "exists=false" >> $GITHUB_OUTPUT
             echo "AAB not found! Listing build outputs directory:"
-            ls -la $(pwd)/app/build/outputs/bundle/ 2>/dev/null || echo "bundle directory doesn't exist"
+            ls -la $(pwd)/app-rn/android/app/build/outputs/bundle/ 2>/dev/null || echo "bundle directory doesn't exist"
             echo "Full build directory:"
-            ls -la $(pwd)/app/build/ 2>/dev/null || echo "build directory doesn't exist"
+            ls -la $(pwd)/app-rn/android/app/build/ 2>/dev/null || echo "build directory doesn't exist"
           fi
 
       - name: Extract version
