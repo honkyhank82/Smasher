@@ -55,6 +55,7 @@ smasher/
 ### Backend
 - **Framework**: NestJS
 - **Database**: PostgreSQL
+- **Deployment**: Fly.io (smasher-api)
 - **Status**: Being separated to independent repo
 - **New Repo**: https://github.com/honkyhank82/smasher-backend
 - **Current Version**: 1.0.36
@@ -77,7 +78,7 @@ smasher/
 ## DEPLOYMENT PLATFORMS
 
 ### Currently Active
-- **Backend**: Render
+- **Backend**: Fly.io (smasher-api app)
 - **Web App**: Vercel
 - **Mobile**: Expo & Google Play / Apple App Store
 
