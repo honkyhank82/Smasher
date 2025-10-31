@@ -1,5 +1,12 @@
 module.exports = function(api) {
   api.cache(true);
+  
+  // Remove console in production
+  const removeConsolePlugin = [];
+  if (process.env.NODE_ENV === 'production') {
+    removeConsolePlugin.push('transform-remove-console');
+  }
+
   return {
     presets: ['babel-preset-expo'],
     plugins: [
@@ -25,6 +32,7 @@ module.exports = function(api) {
           '@config': './src/config',
         },
       }],
+      ...removeConsolePlugin,
     ],
   };
 };
