@@ -1,4 +1,12 @@
-import React, { useEffect, useCallback, useRef, ComponentType, ErrorInfo, ReactNode } from 'react';
+import React, { 
+  useEffect, 
+  useCallback, 
+  useRef, 
+  ComponentType, 
+  ErrorInfo, 
+  ReactNode,
+  useMemo
+} from 'react';
 import { 
   StatusBar, 
   View, 
@@ -10,13 +18,32 @@ import {
   Platform,
   StyleProp,
   ViewStyle,
-  TextStyle
+  TextStyle,
+  Alert,
+  LogBox
 } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 import * as Updates from 'expo-updates';
 import * as SystemUI from 'expo-system-ui';
 import * as Sentry from '@sentry/react-native';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
+import { ErrorBoundary, ErrorBoundaryProps } from './src/components/ErrorBoundary';
+import { AppError, ErrorCode } from './src/utils/errorHandling';
+
+// Ignore specific warnings
+LogBox.ignoreLogs([
+  'Non-serializable values were found in the navigation state',
+  'Sending `onAnimatedValueUpdate` with no listeners registered',
+]);
+
+// Environment configuration
+const ENV = {
+  SENTRY_DSN: process.env.SENTRY_DSN || '',
+  API_CONFIG: process.env.API_CONFIG || '{}',
+  NODE_ENV: process.env.NODE_ENV || 'development',
+  IS_DEV: __DEV__,
+  IS_PRODUCTION: !__DEV__,
+} as const;
 import { PremiumProvider } from './src/contexts/PremiumContext';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
@@ -33,47 +60,139 @@ const ENV = {
   NODE_ENV: process.env.NODE_ENV || 'development'
 } as const;
 
-// Types
-type AppError = Error & {
-  isOperational?: boolean;
-  statusCode?: number;
-  code?: string | number;
-  extra?: Record<string, unknown>;
+// App-specific types
+interface AppStateType {
+  current: AppStateStatus;
+  previous: AppStateStatus | null;
+  isInForeground: boolean;
+}
+
+interface UpdateCheckResult {
+  isAvailable: boolean;
+  isDownloaded?: boolean;
+  version?: string;
+  lastChecked?: Date;
+}
+
+// Performance metrics
+interface AppPerformanceMetrics {
+  appStartTime: number;
+  jsBundleLoadedTime: number | null;
+  timeToInteractive: number | null;
+  errors: AppError[];
+  networkRequests: {
+    url: string;
+    startTime: number;
+    endTime: number | null;
+    status: 'pending' | 'success' | 'error';
+  }[];
+}
+
+// Feature flags
+interface FeatureFlags {
+  enableNewOnboarding: boolean;
+  enableDarkMode: boolean;
+  enableAnalytics: boolean;
+  enableCrashReporting: boolean;
+}
+
+// App configuration
+interface AppConfig {
+  name: string;
+  version: string;
+  buildNumber: string;
+  environment: 'development' | 'staging' | 'production';
+  sentryDsn: string;
+  apiBaseUrl: string;
+  featureFlags: FeatureFlags;
+  isEmulator: boolean;
+  isTablet: boolean;
+  hasNotch: boolean;
+}
+
+// Initialize Sentry with proper configuration
+const initializeSentry = () => {
+  if (ENV.IS_DEV) {
+    console.log('[Sentry] Running in development mode - Sentry is disabled');
+    return;
+  }
+
+  try {
+    const sentryConfig: Sentry.ReactNativeOptions = {
+      dsn: ENV.SENTRY_DSN,
+      debug: false,
+      environment: ENV.NODE_ENV,
+      release: `smasher@${require('./package.json').version}`,
+      dist: require('./app.json').expo.version,
+      enableAutoSessionTracking: true,
+      tracesSampleRate: ENV.IS_PRODUCTION ? 0.2 : 1.0,
+      attachStacktrace: true,
+      maxBreadcrumbs: 50,
+      beforeSend: (event, hint) => {
+        // Filter out specific errors if needed
+        if (hint?.originalException instanceof Error) {
+          // Example: Filter out specific error messages
+          if (hint.originalException.message.includes('Network request failed')) {
+            return null;
+          }
+        }
+        return event;
+      },
+      integrations: [
+        new Sentry.ReactNativeTracing({
+          tracingOrigins: ['localhost', /^\//, /^https:\/\/api\.smasher\.app/],
+        }),
+      ],
+    };
+
+    Sentry.init(sentryConfig);
+    
+    // Configure scope
+    Sentry.configureScope(scope => {
+      scope.setTag('app_version', require('./app.json').expo.version);
+      scope.setTag('build_number', require('./app.json').expo.ios.buildNumber || require('./app.json').expo.android.versionCode);
+      scope.setTag('device_id', Device.osInternalBuildId || 'unknown');
+    });
+    
+    console.log('[Sentry] Initialized successfully');
+  } catch (error) {
+    console.error('[Sentry] Failed to initialize:', error);
+  }
 };
 
-interface ErrorBoundaryProps {
-  children: ReactNode;
-  FallbackComponent: ComponentType<{ error: AppError; resetError: () => void }>;
-  onError?: (error: Error, componentStack: string) => void;
-}
+// Initialize Sentry when the app starts
+initializeSentry();
 
-interface ErrorFallbackProps {
-  error: AppError;
-  resetError: () => void;
-}
-
-interface Styles {
-  errorContainer: StyleProp<ViewStyle>;
-  errorTitle: StyleProp<TextStyle>;
-  errorText: StyleProp<TextStyle>;
-  buttonContainer: StyleProp<ViewStyle>;
-  reportButton: StyleProp<ViewStyle>;
-}
-
-// Initialize Sentry
-if (!__DEV__) {
-  Sentry.init({
-    dsn: SENTRY_DSN,
-    enableInExpoDevelopment: false,
-    debug: __DEV__,
-    environment: __DEV__ ? 'development' : 'production',
-    release: `smasher@${require('./package.json').version}`,
-    tracesSampleRate: 0.2,
-  });
-}
-
-// Custom error fallback component
+// Custom error fallback component with improved error handling and UI
 const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetError }) => {
+  const [showDetails, setShowDetails] = React.useState(false);
+  
+  const handleReportError = useCallback(async () => {
+    if (ENV.IS_DEV) {
+      Alert.alert('Error Report', 'In development mode - error would be reported in production');
+      return;
+    }
+    
+    try {
+      const eventId = Sentry.captureException(error);
+      Alert.alert(
+        'Error Reported',
+        `Error ID: ${eventId}\n\nThank you for helping us improve the app.`,
+        [{ text: 'OK', onPress: resetError }]
+      );
+    } catch (reportError) {
+      console.error('Failed to report error:', reportError);
+      Alert.alert(
+        'Error',
+        'Failed to send error report. Please check your connection and try again.',
+        [{ text: 'OK' }]
+      );
+    }
+  }, [error, resetError]);
+  
+  const toggleDetails = useCallback(() => {
+    setShowDetails(prev => !prev);
+  }, []);
   const handleReportPress = async () => {
     if (!__DEV__) {
       const eventId = Sentry.captureException(error);
@@ -85,19 +204,62 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetError }) => {
   };
 
   return (
-    <View style={styles.errorContainer}>
-      <Text style={styles.errorTitle}>Something went wrong</Text>
-      <Text style={styles.errorText}>
-        {error.message || 'An unexpected error occurred'}
+    <View style={styles.errorContainer} testID="error-fallback">
+      <Text style={styles.errorTitle}>
+        {error.statusCode ? `Error ${error.statusCode}` : 'Something went wrong'}
       </Text>
+      
+      <Text style={styles.errorText}>
+        {error.message || 'An unexpected error occurred. Please try again.'}
+      </Text>
+      
+      {error.code && (
+        <Text style={styles.errorCode}>
+          Error Code: {error.code}
+        </Text>
+      )}
+      
       <View style={styles.buttonContainer}>
-        <Button onPress={resetError} title="Try again" />
-        {!__DEV__ && (
+        <Button 
+          onPress={resetError} 
+          title="Try Again" 
+          color="#007AFF"
+          accessibilityLabel="Try loading the app again"
+        />
+        
+        {!ENV.IS_DEV && (
           <View style={styles.reportButton}>
-            <Button onPress={handleReportPress} title="Report Error" color="#ff3b30" />
+            <Button 
+              onPress={handleReportError} 
+              title="Report Error" 
+              color="#FF3B30"
+              accessibilityLabel="Report this error to the developers"
+            />
           </View>
         )}
+        
+        <Button
+          onPress={toggleDetails}
+          title={showDetails ? 'Hide Details' : 'Show Details'}
+          color="#8E8E93"
+        />
       </View>
+      
+      {showDetails && (
+        <View style={styles.detailsContainer}>
+          <Text style={styles.detailsTitle}>Error Details:</Text>
+          <Text style={styles.detailsText}>
+            {JSON.stringify({
+              name: error.name,
+              message: error.message,
+              code: error.code,
+              statusCode: error.statusCode,
+              isOperational: error.isOperational,
+              stack: error.stack
+            }, null, 2)}
+          </Text>
+        </View>
+      )}
     </View>
   );
 };
@@ -317,7 +479,96 @@ const App: React.FC = () => {
   );
 }
 
-const styles = StyleSheet.create<Styles>({
+const styles = StyleSheet.create({
+  // Base styles
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  
+  // Error boundary styles
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#F5F5F7',
+  },
+  errorTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    marginBottom: 12,
+    color: '#1C1C1E',
+    textAlign: 'center',
+  },
+  errorText: {
+    fontSize: 16,
+    lineHeight: 22,
+    color: '#3A3A3C',
+    textAlign: 'center',
+    marginBottom: 24,
+    paddingHorizontal: 20,
+  },
+  errorCode: {
+    fontSize: 14,
+    color: '#8E8E93',
+    marginBottom: 24,
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+  },
+  buttonContainer: {
+    width: '100%',
+    maxWidth: 300,
+    paddingHorizontal: 20,
+  },
+  reportButton: {
+    marginTop: 12,
+    marginBottom: 12,
+  },
+  detailsContainer: {
+    marginTop: 24,
+    padding: 16,
+    backgroundColor: 'rgba(0,0,0,0.04)',
+    borderRadius: 8,
+    width: '90%',
+    maxWidth: 400,
+  },
+  detailsTitle: {
+    fontWeight: '600',
+    marginBottom: 8,
+    color: '#1C1C1E',
+  },
+  detailsText: {
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+    fontSize: 12,
+    color: '#3A3A3C',
+    lineHeight: 16,
+  },
+  
+  // App container styles
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  content: {
+    flex: 1,
+  },
+  
+  // Status bar safe area
+  statusBarSpacer: {
+    height: Platform.OS === 'ios' ? 20 : StatusBar.currentHeight,
+    backgroundColor: 'transparent',
+  },
+  
+  // Network status indicator
+  offlineContainer: {
+    backgroundColor: '#FF3B30',
+    padding: 8,
+    alignItems: 'center',
+  },
+  offlineText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+  }
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
