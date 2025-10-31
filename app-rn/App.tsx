@@ -1,5 +1,17 @@
-import React, { useEffect, useCallback, useRef } from 'react';
-import { StatusBar, View, Text, Button, StyleSheet, AppState, AppStateStatus, Platform } from 'react-native';
+import React, { useEffect, useCallback, useRef, ComponentType, ErrorInfo, ReactNode } from 'react';
+import { 
+  StatusBar, 
+  View, 
+  Text, 
+  Button, 
+  StyleSheet, 
+  AppState, 
+  AppStateStatus, 
+  Platform,
+  StyleProp,
+  ViewStyle,
+  TextStyle
+} from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as Updates from 'expo-updates';
 import * as SystemUI from 'expo-system-ui';
@@ -10,16 +22,43 @@ import { AppNavigator } from './src/navigation/AppNavigator';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
 import api from './src/services/api';
 import './src/config/i18n'; // Initialize i18n
-import { SENTRY_DSN, API_CONFIG } from '@env';
 import * as Application from 'expo-application';
 import * as Device from 'expo-device';
 import NetInfo from '@react-native-community/netinfo';
+
+// Environment variables with fallbacks
+const ENV = {
+  SENTRY_DSN: process.env.SENTRY_DSN || '',
+  API_CONFIG: process.env.API_CONFIG || '{}',
+  NODE_ENV: process.env.NODE_ENV || 'development'
+} as const;
 
 // Types
 type AppError = Error & {
   isOperational?: boolean;
   statusCode?: number;
+  code?: string | number;
+  extra?: Record<string, unknown>;
 };
+
+interface ErrorBoundaryProps {
+  children: ReactNode;
+  FallbackComponent: ComponentType<{ error: AppError; resetError: () => void }>;
+  onError?: (error: Error, componentStack: string) => void;
+}
+
+interface ErrorFallbackProps {
+  error: AppError;
+  resetError: () => void;
+}
+
+interface Styles {
+  errorContainer: StyleProp<ViewStyle>;
+  errorTitle: StyleProp<TextStyle>;
+  errorText: StyleProp<TextStyle>;
+  buttonContainer: StyleProp<ViewStyle>;
+  reportButton: StyleProp<ViewStyle>;
+}
 
 // Initialize Sentry
 if (!__DEV__) {
@@ -34,7 +73,7 @@ if (!__DEV__) {
 }
 
 // Custom error fallback component
-const ErrorFallback = ({ error, resetError }: { error: AppError; resetError: () => void }) => {
+const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetError }) => {
   const handleReportPress = async () => {
     if (!__DEV__) {
       const eventId = Sentry.captureException(error);
@@ -64,7 +103,7 @@ const ErrorFallback = ({ error, resetError }: { error: AppError; resetError: () 
 };
 
 // App initialization function
-const initializeApp = async () => {
+const initializeApp = async (): Promise<void> => {
   try {
     // Initialize API service health checks
     await api.checkServiceHealth();
@@ -90,7 +129,7 @@ const initializeApp = async () => {
   }
 };
 
-function App() {
+const App: React.FC = () => {
   const appState = useRef(AppState.currentState);
   const { isAuthenticated } = useAuth();
   
@@ -278,7 +317,7 @@ function App() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create<Styles>({
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
