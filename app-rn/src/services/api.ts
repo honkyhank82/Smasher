@@ -1,53 +1,193 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { 
+  AxiosInstance, 
+  AxiosRequestConfig, 
+  AxiosResponse, 
+  AxiosError, 
+  InternalAxiosRequestConfig,
+  AxiosRequestHeaders 
+} from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { BACKEND_SERVICES, checkServiceHealth, updateServiceUrls, API_TIMEOUT } from '../config/api';
+import * as Sentry from '@sentry/react-native';
+import { Platform } from 'react-native';
+import { API_TIMEOUT, BACKEND_SERVICES } from '../config/constants';
+import { getAppVersion, getDeviceInfo } from '../utils/deviceInfo';
+
+// Types
+type BackendService = {
+  name: string;
+  apiUrl: string;
+  healthCheckUrl?: string;
+  isActive?: boolean;
+  lastChecked?: number;
+};
+
+interface RetryConfig extends AxiosRequestConfig {
+  _retry?: boolean;
+  _retryCount?: number;
+}
+
+// Constants
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000; // 1 second
+const HEALTH_CHECK_INTERVAL = 5 * 60 * 1000; // 5 minutes
+
+// Service health tracking
+let serviceHealth: Record<string, { isHealthy: boolean; lastChecked: number }> = {};
 
 class ApiService {
   private currentServiceIndex: number = 0;
   private axiosInstance: AxiosInstance;
-  private failoverAttempts: number = 0;
-  private maxFailoverAttempts: number = 3;
+  private retryCount: number = 0;
+  private maxRetries: number = MAX_RETRIES;
   private healthCheckInterval: NodeJS.Timeout | null = null;
+  private isRefreshing = false;
+  private refreshSubscribers: ((token: string) => void)[] = [];
+  private services: BackendService[] = [...BACKEND_SERVICES];
+  
+  // Track request timing for performance monitoring
+  private requestTimings: Record<string, number> = {};
 
   constructor() {
-    this.axiosInstance = this.createAxiosInstance(BACKEND_SERVICES[0]);
+    this.axiosInstance = this.createAxiosInstance(this.getActiveService());
     this.initializeHealthMonitoring();
     this.setupInterceptors();
-    console.log('🔗 API Service initialized with failover support');
+    this.initializeServiceHealth();
+    
+    if (__DEV__) {
+      console.log('🔗 API Service initialized with failover support');
+      console.log(`🌐 Active service: ${this.getActiveService().name} (${this.getActiveService().apiUrl})`);
+    }
   }
 
-  private createAxiosInstance(service: typeof BACKEND_SERVICES[0]): AxiosInstance {
-    console.log(`🔗 Creating axios instance for ${service.name}`);
-    return axios.create({
+  private createAxiosInstance(service: BackendService): AxiosInstance {
+    const instance = axios.create({
       baseURL: service.apiUrl,
       timeout: API_TIMEOUT,
       headers: {
         'Content-Type': 'application/json',
+        'X-Client-Version': getAppVersion(),
+        'X-Platform': Platform.OS,
+        'X-Device-Id': getDeviceInfo().uniqueId,
       },
     });
+
+    if (__DEV__) {
+      console.log(`🔗 Created axios instance for ${service.name} (${service.apiUrl})`);
+    }
+
+    return instance;
+  }
+
+  private async getAuthToken(): Promise<string | null> {
+    try {
+      return await AsyncStorage.getItem('authToken');
+    } catch (error) {
+      console.error('Failed to get auth token:', error);
+      return null;
+    }
+  }
+
+  private async refreshToken(): Promise<string | null> {
+    if (this.isRefreshing) {
+      return new Promise((resolve) => {
+        this.refreshSubscribers.push((token: string) => {
+          resolve(token);
+        });
+      });
+    }
+
+    this.isRefreshing = true;
+    try {
+      const refreshToken = await AsyncStorage.getItem('refreshToken');
+      if (!refreshToken) throw new Error('No refresh token available');
+
+      const response = await axios.post(
+        `${this.getActiveService().apiUrl}/auth/refresh-token`,
+        { refreshToken }
+      );
+
+      const { accessToken, refreshToken: newRefreshToken } = response.data;
+      await AsyncStorage.multiSet([
+        ['authToken', accessToken],
+        ['refreshToken', newRefreshToken]
+      ]);
+
+      this.isRefreshing = false;
+      this.onRefreshed(accessToken);
+      return accessToken;
+    } catch (error) {
+      this.isRefreshing = false;
+      this.onRefreshFailed();
+      throw error;
+    }
+  }
+
+  private onRefreshed(token: string) {
+    this.refreshSubscribers.forEach(callback => callback(token));
+    this.refreshSubscribers = [];
+  }
+
+  private onRefreshFailed() {
+    this.refreshSubscribers = [];
+    // Optionally log out the user or take other actions
   }
 
   private setupInterceptors() {
-    // Request interceptor to add auth token
+    // Request interceptor
     this.axiosInstance.interceptors.request.use(
-      async (config) => {
-        const token = await AsyncStorage.getItem('authToken');
+      async (config: InternalAxiosRequestConfig) => {
+        // Track request start time
+        this.requestTimings[config.url || 'unknown'] = Date.now();
+        
+        // Add auth token if available
+        const token = await this.getAuthToken();
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
-        console.log(`📤 ${config.method?.toUpperCase()} ${config.url}`);
+        
+        if (__DEV__) {
+          console.log(`📤 ${config.method?.toUpperCase()} ${config.url}`, {
+            data: config.data,
+            params: config.params,
+          });
+        }
+        
         return config;
       },
-      (error) => {
-        console.error('❌ Request interceptor error:', error.message);
+      (error: AxiosError) => {
+        console.error('❌ Request error:', error.message);
+        this.logErrorToSentry(error, 'request');
         return Promise.reject(error);
       },
     );
 
-    // Response interceptor for error handling
+    // Response interceptor
     this.axiosInstance.interceptors.response.use(
-      (response) => {
-        console.log(`✅ Response: ${response.status} from ${response.config.url}`);
+      (response: AxiosResponse) => {
+        // Calculate request duration
+        const url = response.config.url || 'unknown';
+        const startTime = this.requestTimings[url];
+        const duration = startTime ? Date.now() - startTime : 0;
+        delete this.requestTimings[url];
+
+        // Log successful response
+        if (__DEV__) {
+          console.log(
+            `✅ ${response.status} ${response.config.method?.toUpperCase()} ${url} (${duration}ms)`,
+            response.data
+          );
+        }
+        
+        // Track API performance
+        this.trackApiPerformance({
+          url,
+          method: response.config.method || 'GET',
+          status: response.status,
+          duration,
+        });
+
+        return response;
+      },
         return response;
       },
       async (error) => {
