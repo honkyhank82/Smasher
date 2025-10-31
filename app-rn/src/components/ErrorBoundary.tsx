@@ -1,43 +1,103 @@
 import React, { Component, ReactNode } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import * as Sentry from '@sentry/react-native';
 import { theme } from '../config/theme';
 
 interface Props {
   children: ReactNode;
+  fallback?: (error: Error, resetError: () => void) => ReactNode;
 }
 
 interface State {
   hasError: boolean;
   error: Error | null;
+  errorInfo: any;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false, error: null, errorInfo: null };
   }
 
-  static getDerivedStateFromError(error: Error): State {
+  static getDerivedStateFromError(error: Error): Partial<State> {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: any) {
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    // Log error to Sentry
+    Sentry.withScope(scope => {
+      scope.setExtras({
+        componentStack: errorInfo?.componentStack,
+      });
+      Sentry.captureException(error);
+    });
+
+    this.setState({ error, errorInfo });
     console.error('ErrorBoundary caught an error:', error, errorInfo);
   }
 
   handleReset = () => {
-    this.setState({ hasError: false, error: null });
+    this.setState({ hasError: false, error: null, errorInfo: null });
+  };
+
+  // Show error report dialog in development
+  showErrorReport = () => {
+    const { error, errorInfo } = this.state;
+    if (!error) return;
+    
+    const report = `Error: ${error.toString()}\n\n` +
+      `Component Stack: ${errorInfo?.componentStack || 'No stack trace available'}`;
+    
+    Alert.alert(
+      'Error Report',
+      'Would you like to report this error?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Report',
+          onPress: () => {
+            // You can implement your error reporting logic here
+            Alert.alert('Thank you!', 'The error has been reported.');
+          },
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   render() {
-    if (this.state.hasError) {
+    const { fallback } = this.props;
+    const { hasError, error } = this.state;
+
+    if (hasError && error) {
+      if (fallback) {
+        return fallback(error, this.handleReset);
+      }
+
       return (
-        <View style={styles.container}>
-          <Text style={styles.title}>Oops! Something went wrong</Text>
+        <View style={styles.container} testID="error-boundary">
+          <Text style={styles.title}>😢 Oops! Something went wrong</Text>
           <Text style={styles.message}>
-            {this.state.error?.message || 'An unexpected error occurred'}
+            {error.message || 'An unexpected error occurred'}
           </Text>
-          <TouchableOpacity style={styles.button} onPress={this.handleReset}>
+          
+          {__DEV__ && (
+            <TouchableOpacity 
+              style={[styles.button, styles.reportButton]} 
+              onPress={this.showErrorReport}
+            >
+              <Text style={styles.buttonText}>Report Error</Text>
+            </TouchableOpacity>
+          )}
+          
+          <TouchableOpacity 
+            style={[styles.button, styles.retryButton]} 
+            onPress={this.handleReset}
+          >
             <Text style={styles.buttonText}>Try Again</Text>
           </TouchableOpacity>
         </View>
@@ -51,33 +111,42 @@ export class ErrorBoundary extends Component<Props, State> {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: theme.spacing.lg,
+    padding: 24,
+    backgroundColor: theme.colors.background,
   },
   title: {
-    fontSize: theme.fontSize.xl,
+    fontSize: 22,
     fontWeight: 'bold',
-    color: theme.colors.text,
-    marginBottom: theme.spacing.md,
+    marginBottom: 16,
+    color: theme.colors.error,
     textAlign: 'center',
   },
   message: {
-    fontSize: theme.fontSize.md,
-    color: theme.colors.textSecondary,
-    marginBottom: theme.spacing.xl,
     textAlign: 'center',
+    marginBottom: 24,
+    color: theme.colors.text,
+    fontSize: 16,
+    lineHeight: 24,
   },
   button: {
+    padding: 14,
+    borderRadius: 8,
+    minWidth: 200,
+    alignItems: 'center',
+    marginVertical: 8,
+  },
+  retryButton: {
     backgroundColor: theme.colors.primary,
-    borderRadius: theme.borderRadius.md,
-    paddingVertical: theme.spacing.md,
-    paddingHorizontal: theme.spacing.xl,
+  },
+  reportButton: {
+    backgroundColor: theme.colors.secondary,
   },
   buttonText: {
-    color: theme.colors.text,
-    fontSize: theme.fontSize.md,
+    color: '#FFFFFF',
+    fontWeight: '600',
+    fontSize: 16,
     fontWeight: 'bold',
   },
 });
