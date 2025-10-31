@@ -105,17 +105,27 @@ android {
             keyPassword 'android'
         }
         release {
-            // Load from gradle.properties if present, otherwise from environment variables
+            // Load from Gradle properties passed via -P flags
             if (project.hasProperty('SMASHER_UPLOAD_STORE_FILE')) {
-                storeFile file(SMASHER_UPLOAD_STORE_FILE)
+                def storeFilePath = SMASHER_UPLOAD_STORE_FILE
+                println "DEBUG: Using SMASHER_UPLOAD_STORE_FILE from Gradle properties: $storeFilePath"
+                storeFile file(storeFilePath)
                 storePassword SMASHER_UPLOAD_STORE_PASSWORD
                 keyAlias SMASHER_UPLOAD_KEY_ALIAS
                 keyPassword SMASHER_UPLOAD_KEY_PASSWORD
+                println "DEBUG: Release signing configured successfully"
             } else if (System.getenv('SMASHER_UPLOAD_STORE_FILE')) {
-                storeFile file(System.getenv('SMASHER_UPLOAD_STORE_FILE'))
+                def storeFilePath = System.getenv('SMASHER_UPLOAD_STORE_FILE')
+                println "DEBUG: Using SMASHER_UPLOAD_STORE_FILE from environment: $storeFilePath"
+                storeFile file(storeFilePath)
                 storePassword System.getenv('SMASHER_UPLOAD_STORE_PASSWORD')
                 keyAlias System.getenv('SMASHER_UPLOAD_KEY_ALIAS')
                 keyPassword System.getenv('SMASHER_UPLOAD_KEY_PASSWORD')
+                println "DEBUG: Release signing configured from environment"
+            } else {
+                println "WARNING: No signing credentials found! Release builds will fail."
+                println "DEBUG: Gradle properties: SMASHER_UPLOAD_STORE_FILE=${findProperty('SMASHER_UPLOAD_STORE_FILE') ?: 'NOT SET'}"
+                println "DEBUG: Environment: SMASHER_UPLOAD_STORE_FILE=${System.getenv('SMASHER_UPLOAD_STORE_FILE') ?: 'NOT SET'}"
             }
         }
     }
