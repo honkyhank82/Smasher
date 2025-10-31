@@ -208,6 +208,7 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetError }) => {
   const toggleDetails = useCallback(() => {
     setShowDetails(prev => !prev);
   }, []);
+  
   const handleReportPress = async () => {
     if (!__DEV__) {
       const eventId = Sentry.captureException(error);
@@ -216,6 +217,7 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetError }) => {
       alert('In development mode - error would be reported in production');
     }
     resetError();
+  };
 
   return (
     <View style={styles.errorContainer}>
@@ -224,29 +226,26 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetError }) => {
       <View style={styles.buttonContainer}>
         <Button 
           title="Report Error" 
-          onPress={reportError} 
+          onPress={handleReportError} 
           accessibilityLabel="Report this error"
         />
         <Button 
           title="Try Again" 
           onPress={resetError} 
           accessibilityLabel="Try to restart the app"
-            <Button 
-              onPress={handleReportError} 
-              title="Report Error" 
-              color="#FF3B30"
-              accessibilityLabel="Report this error to the developers"
-            />
-          </View>
-        )}
-        
-        <Button
-          onPress={toggleDetails}
-          title={showDetails ? 'Hide Details' : 'Show Details'}
-          color="#8E8E93"
+        />
+        <Button 
+          onPress={handleReportPress} 
+          title="Report Error" 
+          color="#FF3B30"
+          accessibilityLabel="Report this error to the developers"
         />
       </View>
-      
+      <Button
+        onPress={toggleDetails}
+        title={showDetails ? 'Hide Details' : 'Show Details'}
+        color="#8E8E93"
+      />
       {showDetails && (
         <View style={styles.detailsContainer}>
           <Text style={styles.detailsTitle}>Error Details:</Text>
@@ -301,7 +300,20 @@ const ErrorBoundary: React.FC<ErrorBoundaryProps> = ({
 const initializeApp = async (): Promise<void> => {
   try {
     // Initialize API service health checks
-    await api.checkServiceHealth();
+    const checkApiHealth = useCallback(async (): Promise<boolean> => {
+      try {
+        const response = await api.get('/health');
+        if (!response.ok) {
+          throw new Error('API service is not healthy');
+        }
+        return true;
+      } catch (error) {
+        console.error('API health check failed:', error);
+        throw error;
+      }
+    }, []);
+
+    await checkApiHealth();
     
     // Set up network monitoring
     const unsubscribeNetInfo = NetInfo.addEventListener(state => {
@@ -419,7 +431,7 @@ const App: React.FC = () => {
     // Set up global error handler
     const defaultErrorHandler = ErrorUtils.getGlobalHandler();
     
-    const handleError = (error: Error, isFatal: boolean = false) => {
+    const handleError = (error: Error, isFatal: boolean = false): void => {
       handleGlobalError(error, isFatal);
       defaultErrorHandler(error, isFatal);
     };
