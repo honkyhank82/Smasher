@@ -22,6 +22,7 @@ on:
           - production
   push:
     branches:
+      - master
       - main
     paths:
       - 'app-rn/**'
@@ -76,10 +77,10 @@ jobs:
         working-directory: app-rn/android
         run: |
           cat << EOF > gradle.properties
-          MYAPP_UPLOAD_STORE_FILE=release.keystore
-          MYAPP_UPLOAD_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}
-          MYAPP_UPLOAD_STORE_PASSWORD=${{ secrets.ANDROID_STORE_PASSWORD }}
-          MYAPP_UPLOAD_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}
+          SMASHER_UPLOAD_STORE_FILE=release.keystore
+          SMASHER_UPLOAD_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}
+          SMASHER_UPLOAD_STORE_PASSWORD=${{ secrets.ANDROID_STORE_PASSWORD }}
+          SMASHER_UPLOAD_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}
           org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=512m
           org.gradle.daemon=false
           EOF
@@ -110,12 +111,18 @@ jobs:
           path: app-rn/android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 30
 
+      - name: Extract version
+        id: version
+        run: |
+          VERSION=$(grep '"version"' app-rn/package.json | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Create Release
-        if: github.ref == 'refs/heads/main' && (github.event.inputs.build_type == 'apk' || github.event.inputs.build_type == '')
+        if: github.event.inputs.build_type == 'apk' || github.event.inputs.build_type == ''
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v${{ github.run_number }}
-          name: Release v${{ github.run_number }}
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Android APK v${{ steps.version.outputs.version }}
           draft: false
           prerelease: false
           files: |

@@ -14,6 +14,7 @@ on:
           - production
   push:
     branches:
+      - master
       - main
     paths:
       - 'app-rn/**'
@@ -94,12 +95,17 @@ jobs:
           path: app-rn/ios/build/SmasherApp.ipa
           retention-days: 30
 
+      - name: Extract version
+        id: version
+        run: |
+          VERSION=$(grep '"version"' app-rn/package.json | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Create Release
-        if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v${{ github.run_number }}
-          name: Release v${{ github.run_number }}
+          tag_name: v${{ steps.version.outputs.version }}
+          name: iOS IPA v${{ steps.version.outputs.version }}
           draft: false
           prerelease: false
           files: |
