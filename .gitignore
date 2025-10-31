@@ -31,6 +31,10 @@ server/.cache/
 dist/
 build/
 
+# Exception: allow AAB files in builds directory (for release artifacts)
+!builds/
+!builds/**/*.aab
+
 # Android build logs (explicit path ignores)
 app-rn/android/build-log.txt
 app-rn/android/*.log

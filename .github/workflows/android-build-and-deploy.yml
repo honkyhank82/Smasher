@@ -131,6 +131,27 @@ jobs:
           name: app-release.aab
           path: ${{ steps.check_aab_exists.outputs.aab_path }}
 
+      - name: Commit AAB to git
+        if: steps.check_aab_exists.outputs.exists == 'true'
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          
+          # Create builds directory if it doesn't exist
+          mkdir -p builds/android
+          
+          # Copy AAB to builds directory
+          cp ${{ steps.check_aab_exists.outputs.aab_path }} builds/android/app-release.aab
+          
+          # Get version from package.json
+          VERSION=$(grep '"version"' app-rn/package.json | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+          
+          # Add and commit
+          git add builds/android/app-release.aab
+          git commit -m "build(android): AAB v${VERSION} from GitHub Actions run ${{ github.run_number }}"
+          git push origin master
+        shell: bash
+
       - name: Create GitHub release
         if: steps.check_aab_exists.outputs.exists == 'true'
         uses: softprops/action-gh-release@v1
