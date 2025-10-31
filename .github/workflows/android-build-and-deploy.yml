@@ -102,12 +102,19 @@ jobs:
           if [ -f "$AAB_PATH" ]; then
             echo "exists=true" >> $GITHUB_OUTPUT
             echo "aab_path=$AAB_PATH" >> $GITHUB_OUTPUT
+            echo "AAB found successfully!"
+            ls -lh "$AAB_PATH"
           else
             echo "exists=false" >> $GITHUB_OUTPUT
-            echo "AAB not found! Listing build outputs directory:"
-            ls -la $(pwd)/app-rn/android/app/build/outputs/bundle/ 2>/dev/null || echo "bundle directory doesn't exist"
+            echo "ERROR: AAB not found!"
+            echo "Expected path: $AAB_PATH"
+            echo ""
+            echo "Build outputs directory structure:"
+            find $(pwd)/app-rn/android/app/build -type f -name "*.aab" 2>/dev/null || echo "No AAB files found anywhere"
+            echo ""
             echo "Full build directory:"
-            ls -la $(pwd)/app-rn/android/app/build/ 2>/dev/null || echo "build directory doesn't exist"
+            ls -laR $(pwd)/app-rn/android/app/build/ 2>/dev/null | head -100 || echo "build directory doesn't exist"
+            exit 1
           fi
 
       - name: Extract version
@@ -158,18 +165,24 @@ jobs:
           git push origin ${{ github.ref_name }}
         shell: bash
 
-      - name: Create GitHub release
+      - name: Create or Update GitHub release
         if: steps.check_aab_exists.outputs.exists == 'true'
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: v${{ steps.version.outputs.version }}
-          name: Android v${{ steps.version.outputs.version }}
-          draft: false
-          prerelease: false
-          files: ${{ steps.check_aab_exists.outputs.aab_path }}
-          body: "Automated Android AAB build from GitHub Actions run ${{ github.run_number }}"
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          TAG="v${VERSION}"
+          
+          # Delete old release if it exists (to force update)
+          gh release delete "$TAG" -y 2>/dev/null || true
+          
+          # Create fresh release
+          gh release create "$TAG" \
+            "${{ steps.check_aab_exists.outputs.aab_path }}" \
+            --title "Android v${VERSION}" \
+            --notes "Automated Android AAB build from GitHub Actions run ${{ github.run_number }}" \
+            --draft=false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
 
       - name: Run Fastlane deploy lane (upload to Play)
         if: steps.check_aab_exists.outputs.exists == 'true'
