@@ -266,6 +266,37 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetError }) => {
   );
 };
 
+// Custom error boundary component with proper TypeScript types
+const ErrorBoundary: React.FC<ErrorBoundaryProps> = ({ 
+  children, 
+  fallback: FallbackComponent,
+  onError
+}) => {
+  const [error, setError] = useState<Error | null>(null);
+  const [errorInfo, setErrorInfo] = useState<React.ErrorInfo | null>(null);
+
+  const resetError = useCallback(() => {
+    setError(null);
+    setErrorInfo(null);
+  }, []);
+
+  if (error && errorInfo) {
+    return <FallbackComponent error={error} resetError={resetError} />;
+  }
+
+  return (
+    <ErrorBoundaryComponent
+      onError={(err, errorInfo) => {
+        setError(err);
+        setErrorInfo(errorInfo);
+        onError?.(err, errorInfo.componentStack);
+      }}
+    >
+      {children}
+    </ErrorBoundaryComponent>
+  );
+};
+
 // App initialization function
 const initializeApp = async (): Promise<void> => {
   try {
@@ -388,21 +419,12 @@ const App: React.FC = () => {
     // Set up global error handler
     const defaultErrorHandler = ErrorUtils.getGlobalHandler();
     
-    const errorHandler = (error, isFatal) => {
-      if (!__DEV__) {
-        Sentry.captureException(error, {
-          level: isFatal ? 'fatal' : 'error',
-        });
-      }
-      
-      if (isFatal) {
-        // Show error UI or log to analytics
-      }
-      
+    const handleError = (error: Error, isFatal: boolean = false) => {
+      handleGlobalError(error, isFatal);
       defaultErrorHandler(error, isFatal);
     };
     
-    ErrorUtils.setGlobalHandler(errorHandler);
+    ErrorUtils.setGlobalHandler(handleError);
     
     // Check for updates
     checkForUpdates();
@@ -454,11 +476,10 @@ const App: React.FC = () => {
   return (
     <ErrorBoundary 
       fallback={ErrorFallback}
-      onError={(error, componentStack) => {
-        if (!__DEV__) {
-          Sentry.withScope(scope => {
-            scope.setExtras({ componentStack });
-            Sentry.captureException(error);
+      onError={(error: Error, componentStack: string) => {
+        if (Sentry) {
+          Sentry.captureException(error, {
+            extra: { componentStack }
           });
         }
       }}
