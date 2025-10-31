@@ -82,6 +82,7 @@ jobs:
           echo "SMASHER_UPLOAD_STORE_PASSWORD=${{ secrets.SMASHER_UPLOAD_STORE_PASSWORD }}" >> $GITHUB_ENV
           echo "SMASHER_UPLOAD_KEY_ALIAS=${{ secrets.SMASHER_UPLOAD_KEY_ALIAS }}" >> $GITHUB_ENV
           echo "SMASHER_UPLOAD_KEY_PASSWORD=${{ secrets.SMASHER_UPLOAD_KEY_PASSWORD }}" >> $GITHUB_ENV
+        shell: bash
 
       - name: Install project dependencies
         working-directory: app-rn
@@ -92,7 +93,12 @@ jobs:
         working-directory: app-rn/android
         run: |
           # Run Gradle with full warnings and stacktrace, capture output to a log for debugging
-          ./gradlew bundleRelease --no-daemon --warning-mode all --stacktrace 2>&1 | tee $GITHUB_WORKSPACE/app-rn/android/gradle-build.log
+          ./gradlew bundleRelease \
+            -PSMASHER_UPLOAD_STORE_FILE="${SMASHER_UPLOAD_STORE_FILE}" \
+            -PSMASHER_UPLOAD_STORE_PASSWORD="${SMASHER_UPLOAD_STORE_PASSWORD}" \
+            -PSMASHER_UPLOAD_KEY_ALIAS="${SMASHER_UPLOAD_KEY_ALIAS}" \
+            -PSMASHER_UPLOAD_KEY_PASSWORD="${SMASHER_UPLOAD_KEY_PASSWORD}" \
+            --no-daemon --warning-mode all --stacktrace 2>&1 | tee $GITHUB_WORKSPACE/app-rn/android/gradle-build.log
 
       - name: Check for generated AAB
         id: check_aab_exists
