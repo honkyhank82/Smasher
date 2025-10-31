@@ -203,34 +203,21 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetError }) => {
       alert('In development mode - error would be reported in production');
     }
     resetError();
-  };
 
   return (
-    <View style={styles.errorContainer} testID="error-fallback">
-      <Text style={styles.errorTitle}>
-        {error.statusCode ? `Error ${error.statusCode}` : 'Something went wrong'}
-      </Text>
-      
-      <Text style={styles.errorText}>
-        {error.message || 'An unexpected error occurred. Please try again.'}
-      </Text>
-      
-      {error.code && (
-        <Text style={styles.errorCode}>
-          Error Code: {error.code}
-        </Text>
-      )}
-      
+    <View style={styles.errorContainer}>
+      <Text style={styles.errorTitle}>Something went wrong</Text>
+      <Text style={styles.errorText}>{error.message}</Text>
       <View style={styles.buttonContainer}>
         <Button 
-          onPress={resetError} 
-          title="Try Again" 
-          color="#007AFF"
-          accessibilityLabel="Try loading the app again"
+          title="Report Error" 
+          onPress={reportError} 
+          accessibilityLabel="Report this error"
         />
-        
-        {!ENV.IS_DEV && (
-          <View style={styles.reportButton}>
+        <Button 
+          title="Try Again" 
+          onPress={resetError} 
+          accessibilityLabel="Try to restart the app"
             <Button 
               onPress={handleReportError} 
               title="Report Error" 
