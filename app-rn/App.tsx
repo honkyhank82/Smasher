@@ -27,8 +27,25 @@ import * as Updates from 'expo-updates';
 import * as SystemUI from 'expo-system-ui';
 import * as Sentry from '@sentry/react-native';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
-import { ErrorBoundary, ErrorBoundaryProps } from './src/components/ErrorBoundary';
-import { AppError, ErrorCode } from './src/utils/errorHandling';
+import { ErrorBoundary } from './src/components/ErrorBoundary';
+import { AppError } from './src/utils/errorHandling';
+import { PremiumProvider } from './src/contexts/PremiumContext';
+import { AppNavigator } from './src/navigation/AppNavigator';
+import api from './src/services/api';
+import './src/config/i18n'; // Initialize i18n
+import * as Application from 'expo-application';
+import * as Device from 'expo-device';
+import NetInfo from '@react-native-community/netinfo';
+
+declare global {
+  namespace NodeJS {
+    interface ProcessEnv {
+      SENTRY_DSN: string;
+      API_CONFIG: string;
+      NODE_ENV: 'development' | 'production' | 'test';
+    }
+  }
+}
 
 // Ignore specific warnings
 LogBox.ignoreLogs([
@@ -43,21 +60,6 @@ const ENV = {
   NODE_ENV: process.env.NODE_ENV || 'development',
   IS_DEV: __DEV__,
   IS_PRODUCTION: !__DEV__,
-} as const;
-import { PremiumProvider } from './src/contexts/PremiumContext';
-import { AppNavigator } from './src/navigation/AppNavigator';
-import { ErrorBoundary } from './src/components/ErrorBoundary';
-import api from './src/services/api';
-import './src/config/i18n'; // Initialize i18n
-import * as Application from 'expo-application';
-import * as Device from 'expo-device';
-import NetInfo from '@react-native-community/netinfo';
-
-// Environment variables with fallbacks
-const ENV = {
-  SENTRY_DSN: process.env.SENTRY_DSN || '',
-  API_CONFIG: process.env.API_CONFIG || '{}',
-  NODE_ENV: process.env.NODE_ENV || 'development'
 } as const;
 
 // App-specific types
