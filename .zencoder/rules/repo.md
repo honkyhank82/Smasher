@@ -217,6 +217,12 @@ This section tracks key decisions and past conversations.
 - Documented project structure and user preferences
 - Confirmed deployment strategy: Remote-only with free services
 
+### Session 2: GitHub Actions & Google Play Deployment
+- Fixed GitHub release versioning to use semantic versions from package.json instead of run_number
+- Android releases now show correct versions (e.g., v2.0.2 instead of v1.0.15)
+- Configured GOOGLE_PLAY_SERVICE_ACCOUNT_JSON secret for Google Play deployment
+- Workflow now fully supports Android AAB builds and Play Store alpha track deployment
+
 ---
 
 ## NEXT STEPS
