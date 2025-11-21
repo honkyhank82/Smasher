@@ -1,8 +1,10 @@
 name: Android Release (Fastlane)
 
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
 
 jobs:
   build-android:
