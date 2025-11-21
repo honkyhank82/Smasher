@@ -59,7 +59,7 @@ $buildGradle = Get-Content $buildGradlePath -Raw
 $buildGradle = [regex]::Replace(
     $buildGradle,
     'versionName\s+"[^"]+"',
-    "versionName \"$newVersion\""
+    "versionName `"$newVersion`""
 )
 
 # Replace versionCode with newCode
