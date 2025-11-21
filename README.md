@@ -58,7 +58,7 @@ SMASHER is a **location-based social app** that helps you:
 
 #### Step 1: Download the App
 
-1. **Click this link on your phone:** [Download SMASHER](https://github.com/honkyhank82/smasher-app/releases/latest)
+1. **Click this link on your phone:** [Download SMASHER](https://github.com/honkyhank82/Smasher/releases/latest)
    
 2. **Tap the APK file** (it will say something like `SMASHER-v1.0.12.apk`)
 
@@ -385,7 +385,7 @@ SMASHER is a **location-based social app** that helps you:
 
 ### **Download SMASHER now:**
 
-**[⬇️ DOWNLOAD FOR ANDROID](https://github.com/honkyhank82/smasher-app/releases/latest)**
+**[⬇️ DOWNLOAD FOR ANDROID](https://github.com/honkyhank82/Smasher/releases/latest)**
 
 *File size: ~100MB | Android 8.0+ required | 100% Free*
 
@@ -442,7 +442,7 @@ Before you start, make sure you have:
 
 **Download SMASHER today and start meeting gay men nearby!**
 
-**[⬇️ DOWNLOAD NOW](https://github.com/honkyhank82/smasher-app/releases/latest)**
+**[⬇️ DOWNLOAD NOW](https://github.com/honkyhank82/Smasher/releases/latest)**
 
 ---
 
