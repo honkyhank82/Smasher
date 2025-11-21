@@ -53,12 +53,14 @@ jobs:
           name: smasher-android-apk
           path: app-rn/android/app/build/outputs/apk/release/app-release.apk
 
-      - name: Upload APK to GitHub Release
-        uses: actions/upload-release-asset@v1
+      - name: Create or update GitHub Release with APK
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Android APK ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          files: |
+            app-rn/android/app/build/outputs/apk/release/app-release.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: app-rn/android/app/build/outputs/apk/release/app-release.apk
-          asset_name: smasher-${{ github.event.release.tag_name }}.apk
-          asset_content_type: application/vnd.android.package-archive
