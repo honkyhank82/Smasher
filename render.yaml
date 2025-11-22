@@ -12,7 +12,9 @@ services:
       - key: PORT
         value: 3001
       - key: DATABASE_URL
-        fromDatabase: smasher-db
+        fromDatabase:
+          name: smasher-db
+          property: connectionString
       - key: STRIPE_SECRET_KEY
         fromSecret: stripe_secret_key
       - key: STRIPE_WEBHOOK_SECRET
