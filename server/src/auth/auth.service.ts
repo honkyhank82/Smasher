@@ -14,16 +14,16 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
-      private readonly pepper: string;
-    constructor(
-      private readonly users: UsersService,
-      private readonly jwt: JwtService,
-      private readonly email: EmailService,
-      @InjectRepository(VerificationCode)
-      private readonly codes: Repository<VerificationCode>,
-    ) {
-      this.initPepper();
-    }
+  private pepper: string;
+  constructor(
+    private readonly users: UsersService,
+    private readonly jwt: JwtService,
+    private readonly email: EmailService,
+    @InjectRepository(VerificationCode)
+    private readonly codes: Repository<VerificationCode>,
+  ) {
+    this.initPepper();
+  }
   // Initialize and enforce required env vars
   private initPepper() {
     const envPepper = (process.env.VERIFICATION_CODE_PEPPER ?? '').trim();
@@ -58,7 +58,7 @@ export class AuthService {
       const passwordHash = await bcrypt.hash(params.password, 10);
       await this.users.createUser(params.email, passwordHash, {
         birthdate: birthDate,
-        age,
+        age: new Date(),
         tos: new Date(),
       });
       return { message: 'Registration successful' };

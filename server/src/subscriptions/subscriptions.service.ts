@@ -258,6 +258,8 @@ export class SubscriptionsService {
       return;
     }
 
+    const stripeSubAny = stripeSubscription as any;
+
     // Create subscription record
     const subscription = this.subscriptionRepository.create({
       userId,
@@ -269,8 +271,8 @@ export class SubscriptionsService {
       currency: stripeSubscription.items.data[0].price.currency.toUpperCase(),
       interval: stripeSubscription.items.data[0].price.recurring?.interval || 'month',
       status: stripeSubscription.status as any,
-      currentPeriodStart: new Date((stripeSubscription.current_period_start as number) * 1000),
-      currentPeriodEnd: new Date((stripeSubscription.current_period_end as number) * 1000),
+      currentPeriodStart: new Date((stripeSubAny.current_period_start as number) * 1000),
+      currentPeriodEnd: new Date((stripeSubAny.current_period_end as number) * 1000),
       cancelAt: stripeSubscription.cancel_at ? new Date(stripeSubscription.cancel_at * 1000) : null,
       canceledAt: stripeSubscription.canceled_at ? new Date(stripeSubscription.canceled_at * 1000) : null,
       trialStart: stripeSubscription.trial_start ? new Date(stripeSubscription.trial_start * 1000) : null,
@@ -282,7 +284,7 @@ export class SubscriptionsService {
 
     // Update user premium status
     user.isPremium = stripeSubscription.status === 'active' || stripeSubscription.status === 'trialing';
-    user.premiumExpiresAt = new Date((stripeSubscription.current_period_end as number) * 1000);
+    user.premiumExpiresAt = new Date((stripeSubAny.current_period_end as number) * 1000);
     await this.userRepository.save(user);
 
     this.logger.log(`Subscription created for user ${userId}`);
@@ -301,10 +303,12 @@ export class SubscriptionsService {
       return;
     }
 
+    const stripeSubAny = stripeSubscription as any;
+
     // Update subscription
     subscription.status = stripeSubscription.status as any;
-    subscription.currentPeriodStart = new Date((stripeSubscription.current_period_start as number) * 1000);
-    subscription.currentPeriodEnd = new Date((stripeSubscription.current_period_end as number) * 1000);
+    subscription.currentPeriodStart = new Date((stripeSubAny.current_period_start as number) * 1000);
+    subscription.currentPeriodEnd = new Date((stripeSubAny.current_period_end as number) * 1000);
     subscription.cancelAt = stripeSubscription.cancel_at ? new Date(stripeSubscription.cancel_at * 1000) : null;
     subscription.canceledAt = stripeSubscription.canceled_at ? new Date(stripeSubscription.canceled_at * 1000) : null;
     subscription.cancelAtPeriodEnd = stripeSubscription.cancel_at_period_end;
@@ -315,7 +319,7 @@ export class SubscriptionsService {
     const user = await this.userRepository.findOne({ where: { id: subscription.userId } });
     if (user) {
       user.isPremium = stripeSubscription.status === 'active' || stripeSubscription.status === 'trialing';
-      user.premiumExpiresAt = new Date((stripeSubscription.current_period_end as number) * 1000);
+      user.premiumExpiresAt = new Date((stripeSubAny.current_period_end as number) * 1000);
       await this.userRepository.save(user);
     }
 
@@ -355,10 +359,14 @@ export class SubscriptionsService {
    * Handle successful payment
    */
   private async handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
-    if (!invoice.subscription) {
+    const invoiceAny = invoice as any;
+    if (!invoiceAny.subscription) {
       return;
     }
-    const subscriptionId = typeof invoice.subscription === 'string' ? invoice.subscription : invoice.subscription.id;
+    const subscriptionId =
+      typeof invoiceAny.subscription === 'string'
+        ? invoiceAny.subscription
+        : invoiceAny.subscription.id;
     const subscription = await this.subscriptionRepository.findOne({
       where: { stripeSubscriptionId: subscriptionId },
     });
@@ -372,10 +380,14 @@ export class SubscriptionsService {
    * Handle failed payment
    */
   private async handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
-    if (!invoice.subscription) {
+    const invoiceAny = invoice as any;
+    if (!invoiceAny.subscription) {
       return;
     }
-    const subscriptionId = typeof invoice.subscription === 'string' ? invoice.subscription : invoice.subscription.id;
+    const subscriptionId =
+      typeof invoiceAny.subscription === 'string'
+        ? invoiceAny.subscription
+        : invoiceAny.subscription.id;
     const subscription = await this.subscriptionRepository.findOne({
       where: { stripeSubscriptionId: subscriptionId },
     });
@@ -419,8 +431,9 @@ export class SubscriptionsService {
       },
     );
 
+    const updatedSubAny = updatedSubscription as any;
     subscription.cancelAtPeriodEnd = true;
-    subscription.cancelAt = new Date((updatedSubscription.current_period_end as number) * 1000);
+    subscription.cancelAt = new Date((updatedSubAny.current_period_end as number) * 1000);
     await this.subscriptionRepository.save(subscription);
 
     this.logger.log(`Subscription ${subscription.id} will cancel at period end`);
