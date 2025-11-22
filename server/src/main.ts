@@ -1,3 +1,5 @@
+import 'reflect-metadata';
+
 // Polyfill for crypto in production
 if (typeof global.crypto === 'undefined') {
   global.crypto = require('crypto').webcrypto;
