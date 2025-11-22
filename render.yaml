@@ -23,6 +23,8 @@ services:
         fromSecret: jwt_secret
       - key: RESEND_API_KEY
         fromSecret: resend_api_key
+      - key: VERIFICATION_CODE_PEPPER
+        fromSecret: verification_code_pepper
       - key: FROM_EMAIL
         value: noreply@smasher.app
       - key: R2_ACCOUNT_ID
