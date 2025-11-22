@@ -25,6 +25,8 @@ services:
         fromSecret: resend_api_key
       - key: VERIFICATION_CODE_PEPPER
         fromSecret: verification_code_pepper
+      - key: RESEND_FROM
+        value: noreply@smasher.app
       - key: FROM_EMAIL
         value: noreply@smasher.app
       - key: R2_ACCOUNT_ID
@@ -36,6 +38,18 @@ services:
       - key: R2_BUCKET_NAME
         value: smasher-media
       - key: R2_PUBLIC_URL
+        value: https://r2.smasher.app
+      - key: S3_ENDPOINT
+        value: https://d106b8f0544da6022da7de38fb440af4.r2.cloudflarestorage.com
+      - key: S3_REGION
+        value: auto
+      - key: S3_ACCESS_KEY_ID
+        fromSecret: r2_access_key_id
+      - key: S3_SECRET_ACCESS_KEY
+        fromSecret: r2_secret_access_key
+      - key: S3_BUCKET
+        value: smasher-media
+      - key: PUBLIC_MEDIA_BASE_URL
         value: https://r2.smasher.app
     
     healthCheckPath: /health
