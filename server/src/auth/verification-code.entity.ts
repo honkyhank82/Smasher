@@ -13,7 +13,7 @@ export class VerificationCode {
   @Index('idx_verification_codehash')
   codeHash!: string;
 
-  @Column({ type: 'timestamp', name: 'expires_at' })
+  @Column({ name: 'expires_at' })
   @Index('idx_verification_expires')
   expiresAt!: Date;
 
