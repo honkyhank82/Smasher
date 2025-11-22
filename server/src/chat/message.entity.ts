@@ -27,7 +27,7 @@ export class Message {
   @Column({ type: 'boolean', default: false, name: 'is_read' })
   isRead!: boolean;
 
-  @Column({ name: 'read_at', nullable: true })
+  @Column({ type: 'datetime', name: 'read_at', nullable: true })
   readAt!: Date | null;
 
   @CreateDateColumn({ name: 'created_at' })
