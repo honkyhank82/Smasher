@@ -1,10 +1,13 @@
 {
   "name": "server",
-  "version": "1.0.42",
+  "version": "1.0.43",
   "description": "",
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
