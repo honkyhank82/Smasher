@@ -22,13 +22,13 @@ export class AuthController {
   }
 
   @Post('send-verification')
-  @Throttle(3, 3600) // 3 requests per hour
+  @Throttle({ default: { limit: 3, ttl: 3600 } }) // 3 requests per hour
   sendVerification(@Body() dto: SendVerificationDto) {
     return this.auth.sendVerification(dto.email);
   }
 
   @Post('verify')
-  @Throttle(10, 900) // 10 requests per 15 minutes
+  @Throttle({ default: { limit: 10, ttl: 900 } }) // 10 requests per 15 minutes
   verify(@Body() dto: VerifyDto) {
     return this.auth.verify(dto.email, dto.code);
   }
