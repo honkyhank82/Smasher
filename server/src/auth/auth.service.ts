@@ -32,7 +32,7 @@ export class AuthService {
     if (!envPepper) {
       const nodeEnv = process.env.NODE_ENV || 'undefined';
       const hasJwt = !!(process.env.JWT_SECRET ?? '').trim();
-      this.logger.error(
+      this.logger.warn(
         `[AuthService] VERIFICATION_CODE_PEPPER is missing or empty. NODE_ENV=${nodeEnv}, JWT_SECRET set=${hasJwt}. ` +
         'Using fallback pepper derived from JWT_SECRET or a built-in default. Configure VERIFICATION_CODE_PEPPER as soon as possible.',
       );
