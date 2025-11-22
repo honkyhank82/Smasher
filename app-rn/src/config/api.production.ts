@@ -1,10 +1,10 @@
 // Production API Configuration
 // This file should be used when building for production
 
-export const API_BASE_URL = 'https://smasher.onrender.com'; // Render backend URL
+export const API_BASE_URL = 'https://smasher-backend-xsfi.onrender.com'; // Render backend URL
 
 // WebSocket URL (for Socket.IO)
-export const WS_URL = 'https://smasher.onrender.com'; // Same as API_BASE_URL for Socket.IO
+export const WS_URL = 'https://smasher-backend-xsfi.onrender.com'; // Same as API_BASE_URL for Socket.IO
 
 // API Timeouts
 export const API_TIMEOUT = 30000; // 30 seconds

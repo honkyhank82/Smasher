@@ -35,8 +35,8 @@ const HEALTH_CHECK_INTERVAL = 5 * 60 * 1000; // 5 minutes
 const BACKEND_SERVICES: BackendService[] = [
   {
     name: 'production',
-    apiUrl: 'https://smasher.onrender.com',
-    healthCheckUrl: 'https://smasher.onrender.com/health',
+    apiUrl: 'https://smasher-backend-xsfi.onrender.com',
+    healthCheckUrl: 'https://smasher-backend-xsfi.onrender.com/health',
   },
   {
     name: 'staging',
