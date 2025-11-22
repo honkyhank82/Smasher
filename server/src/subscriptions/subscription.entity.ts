@@ -41,25 +41,25 @@ export class Subscription {
   })
   status!: 'active' | 'canceled' | 'past_due' | 'unpaid' | 'incomplete' | 'trialing';
 
-  @Column({ name: 'current_period_start' })
+  @Column({ type: 'datetime', name: 'current_period_start' })
   currentPeriodStart!: Date;
 
-  @Column({ name: 'current_period_end' })
+  @Column({ type: 'datetime', name: 'current_period_end' })
   currentPeriodEnd!: Date;
 
-  @Column({ name: 'cancel_at', nullable: true })
+  @Column({ type: 'datetime', name: 'cancel_at', nullable: true })
   cancelAt!: Date | null;
 
-  @Column({ name: 'canceled_at', nullable: true })
+  @Column({ type: 'datetime', name: 'canceled_at', nullable: true })
   canceledAt!: Date | null;
 
-  @Column({ name: 'ended_at', nullable: true })
+  @Column({ type: 'datetime', name: 'ended_at', nullable: true })
   endedAt!: Date | null;
 
-  @Column({ name: 'trial_start', nullable: true })
+  @Column({ type: 'datetime', name: 'trial_start', nullable: true })
   trialStart!: Date | null;
 
-  @Column({ name: 'trial_end', nullable: true })
+  @Column({ type: 'datetime', name: 'trial_end', nullable: true })
   trialEnd!: Date | null;
 
   @Column({ type: 'boolean', name: 'cancel_at_period_end', default: false })
