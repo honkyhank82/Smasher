@@ -1,65 +1,65 @@
-{
-  "expo": {
-    "name": "SMASHER",
-    "slug": "smasher-app",
-    "version": "2.0.2",
-    "orientation": "default",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "automatic",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#000000"
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#000000"
-      },
-      "package": "com.smasher.app",
-      "versionCode": 22,
-      "permissions": [
-        "ACCESS_COARSE_LOCATION",
-        "ACCESS_FINE_LOCATION",
-        "CAMERA",
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE"
-      ],
-      "navigationBar": {
-        "visible": "leanback",
-        "backgroundColor": "#00000000"
-      },
-      "softwareKeyboardLayoutMode": "pan"
-    },
-    "web": {
-      "favicon": "./assets/icon.png",
-      "bundler": "metro",
-      "output": "static"
-    },
-    "updates": {
-      "url": "https://u.expo.dev/edef8952-a01b-408f-abeb-e3922973df75"
-    },
-    "runtimeVersion": "1.0.3",
-    "extra": {
-      "eas": {
-        "projectId": "edef8952-a01b-408f-abeb-e3922973df75"
-      }
-    },
-    "plugins": [
-      [
-        "expo-location",
-        {
-          "locationAlwaysAndWhenInUsePermission": "Allow SMASHER to use your location to show nearby users and share your location."
-        }
-      ],
-      [
-        "expo-image-picker",
-        {
-          "photosPermission": "Allow SMASHER to access your photos to upload profile pictures and media.",
-          "cameraPermission": "Allow SMASHER to access your camera to take photos."
-        }
-      ],
-      "expo-video"
-    ]
-  }
+﻿{
+    "expo":  {
+                 "name":  "SMASHER",
+                 "slug":  "smasher-app",
+                 "version":  "2.0.3",
+                 "orientation":  "default",
+                 "icon":  "./assets/icon.png",
+                 "userInterfaceStyle":  "automatic",
+                 "splash":  {
+                                "image":  "./assets/splash.png",
+                                "resizeMode":  "contain",
+                                "backgroundColor":  "#000000"
+                            },
+                 "android":  {
+                                 "adaptiveIcon":  {
+                                                      "foregroundImage":  "./assets/adaptive-icon.png",
+                                                      "backgroundColor":  "#000000"
+                                                  },
+                                 "package":  "com.smasher.app",
+                                 "versionCode":  23,
+                                 "permissions":  [
+                                                     "ACCESS_COARSE_LOCATION",
+                                                     "ACCESS_FINE_LOCATION",
+                                                     "CAMERA",
+                                                     "READ_EXTERNAL_STORAGE",
+                                                     "WRITE_EXTERNAL_STORAGE"
+                                                 ],
+                                 "navigationBar":  {
+                                                       "visible":  "leanback",
+                                                       "backgroundColor":  "#00000000"
+                                                   },
+                                 "softwareKeyboardLayoutMode":  "pan"
+                             },
+                 "web":  {
+                             "favicon":  "./assets/icon.png",
+                             "bundler":  "metro",
+                             "output":  "static"
+                         },
+                 "updates":  {
+                                 "url":  "https://u.expo.dev/edef8952-a01b-408f-abeb-e3922973df75"
+                             },
+                 "runtimeVersion":  "1.0.3",
+                 "extra":  {
+                               "eas":  {
+                                           "projectId":  "edef8952-a01b-408f-abeb-e3922973df75"
+                                       }
+                           },
+                 "plugins":  [
+                                 [
+                                     "expo-location",
+                                     {
+                                         "locationAlwaysAndWhenInUsePermission":  "Allow SMASHER to use your location to show nearby users and share your location."
+                                     }
+                                 ],
+                                 [
+                                     "expo-image-picker",
+                                     {
+                                         "photosPermission":  "Allow SMASHER to access your photos to upload profile pictures and media.",
+                                         "cameraPermission":  "Allow SMASHER to access your camera to take photos."
+                                     }
+                                 ],
+                                 "expo-video"
+                             ]
+             }
 }
