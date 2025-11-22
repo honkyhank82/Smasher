@@ -36,6 +36,10 @@ async function bootstrap() {
       console.log('[startup] (pre-create) DATABASE_URL is NOT set');
     }
 
+    const hasJwt = !!(process.env['JWT_SECRET'] ?? '').trim();
+    const hasPepper = !!(process.env['VERIFICATION_CODE_PEPPER'] ?? '').trim();
+    console.log(`[startup] Env check - JWT_SECRET set=${hasJwt}, VERIFICATION_CODE_PEPPER set=${hasPepper}`);
+
     console.log('[bootstrap] About to call NestFactory.create');
     const app = await NestFactory.create(AppModule, {
       bodyParser: true,

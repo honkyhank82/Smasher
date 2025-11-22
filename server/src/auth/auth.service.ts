@@ -26,10 +26,29 @@ export class AuthService {
   }
   // Initialize and enforce required env vars
   private initPepper() {
-    const envPepper = (process.env.VERIFICATION_CODE_PEPPER ?? '').trim();
+    const rawPepper = process.env.VERIFICATION_CODE_PEPPER;
+    const envPepper = (rawPepper ?? '').trim();
+
     if (!envPepper) {
-      throw new Error('Missing required env var VERIFICATION_CODE_PEPPER for verification code hashing');
+      const nodeEnv = process.env.NODE_ENV || 'undefined';
+      const hasJwt = !!(process.env.JWT_SECRET ?? '').trim();
+      this.logger.error(
+        `[AuthService] VERIFICATION_CODE_PEPPER is missing or empty. NODE_ENV=${nodeEnv}, JWT_SECRET set=${hasJwt}. ` +
+        'Using fallback pepper derived from JWT_SECRET or a built-in default. Configure VERIFICATION_CODE_PEPPER as soon as possible.',
+      );
+
+      const jwtSecret = (process.env.JWT_SECRET ?? '').trim();
+      if (jwtSecret) {
+        // Derive a stable fallback pepper from JWT_SECRET so codes remain verifiable across restarts
+        this.pepper = createHmac('sha256', 'verification-pepper-fallback').update(jwtSecret).digest('hex');
+      } else {
+        // Last-resort fallback; verification codes will still be hashed, but all environments share this pepper
+        this.pepper = 'fallback-verification-pepper-change-me';
+      }
+
+      return;
     }
+
     this.pepper = envPepper;
   }
 
