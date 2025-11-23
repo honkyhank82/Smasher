@@ -1,6 +1,6 @@
 {
     "name":  "smasher-app",
-    "version":  "3.0.4",
+    "version":  "3.0.1",
     "private":  true,
     "scripts":  {
                     "start":  "expo start",
