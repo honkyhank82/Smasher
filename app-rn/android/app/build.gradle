@@ -2,6 +2,12 @@ apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 
+// Add this at the top of the file, after the plugins
+afterEvaluate {
+    if (plugins.hasPlugin("com.android.application")) {
+        android.components.release // This ensures the release component is created
+    }
+}
 
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
 
