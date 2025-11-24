@@ -12,10 +12,10 @@ export const backendService = {
   /**
    * Get the currently selected backend service
    */
-  async getSelectedService() {
+  async getSelectedService(): Promise<string> {
     try {
       const serviceKey = await AsyncStorage.getItem(SELECTED_SERVICE_KEY);
-      if (serviceKey && BACKEND_SERVICES[serviceKey]) {
+      if (serviceKey && BACKEND_SERVICES[serviceKey as keyof typeof BACKEND_SERVICES]) {
         return serviceKey;
       }
       return 'FLY_IO'; // Default to Fly.io
@@ -28,11 +28,11 @@ export const backendService = {
   /**
    * Set the active backend service
    */
-  async setActiveService(serviceKey) {
+  async setActiveService(serviceKey: keyof typeof BACKEND_SERVICES): Promise<boolean> {
     try {
       // Reset all services to inactive
       Object.keys(BACKEND_SERVICES).forEach(key => {
-        BACKEND_SERVICES[key].isActive = false;
+        BACKEND_SERVICES[key as keyof typeof BACKEND_SERVICES].isActive = false;
       });
 
       // Set the selected service to active
@@ -51,29 +51,32 @@ export const backendService = {
   /**
    * Get all available backend services
    */
-  getAvailableServices() {
+  getAvailableServices(): { key: keyof typeof BACKEND_SERVICES; isActive: boolean }[] {
     return Object.entries(BACKEND_SERVICES).map(([key, service]) => ({
-      key,
-      ...service
+      key: key as keyof typeof BACKEND_SERVICES,
+      ...service,
     }));
   },
 
   /**
    * Check if a backend service is available
    */
-  async checkServiceAvailability(serviceKey) {
+  async checkServiceAvailability(serviceKey: keyof typeof BACKEND_SERVICES): Promise<boolean> {
     try {
       const service = BACKEND_SERVICES[serviceKey];
       if (!service) return false;
 
       // Try to fetch the health endpoint
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
       const response = await fetch(`${service.apiUrl}/health`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
-        timeout: 5000, // 5 second timeout
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
 
       return response.ok;
     } catch (error) {
@@ -85,15 +88,17 @@ export const backendService = {
   /**
    * Switch to the next available backend service
    */
-  async switchToNextAvailableService() {
+  async switchToNextAvailableService(): Promise<{ success: boolean; service?: typeof BACKEND_SERVICES[keyof typeof BACKEND_SERVICES]; message?: string }> {
     const currentService = await this.getSelectedService();
     const services = Object.keys(BACKEND_SERVICES);
+
     const currentIndex = services.indexOf(currentService);
-    
+
     // Try each service in order
     for (let i = 1; i <= services.length; i++) {
       const nextIndex = (currentIndex + i) % services.length;
-      const nextService = services[nextIndex];
+      const nextService = services[nextIndex] as keyof typeof BACKEND_SERVICES;
+
       
       const isAvailable = await this.checkServiceAvailability(nextService);
       if (isAvailable) {
