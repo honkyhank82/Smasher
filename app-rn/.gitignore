@@ -78,4 +78,3 @@ yarn-error.log
 google-play-service-account.json
 *.json.key
 *-service-account.json
-android/gradle.properties
