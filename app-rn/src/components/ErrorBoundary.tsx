@@ -12,6 +12,7 @@ interface ErrorFallbackProps {
 interface Props {
   children: ReactNode;
   fallback?: React.ComponentType<ErrorFallbackProps> | ReactNode | ((props: ErrorFallbackProps) => ReactNode);
+  onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
 }
 
 interface State {
@@ -52,6 +53,10 @@ export class ErrorBoundary extends Component<Props, State> {
 
     this.setState({ error, errorInfo });
     console.error('ErrorBoundary caught an error:', error, errorInfo);
+
+    if (this.props.onError) {
+      this.props.onError(error, errorInfo);
+    }
   }
 
   handleReset = () => {

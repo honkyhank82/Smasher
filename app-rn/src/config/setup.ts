@@ -151,29 +151,24 @@ const initializeErrorHandling = () => {
   // Initialize Sentry if DSN is provided
   if (appConfig.sentryDsn && !appConfig.isDev) {
     try {
-      Sentry.init({
+      const SentryAny = Sentry as any;
+      SentryAny.init({
         dsn: appConfig.sentryDsn,
         environment: appConfig.environment,
         release: `${appConfig.appName}@${appConfig.version}+${appConfig.buildNumber}`,
         enableAutoSessionTracking: true,
-        // Only capture a percentage of sessions in production
         tracesSampleRate: appConfig.environment === 'production' ? 0.1 : 1.0,
-        // Disable in development
         enabled: !appConfig.isDev,
-        // Disable in development
         debug: appConfig.debug,
-        // Add default tags
-        defaultIntegrations: false, // Disable default integrations
+        defaultIntegrations: false,
         integrations: [
-          new Sentry.ReactNativeTracing({
-            routingInstrumentation: new Sentry.ReactNavigationInstrumentation(),
-            // Only track performance in production
+          new SentryAny.ReactNativeTracing({
+            routingInstrumentation: new SentryAny.ReactNavigationInstrumentation(),
             enableAppStartTracking: appConfig.environment === 'production',
-            // Disable in development
             enableAutoPerformanceTracking: !appConfig.isDev,
           }),
-          new Sentry.ReactNativeErrorHandlers({
-            onerror: false, // We handle this ourselves
+          new SentryAny.ReactNativeErrorHandlers({
+            onerror: false,
             onunhandledrejection: true,
           }),
         ],
