@@ -2,14 +2,7 @@ apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 
-// This is a workaround for expo-modules-core compatibility
-// The release component will be properly configured by the Android Gradle plugin
-afterEvaluate {
-    if (plugins.hasPlugin("com.android.application")) {
-        // No need to explicitly access android.components.release
-        // The expo-modules-core plugin will handle the component registration
-    }
-}
+
 
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
 
