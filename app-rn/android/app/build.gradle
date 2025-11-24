@@ -78,7 +78,7 @@ def enableProguardInReleaseBuilds = (findProperty('android.enableProguardInRelea
 def jscFlavor = 'org.webkit:android-jsc:+'
 
 def hermesEnabled = (findProperty('expo.jsEngine') ?: "hermes") == "hermes"
-project
+project.ext.hermesEnabled = hermesEnabled
 android {
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
