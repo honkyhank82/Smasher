@@ -2,10 +2,12 @@ apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 
-// Add this at the top of the file, after the plugins
+// This is a workaround for expo-modules-core compatibility
+// The release component will be properly configured by the Android Gradle plugin
 afterEvaluate {
     if (plugins.hasPlugin("com.android.application")) {
-        android.components.release // This ensures the release component is created
+        // No need to explicitly access android.components.release
+        // The expo-modules-core plugin will handle the component registration
     }
 }
 
