@@ -3,12 +3,28 @@ default_platform(:android)
 platform :android do
   desc "Build the Android AAB"
   lane :build do
-    gradle(task: 'bundle', build_type: 'Release', project_dir: 'android')
+    gradle(
+      task: 'bundle',
+      build_type: 'Release',
+      project_dir: 'android',
+      properties: {
+        'android.useAndroidX' => 'true',
+        'android.enableJetifier' => 'true'
+      }
+    )
   end
 
   desc "Build the Android APK"
   lane :build_apk do
-    gradle(task: 'assemble', build_type: 'Release', project_dir: 'android')
+    gradle(
+      task: 'assemble',
+      build_type: 'Release',
+      project_dir: 'android',
+      properties: {
+        'android.useAndroidX' => 'true',
+        'android.enableJetifier' => 'true'
+      }
+    )
   end
 
   desc "Deploy the AAB to Google Play (alpha by default). Expects json_key option or app-rn/google-play-service-account.json"
