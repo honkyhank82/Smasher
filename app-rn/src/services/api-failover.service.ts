@@ -1,14 +1,15 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-import { BACKEND_SERVICES, checkServiceHealth, updateServiceUrls, API_TIMEOUT } from '../config/api';
+import { BACKEND_SERVICES_LIST, checkServiceHealth, updateServiceUrls, API_TIMEOUT } from '../config/api';
 
 class ApiFailoverService {
   private currentServiceIndex: number = 0;
   private axiosInstance: AxiosInstance;
   private failoverAttempts: number = 0;
   private maxFailoverAttempts: number = 3;
+  private services = BACKEND_SERVICES_LIST;
 
   constructor() {
-    this.axiosInstance = this.createAxiosInstance(BACKEND_SERVICES[0]);
+    this.axiosInstance = this.createAxiosInstance(this.services[0]);
     this.initializeHealthMonitoring();
   }
 
@@ -30,7 +31,7 @@ class ApiFailoverService {
   }
 
   private async checkAndFailover() {
-    const currentService = BACKEND_SERVICES[this.currentServiceIndex];
+    const currentService = this.services[this.currentServiceIndex];
     const isHealthy = await checkServiceHealth(currentService);
 
     if (!isHealthy && this.failoverAttempts < this.maxFailoverAttempts) {
@@ -46,9 +47,9 @@ class ApiFailoverService {
     this.failoverAttempts++;
     
     // Try next service in the list
-    for (let i = 0; i < BACKEND_SERVICES.length; i++) {
-      const nextIndex = (this.currentServiceIndex + 1 + i) % BACKEND_SERVICES.length;
-      const nextService = BACKEND_SERVICES[nextIndex];
+    for (let i = 0; i < this.services.length; i++) {
+      const nextIndex = (this.currentServiceIndex + 1 + i) % this.services.length;
+      const nextService = this.services[nextIndex];
       
       const isHealthy = await checkServiceHealth(nextService);
       
@@ -115,7 +116,7 @@ class ApiFailoverService {
   }
 
   public getCurrentService() {
-    return BACKEND_SERVICES[this.currentServiceIndex];
+    return this.services[this.currentServiceIndex];
   }
 }
 
