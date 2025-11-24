@@ -223,23 +223,23 @@ if (-not $SkipStaticChecks) {
       Add-Finding -Area 'Auth' -Severity 'Medium' -Message 'Missing @Throttle decorators' -Fix 'Add @Throttle(3, 3600) to verification routes' -Path $authController -Details @{ }
     }
   }
-
   # 6) ScheduleModule and cron
   Write-Host "[Audit] Checking cron setup..." -ForegroundColor Cyan
   $appModule = Join-Path $RepoRoot 'server/src/app.module.ts'
-  if (Test-Path $appModule -and (Get-Content $appModule -Raw) -notmatch 'ScheduleModule\.forRoot\(') {
+  if ((Test-Path $appModule) -and ((Get-Content $appModule -Raw) -notmatch 'ScheduleModule\.forRoot\(')) {
     Add-Finding -Area 'Cron' -Severity 'Low' -Message 'ScheduleModule not registered' -Fix 'Import ScheduleModule.forRoot()' -Path $appModule -Details @{ }
   }
 
   $authService = Join-Path $RepoRoot 'server/src/auth/auth.service.ts'
-  if (Test-Path $authService -and (Get-Content $authService -Raw) -notmatch '@Cron\(') {
+  if ((Test-Path $authService) -and ((Get-Content $authService -Raw) -notmatch '@Cron\(')) {
     Add-Finding -Area 'Cron' -Severity 'Low' -Message 'No cleanup cron in AuthService' -Fix 'Add @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)' -Path $authService -Details @{ }
   }
 
   # 7) Verification code storage
   Write-Host "[Audit] Checking code storage..." -ForegroundColor Cyan
   $entityPath = Join-Path $RepoRoot 'server/src/auth/verification-code.entity.ts'
-  if (Test-Path $entityPath) {
+  if ((Test-Path $entityPath) -and ((Get-Content $entityPath -Raw) -match 'code!:\s*string') -and -not ((Get-Content $entityPath -Raw) -match 'codeHash')) {
+    Add-Finding -Area 'Auth' -Severity 'High' -Message 'Codes stored in plaintext' -Fix 'Store only hashed codes (HMAC-SHA256)' -Path $entityPath -Details @{ }
     $text = Get-Content $entityPath -Raw
     if (($text -match 'code!:\s*string') -and -not ($text -match 'codeHash')) {
       Add-Finding -Area 'Auth' -Severity 'High' -Message 'Codes stored in plaintext' -Fix 'Store only hashed codes (HMAC-SHA256)' -Path $entityPath -Details @{ }
