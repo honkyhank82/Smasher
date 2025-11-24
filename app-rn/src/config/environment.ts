@@ -5,8 +5,8 @@ import { Platform } from 'react-native';
 // Environment types
 type Environment = 'development' | 'staging' | 'production';
 
-// Get the release channel from environment variables or default to 'development'
-const releaseChannel = Constants.expoConfig?.releaseChannel || 'development';
+// Get the release channel from Expo config (cast to any to avoid type issues)
+const releaseChannel = (Constants.expoConfig as any)?.releaseChannel || 'development';
 
 // Determine the current environment
 const getEnvironment = (): Environment => {
