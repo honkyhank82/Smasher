@@ -29,6 +29,19 @@ try {
 
 Write-Host "[BUILD] Building application..." -ForegroundColor Yellow
 Set-Location $serverDir
+
+$packageJsonPath = Join-Path $serverDir "package.json"
+if (Test-Path $packageJsonPath) {
+    try {
+        $package = Get-Content $packageJsonPath | ConvertFrom-Json
+        $version = $package.version
+        Write-Host "[VERSION] Current server version: $version" -ForegroundColor Yellow
+        Write-Host "[VERSION] Remember to bump version in server/package.json before deploying." -ForegroundColor Yellow
+    } catch {
+        Write-Host "[WARN] Could not read server/package.json to determine version." -ForegroundColor Yellow
+    }
+}
+
 npm install
 npm run build
 
@@ -44,6 +57,21 @@ Write-Host "[INFO] Server dir: $serverDir" -ForegroundColor Yellow
 Set-Location $serverDir
 Write-Host "[DEPLOY] Running: fly deploy -a smasher-api" -ForegroundColor Gray
 fly deploy -a smasher-api
+
+Write-Host "[SCALE] Ensuring at least 2 machines are running..." -ForegroundColor Yellow
+try {
+    fly scale count 2 -a smasher-api | Out-Null
+} catch {
+    Write-Host "[WARN] Failed to scale machines automatically. You may need to run 'fly scale count 2 -a smasher-api' manually." -ForegroundColor Yellow
+}
+
+Write-Host "[HEALTH] Checking /health/live endpoint..." -ForegroundColor Yellow
+try {
+    $healthResponse = Invoke-WebRequest "https://smasher-api.fly.dev/health/live" -UseBasicParsing -TimeoutSec 10
+    Write-Host "[HEALTH] Status: $($healthResponse.StatusCode)" -ForegroundColor Green
+} catch {
+    Write-Host "[HEALTH] Health check failed: $($_.Exception.Message)" -ForegroundColor Red
+}
 
 Write-Host ""
 Write-Host "[OK] Deployment complete!" -ForegroundColor Green
