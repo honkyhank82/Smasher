@@ -29,9 +29,9 @@ fly secrets set `
   R2_ACCESS_KEY_ID="<optional>" `
   R2_SECRET_ACCESS_KEY="<optional>" `
   R2_BUCKET_NAME="<optional>" `
-  S3_ENDPOINT=https://d106b8f0544da6022da7de38fb440af4.r2.cloudflarestorage.com 
-S3_REGION=auto
-S3_ACCESS_KEY_ID=4ff5856f77d90eb13b221dad23b6e608
+  S3_ENDPOINT=https://d106b8f0544da6022da7de38fb440af4.r2.cloudflarestorage.com `
+S3_REGION=auto `
+S3_ACCESS_KEY_ID=4ff5856f77d90eb13b221dad23b6e608 `
 S3_SECRET_ACCESS_KEY=3c854fb36c661ea38add80e2148496e0d2672ea529b2e46bac0b364d75ae40ce
 S3_BUCKET=smasher-media
 PUBLIC_MEDIA_BASE_URL=https://r2.smasher.app
