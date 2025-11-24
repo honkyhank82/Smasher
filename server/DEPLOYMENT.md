@@ -24,7 +24,7 @@ fly secrets set `
   JWT_SECRET=B!rd!$th3w0rd `
   VERIFICATION_CODE_PEPPER=4c9e8c78c2c54a9f983f7b5b6a1e3d2c7f4b1234567890abcdef1234567890ab `
   RESEND_API_KEY=re_L45VjVkS_SrnNDbngzxdA4suSccrbCjFj`
-  FROM_EMAIL="noreply@example.com" `
+  FROM_EMAIL=smashermain@gmail.com `
   R2_ACCOUNT_ID="<optional>" `
   R2_ACCESS_KEY_ID="<optional>" `
   R2_SECRET_ACCESS_KEY="<optional>" `
