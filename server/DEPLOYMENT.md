@@ -22,7 +22,7 @@ Run from any folder (Windows PowerShell):
 fly secrets set `
   DATABASE_URL="postgresql://user:password@host:5432/smasher_api" `
   JWT_SECRET=B!rd!$th3w0rd `
-  VERIFICATION_CODE_PEPPER="<another-random-secret>" `
+  VERIFICATION_CODE_PEPPER=4c9e8c78c2c54a9f983f7b5b6a1e3d2c7f4b1234567890abcdef1234567890ab `
   RESEND_API_KEY="<optional-resend-key>" `
   FROM_EMAIL="noreply@example.com" `
   R2_ACCOUNT_ID="<optional>" `
