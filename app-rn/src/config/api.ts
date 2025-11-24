@@ -1,9 +1,18 @@
 // API Configuration
 // This file contains configuration for all backend services with automatic failover
 
+export interface BackendServiceConfig {
+  name: string;
+  apiUrl: string;
+  wsUrl: string;
+  priority: number;
+  healthCheck: string;
+  isActive: boolean;
+}
+
 // Available backend services (in priority order)
 // Automatic failover system with multiple redundant servers
-export const BACKEND_SERVICES = {
+export const BACKEND_SERVICES: Record<string, BackendServiceConfig> = {
   FLY_IO: {
     name: 'Fly.io Primary',
     apiUrl: 'https://smasher-api.fly.dev',
@@ -28,9 +37,7 @@ export const BACKEND_SERVICES = {
     healthCheck: '/health',
     isActive: false,
   },
-} as const;
-
-export type BackendServiceConfig = (typeof BACKEND_SERVICES)[keyof typeof BACKEND_SERVICES];
+};
 
 export const BACKEND_SERVICES_LIST: BackendServiceConfig[] = Object.values(BACKEND_SERVICES);
 
@@ -85,7 +92,7 @@ export let API_BASE_URL = getActiveService().apiUrl;
 export let WS_URL = getActiveService().wsUrl;
 
 // Update service URLs (called by failover logic)
-export const updateServiceUrls = (service: typeof BACKEND_SERVICES[0]) => {
+export const updateServiceUrls = (service: BackendServiceConfig) => {
   API_BASE_URL = service.apiUrl;
   WS_URL = service.wsUrl;
 };

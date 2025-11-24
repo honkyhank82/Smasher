@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-import { BACKEND_SERVICES_LIST, checkServiceHealth, updateServiceUrls, API_TIMEOUT } from '../config/api';
+import { BACKEND_SERVICES_LIST, checkServiceHealth, updateServiceUrls, API_TIMEOUT, BackendServiceConfig } from '../config/api';
 
 class ApiFailoverService {
   private currentServiceIndex: number = 0;
@@ -13,7 +13,7 @@ class ApiFailoverService {
     this.initializeHealthMonitoring();
   }
 
-  private createAxiosInstance(service: typeof BACKEND_SERVICES[0]): AxiosInstance {
+  private createAxiosInstance(service: BackendServiceConfig): AxiosInstance {
     return axios.create({
       baseURL: service.apiUrl,
       timeout: API_TIMEOUT,
