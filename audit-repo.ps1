@@ -162,35 +162,38 @@ if (-not $SkipStaticChecks) {
   $codeFilePaths = @($codeFiles.FullName)
   Write-Host "[Audit] Found $($codeFilePaths.Count) source files (cached)" -ForegroundColor Green
 
-  # 1) Merge conflict markers (parallelized)
+  # 1) Merge conflict markers
   Write-Host "[Audit] Scanning for merge conflicts..." -ForegroundColor Cyan
-  $codeFilePaths | ForEach-Object -Parallel {
-    $matches = Select-String -Path $_ -Pattern '<<<<<<<|=======|>>>>>>>' -AllMatches -ErrorAction SilentlyContinue
+  $mergeHits = @()
+  foreach ($path in $codeFilePaths) {
+    $matches = Select-String -Path $path -Pattern '<<<<<<<|=======|>>>>>>>' -AllMatches -ErrorAction SilentlyContinue
     if ($matches) {
-      [PSCustomObject]@{ File = $_; Matches = $matches }
+      $mergeHits += [PSCustomObject]@{ File = $path; Matches = $matches }
     }
-  } -ThrottleLimit 8 | ForEach-Object {
+  }
+  $mergeHits | ForEach-Object {
     Add-Finding -Area 'Git' -Severity 'High' -Message 'Merge conflict markers found' -Fix 'Resolve conflicts and remove markers' -Path $_.File -Details @{ Lines = ($_.Matches | ForEach-Object { $_.LineNumber }) }
   }
 
-  # 2) Secrets (parallelized)
+  # 2) Secrets
   Write-Host "[Audit] Scanning for secrets..." -ForegroundColor Cyan
   $secretPatterns = @(
     'BEGIN PRIVATE KEY', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'RESEND_API_KEY',
     'keystorePassword', 'keyPassword'
   )
   
-  $found = @()
-  $codeFilePaths | ForEach-Object -Parallel {
-    foreach ($pat in $using:secretPatterns) {
-      $hits = Select-String -Path $_ -Pattern $pat -AllMatches -ErrorAction SilentlyContinue
+  $secretHits = @()
+  foreach ($path in $codeFilePaths) {
+    foreach ($pat in $secretPatterns) {
+      $hits = Select-String -Path $path -Pattern $pat -AllMatches -ErrorAction SilentlyContinue
       if ($hits) {
         foreach ($h in $hits) {
-          [PSCustomObject]@{ Path = $_.FullName; Pattern = $pat; LineNumber = $h.LineNumber; Line = $h.Line.Trim() }
+          $secretHits += [PSCustomObject]@{ Path = $path; Pattern = $pat; LineNumber = $h.LineNumber; Line = $h.Line.Trim() }
         }
       }
     }
-  } -ThrottleLimit 8 | ForEach-Object {
+  }
+  $secretHits | ForEach-Object {
     Add-Finding -Area 'Secrets' -Severity 'High' -Message "Potential secret: $($_.Pattern)" -Fix 'Remove from repo; use env vars' -Path $_.Path -Details @{ Line = $_.LineNumber; Text = $_.Line }
   }
 
