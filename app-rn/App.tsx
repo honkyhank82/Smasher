@@ -321,7 +321,8 @@ const initializeApp = async (): Promise<void> => {
   }
 };
 
-const App: React.FC = () => {
+// Main App component that wraps the entire application
+const AppContent: React.FC = () => {
   const appState = useRef(AppState.currentState);
   const { isAuthenticated } = useAuth();
 
@@ -448,20 +449,16 @@ const App: React.FC = () => {
           Sentry.captureException(error, {
             extra: { componentStack },
           });
-        }
-      }}
-    >
-      <Sentry.TouchEventBoundary>
-        <SafeAreaProvider>
-          <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
-          <AuthProvider>
-            <PremiumProvider>
-              <AppNavigator />
-            </PremiumProvider>
-          </AuthProvider>
-        </SafeAreaProvider>
-      </Sentry.TouchEventBoundary>
     </ErrorBoundary>
+  );
+};
+
+// Root App component that provides the Auth context to the entire app
+const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 };
 
