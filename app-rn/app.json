@@ -2,7 +2,7 @@
   "expo": {
     "name": "SMASHER",
     "slug": "smasher-app",
-    "version": "4.0.1",
+    "version": "4.0.3",
     "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -34,7 +34,7 @@
     "web": {
       "favicon": "./assets/icon.png",
       "bundler": "metro",
-      "output": "static"
+      "output": "single"
     },
     "updates": {
       "url": "https://u.expo.dev/edef8952-a01b-408f-abeb-e3922973df75"
