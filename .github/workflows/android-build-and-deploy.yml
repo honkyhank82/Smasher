@@ -226,37 +226,13 @@ jobs:
           git push origin ${{ github.ref_name }}
         shell: bash
 
-      - name: Create or Update GitHub release
-        if: steps.check_aab_exists.outputs.exists == 'true' && github.ref_type == 'tag'
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          TAG="v${VERSION}"
-          
-          # Check if tag exists
-          if ! git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
-            echo "Error: Tag $TAG does not exist. Please create the tag first."
-            exit 1
-          fi
-          
-          # Check if release already exists
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            echo "Updating existing release $TAG"
-            # Delete existing release assets
-            gh release delete-asset "$TAG" "app-release.aab" -y 2>/dev/null || true
-            # Upload new asset
-            gh release upload "$TAG" "${{ steps.check_aab_exists.outputs.aab_path }}" --clobber
-          else
-            echo "Creating new release $TAG"
-            gh release create "$TAG" \
-              "${{ steps.check_aab_exists.outputs.aab_path }}" \
-              --title "Android v${VERSION}" \
-              --notes "Automated Android AAB build from GitHub Actions run ${{ github.run_number }}"
-          fi
-          
-          echo "Release $TAG is now available at: https://github.com/${{ github.repository }}/releases/tag/$TAG"
+      - name: Upload AAB to GitHub Release
+        if: steps.check_aab_exists.outputs.exists == 'true' && startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.check_aab_exists.outputs.aab_path }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        shell: bash
 
       - name: Run Fastlane deploy lane (upload to Play)
         if: steps.check_aab_exists.outputs.exists == 'true'
