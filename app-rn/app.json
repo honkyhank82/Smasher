@@ -58,7 +58,8 @@
           "photosPermission": "Allow SMASHER to access your photos to upload profile pictures and media.",
           "cameraPermission": "Allow SMASHER to access your camera to take photos."
         }
-      ]
+      ],
+      "expo-localization"
     ]
   }
 }
