@@ -183,8 +183,6 @@ jobs:
           echo "Using version: $VERSION"
           
           # Also set version for Android
-          cd app-rn/android
-          ./gradlew setVersion -PversionName=$VERSION
 
       - name: Upload Gradle build log
         if: always()
