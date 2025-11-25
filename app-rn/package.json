@@ -35,6 +35,7 @@
     "expo-device": "~5.9.0",
     "expo-image-picker": "~14.7.0",
     "expo-linking": "~6.2.2",
+    "expo-localization": "~14.8.4",
     "expo-location": "~16.5.5",
     "expo-notifications": "~0.27.8",
     "expo-splash-screen": "~0.26.0",
