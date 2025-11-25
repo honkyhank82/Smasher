@@ -449,6 +449,15 @@ const AppContent: React.FC = () => {
           Sentry.captureException(error, {
             extra: { componentStack },
           });
+        }
+      }}
+    >
+      <StatusBar barStyle="dark-content" />
+      <SafeAreaProvider>
+        <PremiumProvider>
+          <AppNavigator />
+        </PremiumProvider>
+      </SafeAreaProvider>
     </ErrorBoundary>
   );
 };
