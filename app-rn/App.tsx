@@ -285,9 +285,9 @@ const ErrorBoundary: React.FC<ErrorBoundaryProps> = ({
   );
 };
 
-const initializeApp = async (): Promise<void> => {
+const initializeApp = async (): Promise<(() => void) | undefined> => {
   try {
-    const checkApiHealth = useCallback(async (): Promise<boolean> => {
+    const checkApiHealth = async (): Promise<boolean> => {
       try {
         const response = await api.get('/health');
         if (response.status >= 400) {
@@ -298,7 +298,7 @@ const initializeApp = async (): Promise<void> => {
         console.error('API health check failed:', error);
         throw error;
       }
-    }, []);
+    };
 
     await checkApiHealth();
 
@@ -318,6 +318,7 @@ const initializeApp = async (): Promise<void> => {
   } catch (error) {
     console.error('App initialization error:', error);
     Sentry.captureException(error);
+    return undefined;
   }
 };
 
