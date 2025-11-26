@@ -154,10 +154,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export const useAuth = () => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('🚷 useAuth must be used within AuthProvider');
+    if (__DEV__) {
+      throw new Error('🚷 useAuth must be used within AuthProvider');
+    }
+    const stack = new Error().stack;
+    console.error(
+      '🚷 useAuth was called outside AuthProvider. Returning safe defaults in production.',
+      stack,
+    );
+    return {
+      user: null,
+      loading: false,
+      isAuthenticated: false,
+      login: async () => {},
+      register: async () => {},
+      logout: async () => {},
+      refreshUser: async () => {},
+    };
   }
   return context;
 };
