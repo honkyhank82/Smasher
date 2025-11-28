@@ -56,7 +56,7 @@ const environments = {
   },
   production: {
     ...common,
-    API_BASE_URL: 'https://smasher-backend-xsfi.onrender.com',
+    API_BASE_URL: 'https://smasher-api.fly.dev',
     SENTRY_DSN: 'YOUR_PRODUCTION_SENTRY_DSN',
   },
 };

@@ -1,10 +1,11 @@
 // Production API Configuration
 // This file should be used when building for production
 
-export const API_BASE_URL = 'https://smasher-backend-xsfi.onrender.com'; // Render backend URL
+// Fly.io primary backend
+export const API_BASE_URL = 'https://smasher-api.fly.dev';
 
 // WebSocket URL (for Socket.IO)
-export const WS_URL = 'https://smasher-backend-xsfi.onrender.com'; // Same as API_BASE_URL for Socket.IO
+export const WS_URL = 'wss://smasher-api.fly.dev';
 
 // API Timeouts
 export const API_TIMEOUT = 30000; // 30 seconds
