@@ -6,7 +6,7 @@
 
 ## 📦 Current Release
 
-- **App version:** `4.0.10`
+- **App version:** `4.0.11`
 - **Platform:** Android (8.0+)
 - **Download:**
   - **Latest APK:** https://github.com/honkyhank82/Smasher/releases/latest
@@ -28,7 +28,7 @@ Go to the latest GitHub Release and install the attached APK on your Android dev
 - **Rich profiles**
   - Photos (profile + gallery)
   - Bio and display name
-  - Profile details: age visibility toggle, height (inches), weight (lbs),
+  - Profile details: age visibility toggle, height (feet + inches), weight (lbs),
     ethnicity, body type, sexual position, relationship status, and what
     you're looking for (friends, dates, chat, relationship, hookup)
 
