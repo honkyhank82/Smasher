@@ -19,12 +19,36 @@ export class Profile {
   @Column({ name: 'is_distance_hidden', type: 'boolean', default: false })
   isDistanceHidden!: boolean;
 
+  @Column({ name: 'show_age', type: 'boolean', default: true })
+  showAge!: boolean;
+
   // Optional location snapshot (we will rely on PostGIS later)
   @Column({ type: 'real', nullable: true })
   lat!: number | null;
 
   @Column({ type: 'real', nullable: true })
   lng!: number | null;
+
+   @Column({ name: 'height_cm', type: 'int', nullable: true })
+   heightCm!: number | null;
+
+   @Column({ name: 'weight_kg', type: 'int', nullable: true })
+   weightKg!: number | null;
+
+   @Column({ name: 'ethnicity', type: 'varchar', length: 50, nullable: true })
+   ethnicity!: string | null;
+
+   @Column({ name: 'body_type', type: 'varchar', length: 50, nullable: true })
+   bodyType!: string | null;
+
+   @Column({ name: 'sexual_position', type: 'varchar', length: 50, nullable: true })
+   sexualPosition!: string | null;
+
+   @Column({ name: 'relationship_status', type: 'varchar', length: 50, nullable: true })
+   relationshipStatus!: string | null;
+
+   @Column({ name: 'looking_for', type: 'varchar', length: 100, nullable: true })
+   lookingFor!: string | null;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
