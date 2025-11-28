@@ -107,6 +107,7 @@ export class AuthService {
       const accessToken = await this.jwt.signAsync({ 
         sub: user.id,
         isPremium: user.isPremium || false,
+        isAdmin: (user as any).isAdmin || false,
       });
       
       // Return user without sensitive data
@@ -200,6 +201,7 @@ export class AuthService {
     const accessToken = await this.jwt.signAsync({
       sub: user.id,
       isPremium: user.isPremium || false,
+      isAdmin: (user as any).isAdmin || false,
     });
 
     const { passwordHash, ...userWithoutPassword } = user;
