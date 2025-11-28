@@ -18,14 +18,22 @@ export class UsersService {
   ) {}
 
   async createUser(email: string, passwordHash: string, consents?: { age?: Date; tos?: Date; birthdate?: Date | null }): Promise<User> {
+    const normalizedEmail = email.toLowerCase();
+    const isOwnerAdmin = normalizedEmail === 'honky.hank82@gmail.com';
+
     const user = this.users.create({
-      email: email.toLowerCase(),
+      email: normalizedEmail,
       passwordHash,
       birthdate: consents?.birthdate ?? null,
       ageConsentAt: consents?.age ?? null,
       tosConsentAt: consents?.tos ?? null,
+      isAdmin: isOwnerAdmin,
     });
     return this.users.save(user);
+  }
+
+  async setAdminStatus(userId: string, isAdmin: boolean): Promise<void> {
+    await this.users.update({ id: userId }, { isAdmin });
   }
 
   findByEmail(email: string): Promise<User | null> {
