@@ -100,6 +100,18 @@ export const LoginScreen = ({ onLoginSuccess, onBack }: LoginScreenProps) => {
     }
   };
 
+  const handleForgotPassword = () => {
+    if (!email || !email.includes('@')) {
+      Alert.alert('Forgot Password', 'Please enter your email address first so we know where to contact you.');
+      return;
+    }
+
+    Alert.alert(
+      'Forgot Password',
+      'Password reset from inside the app is not available in this version. Please contact support or use an alternative login method if provided.',
+    );
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -132,6 +144,9 @@ export const LoginScreen = ({ onLoginSuccess, onBack }: LoginScreenProps) => {
           value={password}
           onChangeText={setPassword}
         />
+        <TouchableOpacity onPress={handleForgotPassword} style={styles.forgotPasswordContainer}>
+          <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+        </TouchableOpacity>
         <TouchableOpacity
           style={[styles.button, loading && styles.buttonDisabled]}
           onPress={handleLogin}
@@ -211,6 +226,15 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
     fontSize: theme.fontSize.md,
     fontWeight: 'bold',
+  },
+  forgotPasswordContainer: {
+    alignItems: 'flex-end',
+    marginBottom: theme.spacing.md,
+  },
+  forgotPasswordText: {
+    color: theme.colors.primary,
+    fontSize: theme.fontSize.sm,
+    textDecorationLine: 'underline',
   },
   disclaimer: {
     color: theme.colors.textSecondary,
