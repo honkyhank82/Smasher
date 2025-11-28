@@ -22,11 +22,15 @@ export const EditProfileScreen = ({ navigation }: any) => {
   const [showAge, setShowAge] = useState(
     user?.profile?.showAge !== undefined ? user.profile.showAge : true,
   );
-  const [heightCm, setHeightCm] = useState(
-    user?.profile?.heightCm != null ? String(user.profile.heightCm) : '',
+  const [heightInches, setHeightInches] = useState(
+    user?.profile?.heightCm != null
+      ? String(Math.round(user.profile.heightCm / 2.54))
+      : '',
   );
-  const [weightKg, setWeightKg] = useState(
-    user?.profile?.weightKg != null ? String(user.profile.weightKg) : '',
+  const [weightLbs, setWeightLbs] = useState(
+    user?.profile?.weightKg != null
+      ? String(Math.round(user.profile.weightKg * 2.20462))
+      : '',
   );
   const [ethnicity, setEthnicity] = useState(user?.profile?.ethnicity || '');
   const [bodyType, setBodyType] = useState(user?.profile?.bodyType || '');
@@ -75,13 +79,16 @@ export const EditProfileScreen = ({ navigation }: any) => {
 
     setLoading(true);
     try {
+      const heightInchesNum = heightInches ? parseInt(heightInches, 10) : null;
+      const weightLbsNum = weightLbs ? parseInt(weightLbs, 10) : null;
+
       // Update profile text fields
       await api.patch('/profiles/me', {
         displayName: displayName.trim(),
         bio: bio.trim(),
         showAge,
-        heightCm: heightCm ? parseInt(heightCm, 10) : null,
-        weightKg: weightKg ? parseInt(weightKg, 10) : null,
+        heightCm: heightInchesNum != null ? Math.round(heightInchesNum * 2.54) : null,
+        weightKg: weightLbsNum != null ? Math.round(weightLbsNum / 2.20462) : null,
         ethnicity: ethnicity.trim() || null,
         bodyType: bodyType.trim() || null,
         sexualPosition: sexualPosition.trim() || null,
@@ -228,24 +235,24 @@ export const EditProfileScreen = ({ navigation }: any) => {
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.label}>Height (cm)</Text>
+        <Text style={styles.label}>Height (inches)</Text>
         <TextInput
           style={styles.input}
-          placeholder="e.g. 180"
+          placeholder="e.g. 70"
           placeholderTextColor={theme.colors.textSecondary}
-          value={heightCm}
-          onChangeText={setHeightCm}
+          value={heightInches}
+          onChangeText={setHeightInches}
           keyboardType="numeric"
           maxLength={3}
         />
 
-        <Text style={styles.label}>Weight (kg)</Text>
+        <Text style={styles.label}>Weight (lbs)</Text>
         <TextInput
           style={styles.input}
-          placeholder="e.g. 80"
+          placeholder="e.g. 180"
           placeholderTextColor={theme.colors.textSecondary}
-          value={weightKg}
-          onChangeText={setWeightKg}
+          value={weightLbs}
+          onChangeText={setWeightLbs}
           keyboardType="numeric"
           maxLength={3}
         />
