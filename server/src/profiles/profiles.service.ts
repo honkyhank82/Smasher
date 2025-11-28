@@ -41,6 +41,8 @@ export class ProfilesService {
         | 'lng'
         | 'heightCm'
         | 'weightKg'
+        | 'heightIn'
+        | 'weightLbs'
         | 'ethnicity'
         | 'bodyType'
         | 'sexualPosition'

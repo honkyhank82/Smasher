@@ -23,12 +23,16 @@ export const EditProfileScreen = ({ navigation }: any) => {
     user?.profile?.showAge !== undefined ? user.profile.showAge : true,
   );
   const [heightInches, setHeightInches] = useState(
-    user?.profile?.heightCm != null
+    user?.profile?.heightIn != null
+      ? String(user.profile.heightIn)
+      : user?.profile?.heightCm != null
       ? String(Math.round(user.profile.heightCm / 2.54))
       : '',
   );
   const [weightLbs, setWeightLbs] = useState(
-    user?.profile?.weightKg != null
+    user?.profile?.weightLbs != null
+      ? String(user.profile.weightLbs)
+      : user?.profile?.weightKg != null
       ? String(Math.round(user.profile.weightKg * 2.20462))
       : '',
   );
@@ -87,8 +91,8 @@ export const EditProfileScreen = ({ navigation }: any) => {
         displayName: displayName.trim(),
         bio: bio.trim(),
         showAge,
-        heightCm: heightInchesNum != null ? Math.round(heightInchesNum * 2.54) : null,
-        weightKg: weightLbsNum != null ? Math.round(weightLbsNum / 2.20462) : null,
+        heightIn: heightInchesNum,
+        weightLbs: weightLbsNum,
         ethnicity: ethnicity.trim() || null,
         bodyType: bodyType.trim() || null,
         sexualPosition: sexualPosition.trim() || null,
