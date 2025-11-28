@@ -41,8 +41,9 @@ if (-not $app.expo.android) {
 }
 $app.expo.android.versionCode = $newCode
 
-# Write app.json back
-$app | ConvertTo-Json -Depth 10 | Set-Content $appJsonPath -Encoding UTF8
+# Write app.json back (UTF-8 without BOM)
+$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+[System.IO.File]::WriteAllText($appJsonPath, ($app | ConvertTo-Json -Depth 10), $utf8NoBom)
 
 # Update app-rn/package.json version
 if (Test-Path $packageJsonPath) {
@@ -50,7 +51,6 @@ if (Test-Path $packageJsonPath) {
     $package = $packageJsonRaw | ConvertFrom-Json
     $package.version = $newVersion
     # Write package.json without UTF-8 BOM to avoid JSON parse issues in CI
-    $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
     [System.IO.File]::WriteAllText($packageJsonPath, ($package | ConvertTo-Json -Depth 10), $utf8NoBom)
 }
 
@@ -71,6 +71,6 @@ $buildGradle = [regex]::Replace(
     "versionCode $newCode"
 )
 
-Set-Content $buildGradlePath $buildGradle -Encoding UTF8
+[System.IO.File]::WriteAllText($buildGradlePath, $buildGradle, $utf8NoBom)
 
 Write-Host "Updated version to $newVersion ($newCode)" -ForegroundColor Green
