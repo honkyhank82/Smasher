@@ -439,6 +439,20 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.sm,
     fontWeight: '700',
   },
+  heightRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: theme.spacing.md,
+  },
+  heightInput: {
+    flex: 1,
+    marginRight: theme.spacing.xs,
+  },
+  heightSeparator: {
+    marginHorizontal: theme.spacing.xs,
+    color: theme.colors.textSecondary,
+    fontSize: theme.fontSize.md,
+  },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
