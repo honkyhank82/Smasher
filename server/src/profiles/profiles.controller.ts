@@ -21,12 +21,49 @@ class UpdateProfileDto {
   isDistanceHidden?: boolean;
 
   @IsOptional()
+  @IsBoolean()
+  showAge?: boolean;
+
+  @IsOptional()
   @IsNumber()
   lat?: number | null;
 
   @IsOptional()
   @IsNumber()
   lng?: number | null;
+
+  @IsOptional()
+  @IsNumber()
+  heightCm?: number | null;
+
+  @IsOptional()
+  @IsNumber()
+  weightKg?: number | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  ethnicity?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  bodyType?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  sexualPosition?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  relationshipStatus?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  lookingFor?: string | null;
 }
 
 @Controller('profiles')
@@ -46,6 +83,14 @@ export class ProfilesController {
       profile: {
         displayName: profile.displayName,
         bio: profile.bio,
+        showAge: profile.showAge,
+        heightCm: profile.heightCm,
+        weightKg: profile.weightKg,
+        ethnicity: profile.ethnicity,
+        bodyType: profile.bodyType,
+        sexualPosition: profile.sexualPosition,
+        relationshipStatus: profile.relationshipStatus,
+        lookingFor: profile.lookingFor,
         profilePicture: null, // TODO: Add media relation
       },
     };

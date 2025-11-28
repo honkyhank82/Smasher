@@ -28,7 +28,27 @@ export class ProfilesService {
     return profile;
   }
 
-  async update(userId: string, updates: Partial<Pick<Profile, 'displayName'|'bio'|'isDistanceHidden'|'lat'|'lng'>>): Promise<Profile> {
+  async update(
+    userId: string,
+    updates: Partial<
+      Pick<
+        Profile,
+        | 'displayName'
+        | 'bio'
+        | 'isDistanceHidden'
+        | 'showAge'
+        | 'lat'
+        | 'lng'
+        | 'heightCm'
+        | 'weightKg'
+        | 'ethnicity'
+        | 'bodyType'
+        | 'sexualPosition'
+        | 'relationshipStatus'
+        | 'lookingFor'
+      >
+    >,
+  ): Promise<Profile> {
     const profile = await this.getOrCreate(userId);
     Object.assign(profile, updates);
     return this.profiles.save(profile);
@@ -57,7 +77,7 @@ export class ProfilesService {
     const galleryItems = userMedia.filter(m => !m.isProfilePicture).slice(0, 6);
 
     // Calculate age from birthdate if available
-    let age = 25; // Default
+    let age: number | null = null;
     if (profile.user?.birthdate) {
       const today = new Date();
       const birthDate = new Date(profile.user.birthdate);
@@ -68,10 +88,13 @@ export class ProfilesService {
       }
     }
 
+    // Respect user's preference to hide age
+    const publicAge = profile.showAge ? age : null;
+
     return {
       id: userId,
       displayName: profile.displayName,
-      age,
+      age: publicAge,
       bio: profile.bio,
       distance: null, // Will be calculated by geo service
       profilePicture: profilePic ? this.getMediaUrl(profilePic.key) : null,
