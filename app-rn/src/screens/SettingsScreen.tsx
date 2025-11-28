@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import * as Updates from 'expo-updates';
+import * as Application from 'expo-application';
 import { theme } from '../config/theme';
 import { useAuth } from '../context/AuthContext';
 import { usePremium } from '../contexts/PremiumContext';
@@ -21,6 +22,9 @@ export const SettingsScreen = ({ navigation }: any) => {
   const [notificationsEnabled, setNotificationsEnabled] = React.useState(true);
   const [locationEnabled, setLocationEnabled] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
+
+  const appVersion =
+    Application.nativeApplicationVersion || Application.applicationVersion || 'Unknown';
 
   // Helper to navigate to parent stack screens
   const navigateToScreen = (screenName: string) => {
@@ -292,7 +296,7 @@ export const SettingsScreen = ({ navigation }: any) => {
 
         <View style={styles.menuItem}>
           <Text style={styles.menuItemText}>Version</Text>
-          <Text style={styles.versionText}>4.0.5</Text>
+          <Text style={styles.versionText}>{appVersion}</Text>
         </View>
       </View>
 
