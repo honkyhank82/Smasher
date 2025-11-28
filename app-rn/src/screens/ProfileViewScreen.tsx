@@ -179,7 +179,10 @@ export const ProfileViewScreen = ({ route, navigation }: ProfileViewScreenProps)
       <View style={styles.content}>
         <View style={styles.header}>
           <View>
-            <Text style={styles.name}>{profile.displayName}, {profile.age}</Text>
+            <Text style={styles.name}>
+              {profile.displayName}
+              {profile.age != null ? `, ${profile.age}` : ''}
+            </Text>
             <Text style={styles.distance}>{profile.distance} miles away</Text>
           </View>
         </View>

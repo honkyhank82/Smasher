@@ -396,6 +396,32 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     marginBottom: theme.spacing.md,
   },
+  sectionHeader: {
+    fontSize: theme.fontSize.md,
+    color: theme.colors.text,
+    marginTop: theme.spacing.lg,
+    marginBottom: theme.spacing.sm,
+    fontWeight: '700',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: theme.spacing.md,
+  },
+  toggleButton: {
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.xs,
+    borderRadius: theme.borderRadius.md,
+    backgroundColor: theme.colors.surface,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  toggleText: {
+    color: theme.colors.text,
+    fontSize: theme.fontSize.sm,
+    fontWeight: '600',
+  },
   loadingOverlay: {
     position: 'absolute',
     top: 0,
