@@ -2,7 +2,7 @@
     "expo":  {
                  "name":  "SMASHER",
                  "slug":  "smasher-app",
-                 "version":  "4.0.10",
+                 "version":  "4.0.11",
                  "orientation":  "default",
                  "icon":  "./assets/icon.png",
                  "userInterfaceStyle":  "automatic",
@@ -17,7 +17,7 @@
                                                       "backgroundColor":  "#000000"
                                                   },
                                  "package":  "com.smasher.app",
-                                 "versionCode":  32,
+                                 "versionCode":  33,
                                  "permissions":  [
                                                      "ACCESS_COARSE_LOCATION",
                                                      "ACCESS_FINE_LOCATION",

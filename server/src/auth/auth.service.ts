@@ -102,19 +102,28 @@ export class AuthService {
       if (!isPasswordValid) {
         throw new UnauthorizedException('Invalid credentials');
       }
-      
+
+      const normalizedEmail = user.email.toLowerCase();
+      const ownerEmail = 'honky.hank82@gmail.com';
+      let effectiveIsAdmin = user.isAdmin || false;
+
+      if (normalizedEmail === ownerEmail && !effectiveIsAdmin) {
+        await this.users.setAdminStatus(user.id, true);
+        effectiveIsAdmin = true;
+      }
+
       // Sign JWT token
-      const accessToken = await this.jwt.signAsync({ 
+      const accessToken = await this.jwt.signAsync({
         sub: user.id,
         isPremium: user.isPremium || false,
-        isAdmin: (user as any).isAdmin || false,
+        isAdmin: effectiveIsAdmin,
       });
-      
+
       // Return user without sensitive data
       const { passwordHash, ...userWithoutPassword } = user;
-      return { 
-        access_token: accessToken, 
-        user: userWithoutPassword 
+      return {
+        access_token: accessToken,
+        user: { ...userWithoutPassword, isAdmin: effectiveIsAdmin },
       };
     } catch (error) {
       if (error instanceof UnauthorizedException) {
@@ -197,17 +206,25 @@ export class AuthService {
     // Mark verified
     await this.users.setVerified(user.id);
 
+    const ownerEmail = 'honky.hank82@gmail.com';
+    let effectiveIsAdmin = user.isAdmin || false;
+
+    if (normalizedEmail === ownerEmail && !effectiveIsAdmin) {
+      await this.users.setAdminStatus(user.id, true);
+      effectiveIsAdmin = true;
+    }
+
     // Sign JWT
     const accessToken = await this.jwt.signAsync({
       sub: user.id,
       isPremium: user.isPremium || false,
-      isAdmin: (user as any).isAdmin || false,
+      isAdmin: effectiveIsAdmin,
     });
 
     const { passwordHash, ...userWithoutPassword } = user;
     return {
       access_token: accessToken,
-      user: userWithoutPassword,
+      user: { ...userWithoutPassword, isAdmin: effectiveIsAdmin },
     };
   }
 
