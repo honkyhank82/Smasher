@@ -5,8 +5,8 @@ export const API_TIMEOUT = 30000; // 30 seconds
 export const BACKEND_SERVICES = [
   {
     name: 'production',
-    apiUrl: 'https://api.smasher.app',
-    healthCheckUrl: 'https://api.smasher.app/health',
+    apiUrl: 'https://smasher-api.fly.dev',
+    healthCheckUrl: 'https://smasher-api.fly.dev/health/live',
   },
   {
     name: 'staging',
