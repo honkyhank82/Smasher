@@ -232,14 +232,6 @@ export const SettingsScreen = ({ navigation }: any) => {
           <Text style={styles.menuItemText}>Change Email</Text>
           <Text style={styles.menuItemArrow}>→</Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.menuItem}
-          onPress={() => navigateToScreen('BackendService')}
-        >
-          <Text style={styles.menuItemText}>Backend Services</Text>
-          <Text style={styles.menuItemArrow}>→</Text>
-        </TouchableOpacity>
 
         <TouchableOpacity 
           style={styles.menuItem}
@@ -261,14 +253,6 @@ export const SettingsScreen = ({ navigation }: any) => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>About</Text>
         
-        <TouchableOpacity 
-          style={styles.menuItem}
-          onPress={() => navigateToScreen('UpdateDebug')}
-        >
-          <Text style={styles.menuItemText}>Update Debug Info</Text>
-          <Text style={styles.menuItemArrow}>→</Text>
-        </TouchableOpacity>
-
         <TouchableOpacity 
           style={styles.menuItem}
           onPress={handleCheckForUpdates}
@@ -308,7 +292,7 @@ export const SettingsScreen = ({ navigation }: any) => {
 
         <View style={styles.menuItem}>
           <Text style={styles.menuItemText}>Version</Text>
-          <Text style={styles.versionText}>1.0.1</Text>
+          <Text style={styles.versionText}>4.0.5</Text>
         </View>
       </View>
 
