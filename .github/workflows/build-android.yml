@@ -20,13 +20,6 @@ on:
           - development
           - preview
           - production
-  push:
-    branches:
-      - master
-      - main
-    paths:
-      - 'app-rn/**'
-      - '.github/workflows/build-android.yml'
 
 jobs:
   build:
