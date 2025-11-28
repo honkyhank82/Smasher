@@ -49,7 +49,9 @@ if (Test-Path $packageJsonPath) {
     $packageJsonRaw = Get-Content $packageJsonPath -Raw
     $package = $packageJsonRaw | ConvertFrom-Json
     $package.version = $newVersion
-    $package | ConvertTo-Json -Depth 10 | Set-Content $packageJsonPath -Encoding UTF8
+    # Write package.json without UTF-8 BOM to avoid JSON parse issues in CI
+    $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+    [System.IO.File]::WriteAllText($packageJsonPath, ($package | ConvertTo-Json -Depth 10), $utf8NoBom)
 }
 
 # Update android/app/build.gradle
