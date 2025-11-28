@@ -93,12 +93,21 @@ export class ProfilesService {
     // Respect user's preference to hide age
     const publicAge = profile.showAge ? age : null;
 
+    // Prefer stored imperial height; fall back to converted cm if needed
+    const heightIn =
+      profile.heightIn != null
+        ? profile.heightIn
+        : profile.heightCm != null
+        ? Math.round(profile.heightCm / 2.54)
+        : null;
+
     return {
       id: userId,
       displayName: profile.displayName,
       age: publicAge,
       bio: profile.bio,
       distance: null, // Will be calculated by geo service
+      heightIn,
       profilePicture: profilePic ? this.getMediaUrl(profilePic.key) : null,
       gallery: galleryItems.map(m => this.getMediaUrl(m.key)),
     };
