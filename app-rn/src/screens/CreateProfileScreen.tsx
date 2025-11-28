@@ -23,6 +23,14 @@ export const CreateProfileScreen = ({ navigation }: CreateProfileScreenProps) =>
   const { refreshUser } = useAuth();
   const [displayName, setDisplayName] = useState('');
   const [bio, setBio] = useState('');
+   const [showAge, setShowAge] = useState(true);
+   const [heightInches, setHeightInches] = useState('');
+   const [weightLbs, setWeightLbs] = useState('');
+   const [ethnicity, setEthnicity] = useState('');
+   const [bodyType, setBodyType] = useState('');
+   const [sexualPosition, setSexualPosition] = useState('');
+   const [relationshipStatus, setRelationshipStatus] = useState('');
+   const [lookingFor, setLookingFor] = useState('');
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -115,10 +123,21 @@ export const CreateProfileScreen = ({ navigation }: CreateProfileScreenProps) =>
 
     setLoading(true);
     try {
+      const heightInchesNum = heightInches ? parseInt(heightInches, 10) : null;
+      const weightLbsNum = weightLbs ? parseInt(weightLbs, 10) : null;
+
       // Create profile first
       await api.patch('/profiles/me', {
         displayName: displayName.trim(),
         bio: bio.trim(),
+        showAge,
+        heightCm: heightInchesNum != null ? Math.round(heightInchesNum * 2.54) : null,
+        weightKg: weightLbsNum != null ? Math.round(weightLbsNum / 2.20462) : null,
+        ethnicity: ethnicity.trim() || null,
+        bodyType: bodyType.trim() || null,
+        sexualPosition: sexualPosition.trim() || null,
+        relationshipStatus: relationshipStatus.trim() || null,
+        lookingFor: lookingFor.trim() || null,
       });
 
       // Upload profile picture if provided (optional)
@@ -205,6 +224,90 @@ export const CreateProfileScreen = ({ navigation }: CreateProfileScreenProps) =>
           maxLength={200}
         />
         <Text style={styles.charCount}>{bio.length}/200</Text>
+
+        <Text style={styles.sectionHeader}>Profile Details</Text>
+
+        <View style={styles.row}>
+          <Text style={styles.label}>Show My Age</Text>
+          <TouchableOpacity
+            style={styles.toggleButton}
+            onPress={() => setShowAge(!showAge)}
+          >
+            <Text style={styles.toggleText}>{showAge ? 'On' : 'Off'}</Text>
+          </TouchableOpacity>
+        </View>
+
+        <Text style={styles.label}>Height (inches)</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="e.g. 70"
+          placeholderTextColor={theme.colors.textSecondary}
+          value={heightInches}
+          onChangeText={setHeightInches}
+          keyboardType="numeric"
+          maxLength={3}
+        />
+
+        <Text style={styles.label}>Weight (lbs)</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="e.g. 180"
+          placeholderTextColor={theme.colors.textSecondary}
+          value={weightLbs}
+          onChangeText={setWeightLbs}
+          keyboardType="numeric"
+          maxLength={3}
+        />
+
+        <Text style={styles.label}>Ethnicity</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="e.g. Latino, Black, White, Asian"
+          placeholderTextColor={theme.colors.textSecondary}
+          value={ethnicity}
+          onChangeText={setEthnicity}
+          maxLength={50}
+        />
+
+        <Text style={styles.label}>Body Type</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="e.g. Slim, Average, Athletic, Muscular, Large"
+          placeholderTextColor={theme.colors.textSecondary}
+          value={bodyType}
+          onChangeText={setBodyType}
+          maxLength={50}
+        />
+
+        <Text style={styles.label}>Sexual Position</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Top, Bottom, Vers, Vers Top, Vers Bottom"
+          placeholderTextColor={theme.colors.textSecondary}
+          value={sexualPosition}
+          onChangeText={setSexualPosition}
+          maxLength={50}
+        />
+
+        <Text style={styles.label}>Relationship Status</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Single, In a relationship, Married, Open, etc."
+          placeholderTextColor={theme.colors.textSecondary}
+          value={relationshipStatus}
+          onChangeText={setRelationshipStatus}
+          maxLength={50}
+        />
+
+        <Text style={styles.label}>Looking For</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Friends, Dates, Chat, Relationship, Hookup"
+          placeholderTextColor={theme.colors.textSecondary}
+          value={lookingFor}
+          onChangeText={setLookingFor}
+          maxLength={100}
+        />
       </View>
 
       <TouchableOpacity
