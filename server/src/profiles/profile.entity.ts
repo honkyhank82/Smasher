@@ -29,11 +29,19 @@ export class Profile {
   @Column({ type: 'real', nullable: true })
   lng!: number | null;
 
-   @Column({ name: 'height_cm', type: 'int', nullable: true })
-   heightCm!: number | null;
+  // Legacy metric fields (kept for backward compatibility / data migration)
+  @Column({ name: 'height_cm', type: 'int', nullable: true })
+  heightCm!: number | null;
 
-   @Column({ name: 'weight_kg', type: 'int', nullable: true })
-   weightKg!: number | null;
+  @Column({ name: 'weight_kg', type: 'int', nullable: true })
+  weightKg!: number | null;
+
+  // Canonical imperial fields (inches / lbs)
+  @Column({ name: 'height_in', type: 'int', nullable: true })
+  heightIn!: number | null;
+
+  @Column({ name: 'weight_lbs', type: 'int', nullable: true })
+  weightLbs!: number | null;
 
    @Column({ name: 'ethnicity', type: 'varchar', length: 50, nullable: true })
    ethnicity!: string | null;

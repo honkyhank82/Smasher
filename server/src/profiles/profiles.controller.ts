@@ -41,6 +41,14 @@ class UpdateProfileDto {
   weightKg?: number | null;
 
   @IsOptional()
+  @IsNumber()
+  heightIn?: number | null;
+
+  @IsOptional()
+  @IsNumber()
+  weightLbs?: number | null;
+
+  @IsOptional()
   @IsString()
   @MaxLength(50)
   ethnicity?: string | null;
@@ -86,6 +94,8 @@ export class ProfilesController {
         showAge: profile.showAge,
         heightCm: profile.heightCm,
         weightKg: profile.weightKg,
+        heightIn: profile.heightIn,
+        weightLbs: profile.weightLbs,
         ethnicity: profile.ethnicity,
         bodyType: profile.bodyType,
         sexualPosition: profile.sexualPosition,
