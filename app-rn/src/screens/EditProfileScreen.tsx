@@ -22,12 +22,19 @@ export const EditProfileScreen = ({ navigation }: any) => {
   const [showAge, setShowAge] = useState(
     user?.profile?.showAge !== undefined ? user.profile.showAge : true,
   );
-  const [heightInches, setHeightInches] = useState(
+
+  const initialTotalInches =
     user?.profile?.heightIn != null
-      ? String(user.profile.heightIn)
+      ? user.profile.heightIn
       : user?.profile?.heightCm != null
-      ? String(Math.round(user.profile.heightCm / 2.54))
-      : '',
+      ? Math.round(user.profile.heightCm / 2.54)
+      : null;
+
+  const [heightFeet, setHeightFeet] = useState(
+    initialTotalInches != null ? String(Math.floor(initialTotalInches / 12)) : '',
+  );
+  const [heightInches, setHeightInches] = useState(
+    initialTotalInches != null ? String(initialTotalInches % 12) : '',
   );
   const [weightLbs, setWeightLbs] = useState(
     user?.profile?.weightLbs != null
@@ -83,7 +90,12 @@ export const EditProfileScreen = ({ navigation }: any) => {
 
     setLoading(true);
     try {
+      const heightFeetNum = heightFeet ? parseInt(heightFeet, 10) : null;
       const heightInchesNum = heightInches ? parseInt(heightInches, 10) : null;
+      const totalHeightInches =
+        heightFeetNum != null || heightInchesNum != null
+          ? (heightFeetNum || 0) * 12 + (heightInchesNum || 0)
+          : null;
       const weightLbsNum = weightLbs ? parseInt(weightLbs, 10) : null;
 
       // Update profile text fields
@@ -91,7 +103,7 @@ export const EditProfileScreen = ({ navigation }: any) => {
         displayName: displayName.trim(),
         bio: bio.trim(),
         showAge,
-        heightIn: heightInchesNum,
+        heightIn: totalHeightInches,
         weightLbs: weightLbsNum,
         ethnicity: ethnicity.trim() || null,
         bodyType: bodyType.trim() || null,
@@ -239,16 +251,29 @@ export const EditProfileScreen = ({ navigation }: any) => {
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.label}>Height (inches)</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="e.g. 70"
-          placeholderTextColor={theme.colors.textSecondary}
-          value={heightInches}
-          onChangeText={setHeightInches}
-          keyboardType="numeric"
-          maxLength={3}
-        />
+        <Text style={styles.label}>Height</Text>
+        <View style={styles.heightRow}>
+          <TextInput
+            style={[styles.input, styles.heightInput]}
+            placeholder="5"
+            placeholderTextColor={theme.colors.textSecondary}
+            value={heightFeet}
+            onChangeText={setHeightFeet}
+            keyboardType="numeric"
+            maxLength={2}
+          />
+          <Text style={styles.heightSeparator}>ft</Text>
+          <TextInput
+            style={[styles.input, styles.heightInput]}
+            placeholder="10"
+            placeholderTextColor={theme.colors.textSecondary}
+            value={heightInches}
+            onChangeText={setHeightInches}
+            keyboardType="numeric"
+            maxLength={2}
+          />
+          <Text style={styles.heightSeparator}>in</Text>
+        </View>
 
         <Text style={styles.label}>Weight (lbs)</Text>
         <TextInput
