@@ -23,14 +23,15 @@ export const CreateProfileScreen = ({ navigation }: CreateProfileScreenProps) =>
   const { refreshUser } = useAuth();
   const [displayName, setDisplayName] = useState('');
   const [bio, setBio] = useState('');
-   const [showAge, setShowAge] = useState(true);
-   const [heightInches, setHeightInches] = useState('');
-   const [weightLbs, setWeightLbs] = useState('');
-   const [ethnicity, setEthnicity] = useState('');
-   const [bodyType, setBodyType] = useState('');
-   const [sexualPosition, setSexualPosition] = useState('');
-   const [relationshipStatus, setRelationshipStatus] = useState('');
-   const [lookingFor, setLookingFor] = useState('');
+  const [showAge, setShowAge] = useState(true);
+  const [heightFeet, setHeightFeet] = useState('');
+  const [heightInches, setHeightInches] = useState('');
+  const [weightLbs, setWeightLbs] = useState('');
+  const [ethnicity, setEthnicity] = useState('');
+  const [bodyType, setBodyType] = useState('');
+  const [sexualPosition, setSexualPosition] = useState('');
+  const [relationshipStatus, setRelationshipStatus] = useState('');
+  const [lookingFor, setLookingFor] = useState('');
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -123,7 +124,12 @@ export const CreateProfileScreen = ({ navigation }: CreateProfileScreenProps) =>
 
     setLoading(true);
     try {
+      const heightFeetNum = heightFeet ? parseInt(heightFeet, 10) : null;
       const heightInchesNum = heightInches ? parseInt(heightInches, 10) : null;
+      const totalHeightInches =
+        heightFeetNum != null || heightInchesNum != null
+          ? (heightFeetNum || 0) * 12 + (heightInchesNum || 0)
+          : null;
       const weightLbsNum = weightLbs ? parseInt(weightLbs, 10) : null;
 
       // Create profile first
@@ -131,7 +137,7 @@ export const CreateProfileScreen = ({ navigation }: CreateProfileScreenProps) =>
         displayName: displayName.trim(),
         bio: bio.trim(),
         showAge,
-        heightIn: heightInchesNum,
+        heightIn: totalHeightInches,
         weightLbs: weightLbsNum,
         ethnicity: ethnicity.trim() || null,
         bodyType: bodyType.trim() || null,
@@ -237,16 +243,29 @@ export const CreateProfileScreen = ({ navigation }: CreateProfileScreenProps) =>
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.label}>Height (inches)</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="e.g. 70"
-          placeholderTextColor={theme.colors.textSecondary}
-          value={heightInches}
-          onChangeText={setHeightInches}
-          keyboardType="numeric"
-          maxLength={3}
-        />
+        <Text style={styles.label}>Height</Text>
+        <View style={styles.heightRow}>
+          <TextInput
+            style={[styles.input, styles.heightInput]}
+            placeholder="5"
+            placeholderTextColor={theme.colors.textSecondary}
+            value={heightFeet}
+            onChangeText={setHeightFeet}
+            keyboardType="numeric"
+            maxLength={2}
+          />
+          <Text style={styles.heightSeparator}>ft</Text>
+          <TextInput
+            style={[styles.input, styles.heightInput]}
+            placeholder="10"
+            placeholderTextColor={theme.colors.textSecondary}
+            value={heightInches}
+            onChangeText={setHeightInches}
+            keyboardType="numeric"
+            maxLength={2}
+          />
+          <Text style={styles.heightSeparator}>in</Text>
+        </View>
 
         <Text style={styles.label}>Weight (lbs)</Text>
         <TextInput
@@ -401,6 +420,20 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.colors.border,
     marginBottom: theme.spacing.md,
+  },
+  heightRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: theme.spacing.md,
+  },
+  heightInput: {
+    flex: 1,
+    marginRight: theme.spacing.xs,
+  },
+  heightSeparator: {
+    marginHorizontal: theme.spacing.xs,
+    color: theme.colors.textSecondary,
+    fontSize: theme.fontSize.md,
   },
   bioInput: {
     height: 100,
