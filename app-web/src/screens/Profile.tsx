@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFailoverService } from '../services/api-failover'
+import PremiumBanner from '../components/PremiumBanner'
 import '../styles/profile.css'
 
 interface User {
@@ -122,15 +123,15 @@ export default function Profile({ setIsAuthenticated }: ProfileProps) {
                   />
                 </div>
 
-            <div className="form-group">
-              <label>Age</label>
-              <input
-                type="number"
-                value={formData.age}
-                onChange={(e) => setFormData({ ...formData, age: e.target.value })}
-              />
-              {ageError && <div className="error-text">{ageError}</div>}
-            </div>
+                <div className="form-group">
+                  <label>Age</label>
+                  <input
+                    type="number"
+                    value={formData.age}
+                    onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+                  />
+                  {ageError && <div className="error-text">{ageError}</div>}
+                </div>
 
                 <div className="form-group">
                   <label>Bio</label>
@@ -163,6 +164,16 @@ export default function Profile({ setIsAuthenticated }: ProfileProps) {
         )}
 
         <div className="profile-actions">
+          {user?.isPremium ? (
+            <button
+              onClick={() => navigate('/premium')}
+              className="logout-btn"
+            >
+              Manage Subscription
+            </button>
+          ) : (
+            <PremiumBanner isPremium={false} />
+          )}
           <button onClick={handleLogout} className="logout-btn">
             Logout
           </button>
