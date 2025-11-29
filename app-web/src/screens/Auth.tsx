@@ -8,45 +8,41 @@ interface AuthProps {
 
 export default function Auth({ setIsAuthenticated }: AuthProps) {
   const [email, setEmail] = useState('')
-  const [code, setCode] = useState('')
-  const [step, setStep] = useState<'email' | 'code'>('email')
+  const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const handleEmailSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
 
     try {
-      await apiFailoverService.post('/auth/send-verification', { email })
-      setStep('code')
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to send verification code')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleCodeSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-
-    try {
-      const response = await apiFailoverService.post('/auth/verify', { email, code })
-      if (!response?.data?.access_token) {
+      const response = await apiFailoverService.post('/auth/login', { email, password })
+      const token = response?.data?.access_token
+      if (!token) {
         throw new Error('Invalid response: missing access_token')
       }
-      localStorage.setItem('authToken', response.data.access_token)
-      // Store minimal user info only if needed; avoid PII in localStorage
-      if (response?.data?.user?.userId) {
-        localStorage.setItem('userId', response.data.user.userId)
+
+      localStorage.setItem('authToken', token)
+
+      // Store minimal user info for convenience where needed (e.g. welcome message)
+      if (response?.data?.user && typeof response.data.user === 'object') {
+        try {
+          localStorage.setItem('user', JSON.stringify(response.data.user))
+        } catch {
+          // If storage fails, continue without caching user locally
+        }
       }
-      apiFailoverService.setAuthToken(response.data.access_token)
+
+      apiFailoverService.setAuthToken(token)
       setIsAuthenticated(true)
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid verification code')
+      const message =
+        err?.response?.data?.message ||
+        err?.message ||
+        'Login failed. Please check your email and password.'
+      setError(message)
     } finally {
       setLoading(false)
     }
@@ -60,50 +56,33 @@ export default function Auth({ setIsAuthenticated }: AuthProps) {
 
         {error && <div className="error-message">{error}</div>}
 
-        {step === 'email' ? (
-          <form onSubmit={handleEmailSubmit}>
-            <div className="form-group">
-              <label>Email Address</label>
-              <input
-                type="email"
-                placeholder="your@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <button type="submit" disabled={loading}>
-              {loading ? 'Sending...' : 'Send Verification Code'}
-            </button>
-          </form>
-        ) : (
-          <form onSubmit={handleCodeSubmit}>
-            <div className="form-group">
-              <label>Verification Code</label>
-              <input
-                type="text"
-                placeholder="000000"
-                value={code}
-                onChange={(e) => setCode(e.target.value.slice(0, 6))}
-                maxLength={6}
-                required
-              />
-            </div>
-            <button type="submit" disabled={loading}>
-              {loading ? 'Verifying...' : 'Verify & Login'}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setStep('email')
-                setCode('')
-              }}
-              className="secondary"
-            >
-              Back
-            </button>
-          </form>
-        )}
+        <form onSubmit={handleLogin}>
+          <div className="form-group">
+            <label>Email Address</label>
+            <input
+              type="email"
+              placeholder="you@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Password</label>
+            <input
+              type="password"
+              placeholder="Your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <button type="submit" disabled={loading}>
+            {loading ? 'Signing in...' : 'Sign In'}
+          </button>
+        </form>
 
         <p className="terms">
           By signing in, you agree to our Terms of Service and Privacy Policy
