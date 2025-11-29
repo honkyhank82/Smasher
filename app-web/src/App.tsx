@@ -6,6 +6,7 @@ import Home from './screens/Home'
 import Profile from './screens/Profile'
 import Chat from './screens/Chat'
 import Discover from './screens/Discover'
+import ManageSubscription from './screens/ManageSubscription'
 import './App.css'
 
 function App() {
@@ -61,6 +62,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/discover" element={<Discover />} />
               <Route path="/chat" element={<Chat />} />
+              <Route path="/premium" element={<ManageSubscription />} />
               <Route path="/profile" element={<Profile setIsAuthenticated={setIsAuthenticated} />} />
             </>
           )}
