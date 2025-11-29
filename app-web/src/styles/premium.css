@@ -1,0 +1,143 @@
+.premium-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  padding: 24px;
+}
+
+.premium-card {
+  max-width: 640px;
+  width: 100%;
+  background: #111;
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid #333;
+  color: #fff;
+}
+
+.premium-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.premium-header h2 {
+  margin: 8px 0 0;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #1a1a1a;
+  color: #ffcc33;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.premium-details {
+  border-radius: 12px;
+  border: 1px solid #333;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #222;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.label {
+  color: #aaa;
+  font-size: 14px;
+}
+
+.value {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.status-active {
+  color: #4caf50;
+}
+
+.premium-warning {
+  border-radius: 12px;
+  border: 1px solid #8b0000;
+  background: #2a1a1a;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.premium-warning h3 {
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+.premium-warning p {
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.premium-benefits {
+  margin-bottom: 20px;
+}
+
+.premium-benefits h3 {
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+.premium-benefits ul {
+  padding-left: 20px;
+  margin: 0;
+}
+
+.premium-benefits li {
+  margin-bottom: 4px;
+}
+
+.primary-btn,
+.danger-btn {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.primary-btn {
+  background: #8b0000;
+  color: #fff;
+}
+
+.danger-btn {
+  background: transparent;
+  color: #ff6b6b;
+  border: 1px solid #8b0000;
+}
+
+.secondary-link {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: #aaa;
+  text-decoration: underline;
+  margin-top: 4px;
+  cursor: pointer;
+}
+
+.premium-loading {
+  text-align: center;
+}
