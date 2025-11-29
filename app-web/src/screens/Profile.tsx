@@ -174,6 +174,12 @@ export default function Profile({ setIsAuthenticated }: ProfileProps) {
           ) : (
             <PremiumBanner isPremium={false} />
           )}
+          <button
+            onClick={() => navigate('/gallery')}
+            className="logout-btn"
+          >
+            Manage Gallery
+          </button>
           <button onClick={handleLogout} className="logout-btn">
             Logout
           </button>

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { apiFailoverService } from '../services/api-failover'
 import '../styles/discover.css'
 
@@ -6,6 +7,7 @@ export default function Discover() {
   const [users, setUsers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [distance, setDistance] = useState(5)
+  const navigate = useNavigate()
 
   useEffect(() => {
     loadNearbyUsers()
@@ -59,7 +61,15 @@ export default function Discover() {
                 <h3>{user.name}, {user.age}</h3>
                 <p>{user.bio}</p>
                 <p className="distance">📍 {user.distance} miles away</p>
-                <button>View Profile</button>
+                <button
+                  onClick={() =>
+                    navigate(`/user/${user.id}`, {
+                      state: { user },
+                    })
+                  }
+                >
+                  View Profile
+                </button>
               </div>
             </div>
           ))}

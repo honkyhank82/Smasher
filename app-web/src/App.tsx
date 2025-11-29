@@ -7,6 +7,8 @@ import Profile from './screens/Profile'
 import Chat from './screens/Chat'
 import Discover from './screens/Discover'
 import ManageSubscription from './screens/ManageSubscription'
+import Gallery from './screens/Gallery'
+import UserProfile from './screens/UserProfile'
 import './App.css'
 
 function App() {
@@ -62,6 +64,8 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/discover" element={<Discover />} />
               <Route path="/chat" element={<Chat />} />
+              <Route path="/gallery" element={<Gallery />} />
+              <Route path="/user/:id" element={<UserProfile />} />
               <Route path="/premium" element={<ManageSubscription />} />
               <Route path="/profile" element={<Profile setIsAuthenticated={setIsAuthenticated} />} />
             </>
