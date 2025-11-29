@@ -9,6 +9,11 @@ import Discover from './screens/Discover'
 import ManageSubscription from './screens/ManageSubscription'
 import Gallery from './screens/Gallery'
 import UserProfile from './screens/UserProfile'
+import Settings from './screens/Settings'
+import Terms from './screens/Terms'
+import Privacy from './screens/Privacy'
+import Help from './screens/Help'
+
 import './App.css'
 
 function App() {
@@ -67,6 +72,10 @@ function App() {
               <Route path="/gallery" element={<Gallery />} />
               <Route path="/user/:id" element={<UserProfile />} />
               <Route path="/premium" element={<ManageSubscription />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/help" element={<Help />} />
               <Route path="/profile" element={<Profile setIsAuthenticated={setIsAuthenticated} />} />
             </>
           )}

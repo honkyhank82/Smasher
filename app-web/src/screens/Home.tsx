@@ -40,6 +40,7 @@ export default function Home() {
           <Link to="/discover">Discover</Link>
           <Link to="/chat">Messages</Link>
           <Link to="/profile">Profile</Link>
+          <Link to="/settings">Settings</Link>
         </div>
       </nav>
 
