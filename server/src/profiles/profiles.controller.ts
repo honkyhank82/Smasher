@@ -83,11 +83,13 @@ export class ProfilesController {
   ) {}
 
   @Get('me')
-  async me(@CurrentUser() user?: { userId: string }) {
+  async me(@CurrentUser() user?: { userId: string; isPremium: boolean; isAdmin: boolean }) {
     const profile = await this.profiles.getOrCreate(user!.userId);
     return {
       id: user!.userId,
       email: profile.user.email,
+      isPremium: profile.user.isPremium,
+      isAdmin: profile.user.isAdmin,
       profile: {
         displayName: profile.displayName,
         bio: profile.bio,

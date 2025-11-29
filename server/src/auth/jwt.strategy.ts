@@ -18,10 +18,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: { sub: string; isPremium?: boolean }) {
+  async validate(payload: { sub: string; isPremium?: boolean; isAdmin?: boolean }) {
     return { 
       userId: payload.sub,
       isPremium: payload.isPremium || false,
+      isAdmin: payload.isAdmin || false,
     };
   }
 }

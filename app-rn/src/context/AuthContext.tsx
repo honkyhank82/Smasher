@@ -12,6 +12,8 @@ interface User {
     profilePicture?: string;
   };
   hasProfile: boolean;
+  isPremium?: boolean;
+  isAdmin?: boolean;
 }
 
 interface AuthContextType {
