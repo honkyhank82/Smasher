@@ -254,6 +254,8 @@ Currently **not officially supported**:
 - ❌ iPhone / iOS
 - ❌ Tablets (may work, but not optimized)
 
+ATTN: If you are unable to install the app there is a web version. Go to  https://smasher-6xw7nhn0y-honkyhanks-projects.vercel.app for Smasher-Web. All of the same functionality of the app.
+
 ---
 
 ## 🆘 Troubleshooting & Common Issues
