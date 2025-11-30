@@ -39,7 +39,7 @@ export const ChatScreen = ({ route, navigation }: ChatScreenProps) => {
   const [inputText, setInputText] = useState('');
   const [socket, setSocket] = useState<Socket | null>(null);
   const flatListRef = useRef<FlatList>(null);
-  const isPremium = user?.isPremium || false;
+  const isPremium = (user?.isAdmin || user?.isPremium) ?? false;
 
   useEffect(() => {
     initializeSocket();

@@ -45,11 +45,24 @@ export default function Profile({ setIsAuthenticated }: ProfileProps) {
       setLoading(true)
       const response = await apiFailoverService.get<User>('/users/profile')
       const userData: User = response.data
-      setUser(userData)
+      let isAdminFromCache = false
+      try {
+        const cachedUserRaw = localStorage.getItem('user')
+        if (cachedUserRaw) {
+          const cachedUser = JSON.parse(cachedUserRaw) as { isAdmin?: boolean } | null
+          isAdminFromCache = !!cachedUser?.isAdmin
+        }
+      } catch {
+      }
+      const effectiveUser: User = {
+        ...userData,
+        isPremium: userData.isPremium || isAdminFromCache,
+      }
+      setUser(effectiveUser)
       setFormData({
-        name: userData.name,
-        age: userData.age.toString(), // Convert number to string for form input
-        bio: userData.bio,
+        name: effectiveUser.name,
+        age: effectiveUser.age.toString(), // Convert number to string for form input
+        bio: effectiveUser.bio,
       })
     } catch (error) {
       console.error('Failed to load profile:', error)
