@@ -75,11 +75,47 @@ export class AuthService {
       
       // Hash password
       const passwordHash = await bcrypt.hash(params.password, 10);
-      await this.users.createUser(params.email, passwordHash, {
+      const user = await this.users.createUser(params.email, passwordHash, {
         birthdate: birthDate,
         age: new Date(),
         tos: new Date(),
       });
+
+      // If this user received the limited-time free premium month, send them a welcome email
+      const now = new Date();
+      const hasActiveFreePremium =
+        user.isPremium &&
+        !!user.premiumExpiresAt &&
+        user.premiumExpiresAt > now;
+
+      if (hasActiveFreePremium) {
+        const subject = 'Welcome to SMASHER – 1 Month of Premium Free';
+        const html = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #FF6B35;">SMASHER</h1>
+            <h2>Enjoy 1 Month of Premium on Us</h2>
+            <p>
+              Thanks for being one of the very first people to sign up for SMASHER!
+              As a thank you, you're receiving <strong>1 month of SMASHER Premium for free</strong>.
+            </p>
+            <p>
+              During your free month, you'll have access to all premium features. After your
+              free month ends, your account will automatically revert to the free version
+              unless you choose to upgrade and start a paid monthly subscription.
+            </p>
+            <p>
+              You can upgrade at any time from the app's subscription settings.
+            </p>
+          </div>
+        `;
+
+        try {
+          await this.email.sendNotificationEmail(user.email, subject, html);
+        } catch (emailError) {
+          this.logger.error('Failed to send free premium welcome email', emailError as any);
+        }
+      }
+
       return { message: 'Registration successful' };
     } catch (error) {
       if (error instanceof BadRequestException) {
