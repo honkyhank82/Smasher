@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Patch, Put, Delete, Body, Param, UseGuards, HttpCode, HttpStatus, ForbiddenException } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Put, Delete, Body, Param, UseGuards, HttpCode, HttpStatus, ForbiddenException, Query } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { UsersService } from './users.service';
 import { CurrentUser } from '../auth/current-user.decorator';
@@ -130,6 +130,54 @@ export class UsersController {
   async removePushToken(@CurrentUser() user: { userId: string }) {
     await this.usersService.removePushToken(user.userId);
     return { message: 'Push token removed successfully' };
+  }
+
+  @Get('admin/by-id/:targetUserId')
+  @UseGuards(AuthGuard('jwt'))
+  async adminGetUserById(
+    @CurrentUser() user: { userId: string; isAdmin: boolean },
+    @Param('targetUserId') targetUserId: string,
+  ) {
+    if (!user.isAdmin) {
+      throw new ForbiddenException('Admin access required');
+    }
+    const target = await this.usersService.findById(targetUserId);
+    if (!target) {
+      return null;
+    }
+    const { passwordHash, ...safe } = target as any;
+    return {
+      id: safe.id,
+      email: safe.email,
+      isAdmin: safe.isAdmin,
+      isPremium: safe.isPremium,
+      accountStatus: safe.accountStatus,
+      createdAt: safe.createdAt,
+    };
+  }
+
+  @Get('admin/by-email')
+  @UseGuards(AuthGuard('jwt'))
+  async adminGetUserByEmail(
+    @CurrentUser() user: { userId: string; isAdmin: boolean },
+    @Query('email') email: string,
+  ) {
+    if (!user.isAdmin) {
+      throw new ForbiddenException('Admin access required');
+    }
+    const target = await this.usersService.findByEmail(email);
+    if (!target) {
+      return null;
+    }
+    const { passwordHash, ...safe } = target as any;
+    return {
+      id: safe.id,
+      email: safe.email,
+      isAdmin: safe.isAdmin,
+      isPremium: safe.isPremium,
+      accountStatus: safe.accountStatus,
+      createdAt: safe.createdAt,
+    };
   }
 
   @Post('admin/deactivate/:targetUserId')
