@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Patch, Put, Delete, Body, Param, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Put, Delete, Body, Param, UseGuards, HttpCode, HttpStatus, ForbiddenException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { UsersService } from './users.service';
 import { CurrentUser } from '../auth/current-user.decorator';
@@ -130,5 +130,65 @@ export class UsersController {
   async removePushToken(@CurrentUser() user: { userId: string }) {
     await this.usersService.removePushToken(user.userId);
     return { message: 'Push token removed successfully' };
+  }
+
+  @Post('admin/deactivate/:targetUserId')
+  @UseGuards(AuthGuard('jwt'))
+  @HttpCode(HttpStatus.OK)
+  async adminDeactivateAccount(
+    @CurrentUser() user: { userId: string; isAdmin: boolean },
+    @Param('targetUserId') targetUserId: string,
+  ) {
+    if (!user.isAdmin) {
+      throw new ForbiddenException('Admin access required');
+    }
+    await this.usersService.deactivateAccount(targetUserId);
+    return { message: 'User account deactivated successfully.' };
+  }
+
+  @Post('admin/reactivate/:targetUserId')
+  @UseGuards(AuthGuard('jwt'))
+  @HttpCode(HttpStatus.OK)
+  async adminReactivateAccount(
+    @CurrentUser() user: { userId: string; isAdmin: boolean },
+    @Param('targetUserId') targetUserId: string,
+  ) {
+    if (!user.isAdmin) {
+      throw new ForbiddenException('Admin access required');
+    }
+    await this.usersService.reactivateAccount(targetUserId);
+    return { message: 'User account reactivated successfully.' };
+  }
+
+  @Post('admin/ban/:targetUserId')
+  @UseGuards(AuthGuard('jwt'))
+  @HttpCode(HttpStatus.OK)
+  async adminBanAccount(
+    @CurrentUser() user: { userId: string; isAdmin: boolean },
+    @Param('targetUserId') targetUserId: string,
+  ) {
+    if (!user.isAdmin) {
+      throw new ForbiddenException('Admin access required');
+    }
+    const deletionDate = await this.usersService.scheduleAccountDeletion(targetUserId);
+    return {
+      message: 'User account scheduled for deletion.',
+      deletionDate,
+    };
+  }
+
+  @Post('admin/privileges/:targetUserId')
+  @UseGuards(AuthGuard('jwt'))
+  @HttpCode(HttpStatus.OK)
+  async adminSetPrivileges(
+    @CurrentUser() user: { userId: string; isAdmin: boolean },
+    @Param('targetUserId') targetUserId: string,
+    @Body() body: { isAdmin: boolean },
+  ) {
+    if (!user.isAdmin) {
+      throw new ForbiddenException('Admin access required');
+    }
+    await this.usersService.setAdminStatus(targetUserId, !!body.isAdmin);
+    return { message: 'User privileges updated successfully.' };
   }
 }
