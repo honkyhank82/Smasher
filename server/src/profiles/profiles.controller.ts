@@ -123,4 +123,16 @@ export class ProfilesController {
     
     return this.profiles.getByUserId(userId);
   }
+
+  @Patch('admin/:userId')
+  updateByAdmin(
+    @CurrentUser() current: { userId: string; isAdmin: boolean },
+    @Param('userId') userId: string,
+    @Body() dto: UpdateProfileDto,
+  ) {
+    if (!current.isAdmin) {
+      throw new ForbiddenException('Admin access required');
+    }
+    return this.profiles.update(userId, dto);
+  }
 }
