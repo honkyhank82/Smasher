@@ -49,6 +49,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
+  const initializeLocationForUser = async () => {
+    try {
+      const PermissionsService = (await import('../services/PermissionsService')).default;
+      const LocationService = (await import('../services/LocationService')).default;
+
+      const hasPermission = await PermissionsService.checkLocationPermission();
+      let granted = hasPermission;
+      if (!hasPermission) {
+        granted = await PermissionsService.requestLocationPermission();
+      }
+      if (!granted) {
+        return;
+      }
+
+      const location = await LocationService.getCurrentLocation();
+      if (!location) {
+        return;
+      }
+
+      await LocationService.updateLocationOnServer(location);
+      LocationService.startLocationTracking();
+    } catch (error) {
+      console.error('Failed to initialize location for authenticated user:', error);
+    }
+  };
+
   const checkAuth = async () => {
     try {
       const token = await AsyncStorage.getItem('authToken');
@@ -65,6 +91,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         ...userData,
         hasProfile: !!(userData.profile?.displayName),
       });
+      await initializeLocationForUser();
     } catch (error: any) {
       // Silently handle auth errors - they're expected when not logged in
       if (error?.response?.status === 401) {
@@ -106,6 +133,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       // Register for push notifications
       await NotificationService.registerForPushNotifications();
+      await initializeLocationForUser();
     } catch (error: any) {
       console.error('🚫 Login failed:', error);
       console.error('🚫 Error response:', error.response?.data);
