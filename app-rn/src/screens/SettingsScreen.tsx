@@ -203,12 +203,19 @@ export const SettingsScreen = ({ navigation }: any) => {
           >
             <View>
               <Text style={[styles.menuItemText, styles.premiumText]}>✨ Premium Active</Text>
-              <Text style={styles.premiumSubtext}>
-                {subscriptionStatus?.subscription?.cancelAtPeriodEnd 
-                  ? 'Expires: ' + new Date(subscriptionStatus.subscription.currentPeriodEnd).toLocaleDateString()
-                  : 'Renews: ' + new Date(subscriptionStatus?.subscription?.currentPeriodEnd || '').toLocaleDateString()
-                }
-              </Text>
+              {subscriptionStatus?.isFreeTrial ? (
+                <Text style={styles.premiumSubtext}>
+                  You're on a free 1 month SMASHER Premium trial for early users. After your trial ends, your
+                  account will automatically revert to the free version unless you upgrade.
+                </Text>
+              ) : subscriptionStatus?.subscription ? (
+                <Text style={styles.premiumSubtext}>
+                  {subscriptionStatus.subscription.cancelAtPeriodEnd
+                    ? 'Expires: ' + new Date(subscriptionStatus.subscription.currentPeriodEnd).toLocaleDateString()
+                    : 'Renews: ' + new Date(subscriptionStatus.subscription.currentPeriodEnd).toLocaleDateString()
+                  }
+                </Text>
+              ) : null}
             </View>
             <Text style={styles.menuItemArrow}>→</Text>
           </TouchableOpacity>

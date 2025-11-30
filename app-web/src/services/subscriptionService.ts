@@ -2,6 +2,7 @@ import { apiFailoverService } from './api-failover'
 
 export interface SubscriptionStatus {
   isPremium: boolean
+  isFreeTrial?: boolean
   subscription: {
     status: string
     currentPeriodEnd: string

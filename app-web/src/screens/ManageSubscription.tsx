@@ -100,6 +100,7 @@ export default function ManageSubscription() {
   }
 
   const isPremium = status?.isPremium
+  const isFreeTrial = status?.isFreeTrial
   const subscription = status?.subscription || null
   const expiryDate = subscription?.currentPeriodEnd
     ? new Date(subscription.currentPeriodEnd).toLocaleDateString()
@@ -137,6 +138,17 @@ export default function ManageSubscription() {
           <span className="badge">Premium</span>
           <h2>Your Subscription</h2>
         </div>
+
+        {isFreeTrial && (
+          <div className="premium-warning">
+            <h3>Free 1-Month Premium Trial</h3>
+            <p>
+              Thanks for being one of the first people to sign up for SMASHER! You're on a free 1 month Premium
+              trial. After your trial ends, your account will automatically revert to the free version unless you
+              upgrade.
+            </p>
+          </div>
+        )}
 
         <div className="premium-details">
           <div className="detail-row">
