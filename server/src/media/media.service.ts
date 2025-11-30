@@ -170,6 +170,15 @@ export class MediaService {
     return { ok: true };
   }
 
+  async adminDeleteMedia(mediaId: string): Promise<{ ok: true }> {
+    const media = await this.mediaRepo.findOne({ where: { id: mediaId } });
+    if (!media) {
+      throw new NotFoundException('Media not found');
+    }
+    await this.mediaRepo.remove(media);
+    return { ok: true };
+  }
+
   async getUserMedia(userId: string): Promise<any[]> {
     const media = await this.mediaRepo.find({
       where: { owner: { id: userId } },

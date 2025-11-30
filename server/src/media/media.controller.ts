@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Get, UseGuards, BadRequestException } from '@nestjs/common';
+import { Body, Controller, Post, Get, UseGuards, BadRequestException, ForbiddenException } from '@nestjs/common';
 import * as path from 'path';
 import { AuthGuard } from '@nestjs/passport';
 import { MediaService } from './media.service';
@@ -104,5 +104,17 @@ export class MediaController {
   @UseGuards(AuthGuard('jwt'))
   async getMyMedia(@CurrentUser() user: { userId: string }) {
     return this.mediaService.getUserMedia(user.userId);
+  }
+
+  @Post('admin/delete')
+  @UseGuards(AuthGuard('jwt'))
+  async adminDeleteMedia(
+    @CurrentUser() user: { userId: string; isAdmin: boolean },
+    @Body() body: { mediaId: string },
+  ) {
+    if (!user.isAdmin) {
+      throw new ForbiddenException('Admin access required');
+    }
+    return this.mediaService.adminDeleteMedia(body.mediaId);
   }
 }
