@@ -40,10 +40,11 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
       setLoading(true);
       const status = await subscriptionService.getSubscriptionStatus();
       setSubscriptionStatus(status);
-      setIsPremium(status.isPremium);
+      const effectiveIsPremium = (user.isAdmin ?? false) || status.isPremium;
+      setIsPremium(effectiveIsPremium);
     } catch (error) {
       console.error('Error fetching subscription status:', error);
-      setIsPremium(false);
+      setIsPremium(!!user?.isAdmin);
     } finally {
       setLoading(false);
     }
