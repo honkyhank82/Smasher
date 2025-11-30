@@ -62,14 +62,32 @@ export class GeoService {
       const userLat = currentUser.lat;
       const userLng = currentUser.lng;
       
-      // If current user doesn't have location, return empty
+      // If current user doesn't have location, return a generic list of users
       if (userLat === null || userLng === null) {
-        console.log('Current user has no location set');
-        return [];
+        console.log('Current user has no location set, returning generic nearby users list');
+
+        const profiles = await this.profileRepository
+          .createQueryBuilder('profile')
+          .leftJoinAndSelect('profile.user', 'user')
+          .where('user.id != :userId', { userId })
+          .andWhere('profile.lat IS NOT NULL')
+          .andWhere('profile.lng IS NOT NULL')
+          .orderBy('profile.created_at', 'DESC')
+          .limit(50)
+          .getMany();
+
+        const results = await Promise.all(
+          profiles.map(async (profile) =>
+            this.buildProfileResponse(profile, null),
+          ),
+        );
+
+        return results;
       }
       
       const nearbyUsers = await this.profileRepository
         .createQueryBuilder('profile')
+        .leftJoinAndSelect('profile.user', 'user')
         .where('profile.userId != :userId', { userId })
         .andWhere('profile.lat IS NOT NULL')
         .andWhere('profile.lng IS NOT NULL')
@@ -98,54 +116,12 @@ export class GeoService {
         .getRawAndEntities();
 
       const results = await Promise.all(
-        nearbyUsers.entities.map(async (profile, index) => {
-          const distance = parseFloat(nearbyUsers.raw[index].distance);
-          
-          // Get profile picture
-          const profilePicture = await this.mediaRepository.findOne({
-            where: { owner: { id: profile.user.id }, isProfilePicture: true },
-          });
-          
-          let profilePictureUrl: string | null = null;
-          if (profilePicture) {
-            const { url } = await this.mediaService.createSignedDownloadUrl(profilePicture.key);
-            profilePictureUrl = url;
-          }
-          
-          // Get gallery media
-          const galleryMedia = await this.mediaRepository.find({
-            where: { owner: { id: profile.user.id } },
-            order: { createdAt: 'DESC' },
-            take: 6,
-          });
-          
-          const gallery = await Promise.all(
-            galleryMedia.map(async (media) => {
-              const { url } = await this.mediaService.createSignedDownloadUrl(media.key);
-              return {
-                id: media.id,
-                type: media.type,
-                url,
-              };
-            })
-          );
-          
-          // Online status from event emitters
-          const isOnline = this.isUserOnline(profile.user.id);
-          const lastSeen = this.getLastSeen(profile.user.id);
-          
-          return {
-            id: profile.user.id,
-            displayName: profile.displayName,
-            age: this.calculateAge(profile.user),
-            bio: profile.bio,
-            distance: profile.isDistanceHidden ? null : Math.round(distance * 10) / 10,
-            profilePicture: profilePictureUrl,
-            gallery,
-            isOnline,
-            lastSeen,
-          };
-        })
+        nearbyUsers.entities.map((profile, index) =>
+          this.buildProfileResponse(
+            profile,
+            parseFloat(nearbyUsers.raw[index].distance),
+          ),
+        ),
       );
       
       return results;
@@ -195,6 +171,58 @@ export class GeoService {
 
   private toRadians(degrees: number): number {
     return degrees * (Math.PI / 180);
+  }
+
+  private async buildProfileResponse(profile: Profile, distanceMiles: number | null) {
+    // Get profile picture
+    const profilePicture = await this.mediaRepository.findOne({
+      where: { owner: { id: profile.user.id }, isProfilePicture: true },
+    });
+
+    let profilePictureUrl: string | null = null;
+    if (profilePicture) {
+      const { url } = await this.mediaService.createSignedDownloadUrl(profilePicture.key);
+      profilePictureUrl = url;
+    }
+
+    // Get gallery media
+    const galleryMedia = await this.mediaRepository.find({
+      where: { owner: { id: profile.user.id } },
+      order: { createdAt: 'DESC' },
+      take: 6,
+    });
+
+    const gallery = await Promise.all(
+      galleryMedia.map(async (media) => {
+        const { url } = await this.mediaService.createSignedDownloadUrl(media.key);
+        return {
+          id: media.id,
+          type: media.type,
+          url,
+        };
+      }),
+    );
+
+    // Online status from event emitters
+    const isOnline = this.isUserOnline(profile.user.id);
+    const lastSeen = this.getLastSeen(profile.user.id);
+
+    const distance =
+      distanceMiles !== null && !profile.isDistanceHidden
+        ? Math.round(distanceMiles * 10) / 10
+        : null;
+
+    return {
+      id: profile.user.id,
+      displayName: profile.displayName,
+      age: this.calculateAge(profile.user),
+      bio: profile.bio,
+      distance,
+      profilePicture: profilePictureUrl,
+      gallery,
+      isOnline,
+      lastSeen,
+    };
   }
 
   private calculateAge(user: any): number | null {
