@@ -31,7 +31,7 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
       setSubscriptionStatus(null);
       setLoading(false);
     }
-  }, [user]);
+  }, [user, refreshSubscriptionStatus]);
 
   const refreshSubscriptionStatus = async () => {
     if (!user) return;
