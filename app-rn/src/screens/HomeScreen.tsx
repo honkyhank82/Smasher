@@ -167,6 +167,9 @@ export const HomeScreen = ({ navigation }: any) => {
       </View>
       <View style={styles.userInfo}>
         <Text style={styles.userName} numberOfLines={1}>{item.displayName}, {item.age}</Text>
+        {item.isOnline && (
+          <Text style={styles.userStatus} numberOfLines={1}>Online now</Text>
+        )}
         {item.distance !== null && (
           <Text style={styles.userDistance} numberOfLines={1}>{item.distance} mi</Text>
         )}
@@ -286,6 +289,11 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.xs,
     fontWeight: 'bold',
     color: theme.colors.text,
+    marginBottom: 1,
+  },
+  userStatus: {
+    fontSize: 10,
+    color: '#4CAF50',
     marginBottom: 1,
   },
   userDistance: {
