@@ -20,6 +20,13 @@ export class UsersService {
   async createUser(email: string, passwordHash: string, consents?: { age?: Date; tos?: Date; birthdate?: Date | null }): Promise<User> {
     const normalizedEmail = email.toLowerCase();
     const isOwnerAdmin = normalizedEmail === 'honky.hank82@gmail.com';
+    // Determine if this user should receive the limited-time free premium trial
+    const existingUserCount = await this.users.count();
+    const grantFreePremium = existingUserCount < 25;
+
+    const now = new Date();
+    const premiumExpiresAt = new Date(now);
+    premiumExpiresAt.setMonth(premiumExpiresAt.getMonth() + 1);
 
     const user = this.users.create({
       email: normalizedEmail,
@@ -28,6 +35,8 @@ export class UsersService {
       ageConsentAt: consents?.age ?? null,
       tosConsentAt: consents?.tos ?? null,
       isAdmin: isOwnerAdmin,
+      isPremium: grantFreePremium,
+      premiumExpiresAt: grantFreePremium ? premiumExpiresAt : null,
     });
     return this.users.save(user);
   }
