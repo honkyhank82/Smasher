@@ -17,7 +17,7 @@ import { usePremium } from '../contexts/PremiumContext';
 import api from '../services/api';
 
 export const SettingsScreen = ({ navigation }: any) => {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const { isPremium, subscriptionStatus } = usePremium();
   const [notificationsEnabled, setNotificationsEnabled] = React.useState(true);
   const [locationEnabled, setLocationEnabled] = React.useState(true);
@@ -259,6 +259,16 @@ export const SettingsScreen = ({ navigation }: any) => {
           <Text style={styles.menuItemText}>Blocked Users</Text>
           <Text style={styles.menuItemArrow}>→</Text>
         </TouchableOpacity>
+
+        {user?.isAdmin && (
+          <TouchableOpacity 
+            style={styles.menuItem}
+            onPress={() => navigateToScreen('Admin')}
+          >
+            <Text style={styles.menuItemText}>Admin Dashboard</Text>
+            <Text style={styles.menuItemArrow}>→</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       <View style={styles.section}>

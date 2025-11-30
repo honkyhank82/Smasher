@@ -25,6 +25,7 @@ import { PremiumUpgradeScreen } from '../screens/PremiumUpgradeScreen';
 import { ManageSubscriptionScreen } from '../screens/ManageSubscriptionScreen';
 import { BackendServiceScreen } from '../screens/BackendServiceScreen';
 import { MainTabs } from './MainTabs';
+import { AdminScreen } from '../screens/AdminScreen';
 import { usePremium } from '../contexts/PremiumContext';
 import { ActivityIndicator, View, StyleSheet, Text } from 'react-native';
 import { theme } from '../config/theme';
@@ -153,6 +154,7 @@ export const AppNavigator = () => {
         <Stack.Screen name="PremiumUpgrade" component={PremiumUpgradeScreen} />
         <Stack.Screen name="ManageSubscription" component={ManageSubscriptionScreen} />
         <Stack.Screen name="BackendService" component={BackendServiceScreen} />
+        <Stack.Screen name="Admin" component={AdminScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
