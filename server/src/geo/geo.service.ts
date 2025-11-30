@@ -55,6 +55,7 @@ export class GeoService {
     maxDistance: number = 15,
   ): Promise<any[]> {
     try {
+      console.log('GeoService.getNearbyUsers called for user', userId, 'maxDistance', maxDistance);
       const currentUser = await this.profileRepository.findOne({
         where: { user: { id: userId } },
       });
@@ -66,7 +67,7 @@ export class GeoService {
       if (userLat === null || userLng === null) {
         console.log('Current user has no location set, returning generic nearby users list');
 
-        const profiles = await this.profileRepository
+        let profiles = await this.profileRepository
           .createQueryBuilder('profile')
           .leftJoinAndSelect('profile.user', 'user')
           .where('user.id != :userId', { userId })
@@ -76,11 +77,26 @@ export class GeoService {
           .limit(50)
           .getMany();
 
+        console.log('Generic nearby profiles with location count:', profiles.length);
+
+        if (profiles.length === 0) {
+          console.log('No profiles with location found, falling back to recent profiles regardless of location');
+          profiles = await this.profileRepository
+            .createQueryBuilder('profile')
+            .leftJoinAndSelect('profile.user', 'user')
+            .where('user.id != :userId', { userId })
+            .orderBy('profile.created_at', 'DESC')
+            .limit(50)
+            .getMany();
+        }
+
         const results = await Promise.all(
           profiles.map(async (profile) =>
             this.buildProfileResponse(profile, null),
           ),
         );
+
+        console.log('Returning generic nearby users results count:', results.length);
 
         return results;
       }
@@ -115,6 +131,29 @@ export class GeoService {
         .limit(50)
         .getRawAndEntities();
 
+      console.log('Nearby users found by distance:', nearbyUsers.entities.length);
+
+      if (nearbyUsers.entities.length === 0) {
+        console.log('No nearby users found within distance, falling back to recent profiles regardless of location');
+
+        const fallbackProfiles = await this.profileRepository
+          .createQueryBuilder('profile')
+          .leftJoinAndSelect('profile.user', 'user')
+          .where('user.id != :userId', { userId })
+          .orderBy('profile.created_at', 'DESC')
+          .limit(50)
+          .getMany();
+
+        const fallbackResults = await Promise.all(
+          fallbackProfiles.map((profile) =>
+            this.buildProfileResponse(profile, null),
+          ),
+        );
+
+        console.log('Returning fallback recent profiles count:', fallbackResults.length);
+        return fallbackResults;
+      }
+
       const results = await Promise.all(
         nearbyUsers.entities.map((profile, index) =>
           this.buildProfileResponse(
@@ -123,7 +162,8 @@ export class GeoService {
           ),
         ),
       );
-      
+
+      console.log('Returning distance-based nearby users count:', results.length);
       return results;
     } catch (error) {
       console.error('Error fetching nearby users:', error);
