@@ -142,17 +142,17 @@ export class SubscriptionsService {
     // If user has premium but their premium period has expired and they do not
     // have an active paid subscription, automatically revert them to free.
     const now = new Date();
+    const hasActivePaidSubscription =
+      !!subscription &&
+      ['active', 'trialing', 'past_due', 'unpaid', 'incomplete'].includes(
+        subscription.status,
+      );
+
     if (
       user.isPremium &&
       user.premiumExpiresAt &&
       user.premiumExpiresAt <= now
     ) {
-      const hasActivePaidSubscription =
-        !!subscription &&
-        ['active', 'trialing', 'past_due', 'unpaid', 'incomplete'].includes(
-          subscription.status,
-        );
-
       if (!hasActivePaidSubscription) {
         user.isPremium = false;
         user.premiumExpiresAt = null;
@@ -160,8 +160,16 @@ export class SubscriptionsService {
       }
     }
 
+    const isFreeTrial =
+      !user.isAdmin &&
+      user.isPremium &&
+      user.premiumExpiresAt &&
+      user.premiumExpiresAt > now &&
+      !hasActivePaidSubscription;
+
     return {
       isPremium: user.isAdmin || user.isPremium,
+      isFreeTrial,
       subscription: subscription ? {
         status: subscription.status,
         currentPeriodEnd: subscription.currentPeriodEnd,

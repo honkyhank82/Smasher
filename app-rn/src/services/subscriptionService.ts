@@ -2,6 +2,7 @@ import api from './api';
 
 export interface SubscriptionStatus {
   isPremium: boolean;
+  isFreeTrial?: boolean;
   subscription: {
     status: string;
     currentPeriodEnd: string;
