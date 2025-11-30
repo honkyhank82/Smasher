@@ -19,7 +19,7 @@ interface NearbyUser {
   id: string;
   displayName: string;
   age: number;
-  distance: number;
+  distance: number | null;
   profilePicture?: string;
   bio?: string;
   isOnline?: boolean;
@@ -167,7 +167,9 @@ export const HomeScreen = ({ navigation }: any) => {
       </View>
       <View style={styles.userInfo}>
         <Text style={styles.userName} numberOfLines={1}>{item.displayName}, {item.age}</Text>
-        <Text style={styles.userDistance} numberOfLines={1}>{item.distance} mi</Text>
+        {item.distance !== null && (
+          <Text style={styles.userDistance} numberOfLines={1}>{item.distance} mi</Text>
+        )}
       </View>
     </TouchableOpacity>
   );
