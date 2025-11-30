@@ -10,10 +10,23 @@ interface BackendInfo {
 
 export default function Settings() {
   const [backend, setBackend] = useState<BackendInfo | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
     const service = apiFailoverService.getCurrentService()
     setBackend({ name: service.name, apiUrl: service.apiUrl })
+
+    try {
+      const raw = localStorage.getItem('user')
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        setIsAdmin(!!parsed?.isAdmin)
+      } else {
+        setIsAdmin(false)
+      }
+    } catch {
+      setIsAdmin(false)
+    }
   }, [])
 
   return (
@@ -32,6 +45,11 @@ export default function Settings() {
           <li>
             <Link to="/profile">Profile</Link>
           </li>
+          {isAdmin && (
+            <li>
+              <Link to="/admin">Admin Dashboard</Link>
+            </li>
+          )}
         </ul>
       </section>
 

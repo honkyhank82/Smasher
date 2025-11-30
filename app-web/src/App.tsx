@@ -13,6 +13,7 @@ import Settings from './screens/Settings'
 import Terms from './screens/Terms'
 import Privacy from './screens/Privacy'
 import Help from './screens/Help'
+import Admin from './screens/Admin'
 
 import './App.css'
 
@@ -20,13 +21,28 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [loading, setLoading] = useState(true)
   const [serverStatus, setServerStatus] = useState<string>('Connecting...')
+  const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem('authToken')
       if (token) {
         setIsAuthenticated(true)
+        try {
+          const rawUser = localStorage.getItem('user')
+          if (rawUser) {
+            const parsed = JSON.parse(rawUser)
+            setIsAdmin(!!parsed?.isAdmin)
+          } else {
+            setIsAdmin(false)
+          }
+        } catch {
+          setIsAdmin(false)
+        }
+      } else {
+        setIsAdmin(false)
       }
+
       setLoading(false)
     }
     checkAuth()
@@ -73,6 +89,7 @@ function App() {
               <Route path="/user/:id" element={<UserProfile />} />
               <Route path="/premium" element={<ManageSubscription />} />
               <Route path="/settings" element={<Settings />} />
+              {isAdmin && <Route path="/admin" element={<Admin />} />}
               <Route path="/terms" element={<Terms />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/help" element={<Help />} />
