@@ -139,6 +139,27 @@ export class SubscriptionsService {
       throw new NotFoundException('User not found');
     }
 
+    // If user has premium but their premium period has expired and they do not
+    // have an active paid subscription, automatically revert them to free.
+    const now = new Date();
+    if (
+      user.isPremium &&
+      user.premiumExpiresAt &&
+      user.premiumExpiresAt <= now
+    ) {
+      const hasActivePaidSubscription =
+        !!subscription &&
+        ['active', 'trialing', 'past_due', 'unpaid', 'incomplete'].includes(
+          subscription.status,
+        );
+
+      if (!hasActivePaidSubscription) {
+        user.isPremium = false;
+        user.premiumExpiresAt = null;
+        await this.userRepository.save(user);
+      }
+    }
+
     return {
       isPremium: user.isPremium,
       subscription: subscription ? {
