@@ -88,7 +88,7 @@ export class GeoService {
       const nearbyUsers = await this.profileRepository
         .createQueryBuilder('profile')
         .leftJoinAndSelect('profile.user', 'user')
-        .where('profile.userId != :userId', { userId })
+        .where('user.id != :userId', { userId })
         .andWhere('profile.lat IS NOT NULL')
         .andWhere('profile.lng IS NOT NULL')
         .addSelect(
