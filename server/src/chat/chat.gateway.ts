@@ -162,9 +162,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     const senderId = client.data.userId;
 
-    // Get sender's premium status
+    // Get sender's premium/admin status
     const sender = await this.userRepository.findOne({ where: { id: senderId } });
-    const senderIsPremium = sender && sender.isPremium && sender.premiumExpiresAt && sender.premiumExpiresAt > new Date();
+    const senderIsPremium =
+      !!sender &&
+      (sender.isAdmin ||
+        (sender.isPremium &&
+          sender.premiumExpiresAt &&
+          sender.premiumExpiresAt > new Date()));
 
     // Check if this is the first message between these users
     const existingMessages = await this.messageRepository.count({
@@ -245,12 +250,18 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       .where('message.id IN (:...ids)', { ids: data.messageIds })
       .getRawMany();
 
-    // Notify senders that their messages were read (only if sender is premium)
+    // Notify senders that their messages were read (only if sender is premium or admin)
     for (const msg of messages) {
       const sender = await this.userRepository.findOne({ where: { id: msg.senderId } });
       
-      // Only send read receipts if the sender has an active premium subscription
-      if (sender && sender.isPremium && sender.premiumExpiresAt && sender.premiumExpiresAt > new Date()) {
+      // Only send read receipts if the sender has an active premium subscription or is admin
+      if (
+        sender &&
+        (sender.isAdmin ||
+          (sender.isPremium &&
+            sender.premiumExpiresAt &&
+            sender.premiumExpiresAt > new Date()))
+      ) {
         const senderSocketId = this.connectedUsers.get(msg.senderId);
         if (senderSocketId) {
           this.server.to(senderSocketId).emit('messagesRead', {
