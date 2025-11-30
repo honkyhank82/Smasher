@@ -134,7 +134,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       createdAt: msg.createdAt,
       isRead: msg.isRead,
       readAt: msg.readAt,
-      senderIsPremium: msg.sender.isPremium && msg.sender.premiumExpiresAt && msg.sender.premiumExpiresAt > new Date(),
+      senderIsPremium:
+        msg.sender.isAdmin ||
+        (msg.sender.isPremium &&
+          msg.sender.premiumExpiresAt &&
+          msg.sender.premiumExpiresAt > new Date()),
     }));
 
     client.emit('messageHistory', formattedMessages);

@@ -161,7 +161,7 @@ export class SubscriptionsService {
     }
 
     return {
-      isPremium: user.isPremium,
+      isPremium: user.isAdmin || user.isPremium,
       subscription: subscription ? {
         status: subscription.status,
         currentPeriodEnd: subscription.currentPeriodEnd,
