@@ -2,6 +2,8 @@
 
 **A free Android app to meet, chat, and connect with gay men around you.**
 
+***Unfortunately no IOS version yet;, however, there is also a web-version with all of the same features/functionality of the app. Please visit https://smasher-6xw7nhn0y-honkyhanks-projects.vercel.app for Smasher-Web.***
+
 ---
 
 ## 📦 Current Version
@@ -254,7 +256,7 @@ Currently **not officially supported**:
 - ❌ iPhone / iOS
 - ❌ Tablets (may work, but not optimized)
 
-ATTN: If you are unable to install the app there is a web version. Go to  https://smasher-6xw7nhn0y-honkyhanks-projects.vercel.app for Smasher-Web. All of the same functionality of the app.
+
 
 ---
 
