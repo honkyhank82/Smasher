@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Alert,
   RefreshControl,
+  Dimensions,
 } from 'react-native';
 import { theme } from '../config/theme';
 import { useAuth } from '../context/AuthContext';
@@ -31,6 +32,10 @@ export const HomeScreen = ({ navigation }: any) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const { user, logout } = useAuth();
+
+  const PAGE_SIZE = 12;
+  const { height: windowHeight } = Dimensions.get('window');
+  const PAGE_HEIGHT = windowHeight - 80; // approximate header + padding offset
 
   useEffect(() => {
     initializeLocation();
@@ -151,8 +156,9 @@ export const HomeScreen = ({ navigation }: any) => {
     ]);
   };
 
-  const renderUser = ({ item }: { item: NearbyUser }) => (
+  const renderUserCard = (item: NearbyUser) => (
     <TouchableOpacity
+      key={item.id}
       style={styles.userCard}
       onPress={() => handleUserPress(item.id)}
     >
@@ -177,6 +183,35 @@ export const HomeScreen = ({ navigation }: any) => {
     </TouchableOpacity>
   );
 
+  const pages = useMemo(() => {
+    const chunks: NearbyUser[][] = [];
+    for (let i = 0; i < users.length; i += PAGE_SIZE) {
+      chunks.push(users.slice(i, i + PAGE_SIZE));
+    }
+    return chunks;
+  }, [users]);
+
+  const renderPage = ({ item }: { item: NearbyUser[] }) => {
+    const rows: NearbyUser[][] = [];
+    for (let i = 0; i < item.length; i += 4) {
+      rows.push(item.slice(i, i + 4));
+    }
+
+    return (
+      <View style={[styles.page, { height: PAGE_HEIGHT }]}>
+        {rows.map((row, rowIndex) => (
+          <View key={rowIndex} style={styles.row}>
+            {row.map((user) => renderUserCard(user))}
+            {row.length < 4 &&
+              Array.from({ length: 4 - row.length }).map((_, idx) => (
+                <View key={`spacer-${rowIndex}-${idx}`} style={[styles.userCard, styles.userCardSpacer]} />
+              ))}
+          </View>
+        ))}
+      </View>
+    );
+  };
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -192,12 +227,12 @@ export const HomeScreen = ({ navigation }: any) => {
       </View>
 
       <FlatList
-        data={users}
-        renderItem={renderUser}
-        keyExtractor={(item) => item.id}
-        numColumns={4}
+        data={pages}
+        renderItem={renderPage}
+        keyExtractor={(_, index) => `page-${index}`}
+        pagingEnabled
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.list}
-        columnWrapperStyle={styles.row}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -246,8 +281,13 @@ const styles = StyleSheet.create({
   list: {
     padding: theme.spacing.sm,
   },
-  row: {
+  page: {
     justifyContent: 'space-between',
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: theme.spacing.sm,
   },
   userCard: {
     flex: 1,
@@ -257,7 +297,11 @@ const styles = StyleSheet.create({
     margin: theme.spacing.xs,
     borderWidth: 1,
     borderColor: theme.colors.border,
-    maxWidth: '23%',
+    maxWidth: '24%',
+  },
+  userCardSpacer: {
+    backgroundColor: 'transparent',
+    borderWidth: 0,
   },
   imageContainer: {
     position: 'relative',
