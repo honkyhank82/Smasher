@@ -52,11 +52,20 @@ export default function Discover() {
         <div className="users-grid">
           {users.map((user) => (
             <div key={user.id} className="user-card">
-              <img
-                src={user.profilePhoto || '/default-avatar.png'}
-                alt={user.name}
-                className="user-image"
-              />
+              <div className="user-image-wrapper">
+                <img
+                  src={user.profilePhoto || '/default-avatar.png'}
+                  alt={user.name}
+                  className="user-image"
+                />
+                <span
+                  className={
+                    user.isOnline
+                      ? 'status-dot status-dot-online'
+                      : 'status-dot status-dot-offline'
+                  }
+                />
+              </div>
               <div className="user-info">
                 <h3>{user.name}, {user.age}</h3>
                 <p>{user.bio}</p>
