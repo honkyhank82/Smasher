@@ -183,10 +183,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (existingMessages === 0 && !senderIsPremium) {
       const distance = await this.geoService.calculateDistanceBetweenUsers(senderId, data.receiverId);
       
-      if (distance !== null && distance > 15) {
+      if (distance !== null && distance > 10) {
         client.emit('messageError', {
           error: 'DISTANCE_RESTRICTION',
-          message: 'Upgrade to Premium to message users beyond 15 miles',
+          message: 'Upgrade to Premium to message users beyond 10 miles',
           distance: Math.round(distance * 10) / 10,
         });
         return;

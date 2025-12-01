@@ -52,7 +52,7 @@ export class GeoService {
 
   async getNearbyUsers(
     userId: string,
-    maxDistance: number = 15,
+    maxDistance: number = 100,
   ): Promise<any[]> {
     try {
       console.log('GeoService.getNearbyUsers called for user', userId, 'maxDistance', maxDistance);
