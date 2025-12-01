@@ -31,7 +31,7 @@ const PREMIUM_FEATURES = [
     icon: '📍',
     title: 'Extended Range',
     description: 'Connect beyond your area',
-    free: '15 miles',
+    free: '10 miles',
     premium: 'Unlimited',
   },
   {
