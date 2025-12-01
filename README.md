@@ -287,7 +287,7 @@ Currently **not officially supported**:
 
 - Double‑check your **email** and **password**.
 - If you recently registered, confirm the account finished creation.
-- Use **Forgot Password** (if available) or contact support at `smashermain@gmail.com`.
+- Use **Forgot Password** (if available) or contact support at `admin@honkyhankinc.com`.
 
 ---
 
@@ -418,7 +418,7 @@ If you:
 
 contact:
 
-- **Email:** `smashermain@gmail.com`
+- **Email:** `admin@honkyhankinc.com`
 
 Or open an issue on the GitHub repo (if issues are enabled).
 
@@ -448,7 +448,7 @@ This software is provided **STRICTLY FOR PERSONAL, NON‑COMMERCIAL USE ONLY.**
 By using this software, you agree to these terms.
 
 > For commercial licensing or enterprise use, please contact  
-> **smashermain@gmail.com**.
+> **admin@honkyhankinc.com**.
 
 ---
 
