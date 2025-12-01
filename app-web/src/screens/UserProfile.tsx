@@ -10,6 +10,7 @@ interface UserSummary {
   bio?: string
   distance?: number
   profilePhoto?: string
+  isOnline?: boolean
 }
 
 export default function UserProfile() {
@@ -39,6 +40,7 @@ export default function UserProfile() {
             bio: data.bio,
             distance: data.distance,
             profilePhoto: data.profilePhoto,
+            isOnline: data.isOnline,
           })
         }
       } catch (error) {
@@ -88,11 +90,20 @@ export default function UserProfile() {
       </button>
 
       <div className="user-profile-card">
-        <img
-          src={user.profilePhoto || '/default-avatar.png'}
-          alt={user.name || 'User'}
-          className="user-profile-photo"
-        />
+        <div className="user-profile-photo-wrapper">
+          <img
+            src={user.profilePhoto || '/default-avatar.png'}
+            alt={user.name || 'User'}
+            className="user-profile-photo"
+          />
+          <span
+            className={
+              user.isOnline
+                ? 'status-dot status-dot-online'
+                : 'status-dot status-dot-offline'
+            }
+          />
+        </div>
         <h2>
           {user.name || 'User'}
           {user.age ? `, ${user.age}` : ''}

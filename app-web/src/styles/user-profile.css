@@ -13,12 +13,36 @@
   text-align: center;
 }
 
+.user-profile-photo-wrapper {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 16px;
+}
+
 .user-profile-photo {
   width: 160px;
   height: 160px;
   border-radius: 999px;
   object-fit: cover;
-  margin-bottom: 16px;
+}
+
+.user-profile-photo-wrapper .status-dot {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 2px solid #111;
+  bottom: 8px;
+  right: 8px;
+  box-shadow: 0 0 0 2px #111;
+}
+
+.status-dot-online {
+  background-color: #00b7ff;
+}
+
+.status-dot-offline {
+  background-color: #ffd600;
 }
 
 .user-profile-card h2 {

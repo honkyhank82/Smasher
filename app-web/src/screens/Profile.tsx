@@ -10,6 +10,7 @@ interface User {
   age: number
   bio: string
   profilePhoto?: string
+  isOnline?: boolean
   isPremium: boolean
   viewCount: number
 }
@@ -119,11 +120,20 @@ export default function Profile({ setIsAuthenticated }: ProfileProps) {
       <div className="profile-content">
         {user && (
           <>
-            <img
-              src={user.profilePhoto || '/default-avatar.png'}
-              alt={user.name}
-              className="profile-photo"
-            />
+            <div className="profile-photo-wrapper">
+              <img
+                src={user.profilePhoto || '/default-avatar.png'}
+                alt={user.name}
+                className="profile-photo"
+              />
+              <span
+                className={
+                  user.isOnline
+                    ? 'status-dot status-dot-online'
+                    : 'status-dot status-dot-offline'
+                }
+              />
+            </div>
 
             {editing ? (
               <form onSubmit={handleUpdate} className="profile-form">

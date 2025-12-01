@@ -26,14 +26,38 @@
   padding: 30px;
 }
 
+.profile-photo-wrapper {
+  position: relative;
+  width: 200px;
+  margin: 0 auto 30px;
+}
+
 .profile-photo {
   width: 200px;
   height: 200px;
   border-radius: 12px;
   object-fit: cover;
   display: block;
-  margin: 0 auto 30px;
   border: 2px solid #c0c0c0;
+}
+
+.profile-photo-wrapper .status-dot {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 2px solid #2a2a2a;
+  bottom: 10px;
+  right: 10px;
+  box-shadow: 0 0 0 2px #2a2a2a;
+}
+
+.status-dot-online {
+  background-color: #00b7ff;
+}
+
+.status-dot-offline {
+  background-color: #ffd600;
 }
 
 .profile-form {
