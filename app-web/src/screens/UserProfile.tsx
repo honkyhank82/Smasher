@@ -28,20 +28,20 @@ export default function UserProfile() {
     const load = async () => {
       try {
         setLoading(true)
-        // Best-effort fetch of full profile for another user.
-        // Backend may expose /users/profile/:id; if not, we fall back to passed-in data.
-        const response = await apiFailoverService.get(`/users/profile/${id}`)
+        // Fetch profile from the backend
+        const response = await apiFailoverService.get(`/profiles/${id}`)
         const data = response.data
         if (data && typeof data === 'object') {
           setUser({
             id: String(data.id || id),
-            name: data.name,
+            name: data.displayName || 'User',
             age: data.age,
             bio: data.bio,
             distance: data.distance,
-            profilePhoto: data.profilePhoto,
+            profilePhoto: data.profilePicture,
             isOnline: data.isOnline,
-          })
+            // Include additional profile fields
+            ...data
         }
       } catch (error) {
         console.error('Failed to load user profile:', error)
