@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, UseGuards, Param, ForbiddenException } from '@nestjs/common';
+import { Body, Controller, Get, Patch, UseGuards, Param, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { IsString, IsOptional, IsBoolean, IsNumber, MaxLength } from 'class-validator';
 import { CurrentUser } from '../auth/current-user.decorator';
@@ -84,23 +84,59 @@ export class ProfilesController {
 
   @Get('me')
   async me(@CurrentUser() user?: { userId: string; isPremium: boolean; isAdmin: boolean }) {
-    const profile = await this.profiles.getOrCreate(user!.userId);
-    return {
-      id: user!.userId,
-      email: profile.user.email,
-      isPremium: profile.user.isPremium,
-      isAdmin: profile.user.isAdmin,
-      profile: {
-        displayName: profile.displayName,
-        bio: profile.bio,
-        showAge: profile.showAge,
-        heightCm: profile.heightCm,
-        weightKg: profile.weightKg,
-        heightIn: profile.heightIn,
-        weightLbs: profile.weightLbs,
-        ethnicity: profile.ethnicity,
-        bodyType: profile.bodyType,
-        sexualPosition: profile.sexualPosition,
+    try {
+      const profile = await this.profiles.getByUserId(user!.userId);
+      return {
+        id: user!.userId,
+        email: profile.email,
+        isPremium: user!.isPremium,
+        isAdmin: user!.isAdmin,
+        profile: {
+          displayName: profile.displayName,
+          bio: profile.bio,
+          showAge: profile.showAge,
+          heightCm: profile.heightCm,
+          weightKg: profile.weightKg,
+          heightIn: profile.heightIn,
+          weightLbs: profile.weightLbs,
+          ethnicity: profile.ethnicity,
+          bodyType: profile.bodyType,
+          sexualPosition: profile.sexualPosition,
+          relationshipStatus: profile.relationshipStatus,
+          lookingFor: profile.lookingFor,
+          profilePicture: null, // TODO: Add media relation
+        },
+      };
+    } catch (error) {
+      console.error('Error in me endpoint:', error);
+      throw new NotFoundException('Profile not found');
+    }
+  }
+
+  @Get(':id')
+  async getProfile(
+    @CurrentUser() currentUser: { userId: string; isPremium: boolean; isAdmin: boolean },
+    @Param('id') userId: string,
+  ) {
+    try {
+      // If the requested profile is the current user's profile, return it directly
+      if (userId === 'me' || userId === currentUser.userId) {
+        return await this.me(currentUser);
+      }
+
+      // For other users' profiles, get the profile and record the view
+      const profile = await this.profiles.getByUserId(userId);
+      
+      // Record the profile view (if not viewing your own profile)
+      if (userId !== currentUser.userId) {
+        await this.profileViews.recordView(currentUser.userId, userId);
+      }
+
+      return profile;
+    } catch (error) {
+      console.error('Error in getProfile endpoint:', error);
+      throw new NotFoundException('Profile not found');
+    }
         relationshipStatus: profile.relationshipStatus,
         lookingFor: profile.lookingFor,
         profilePicture: null, // TODO: Add media relation
