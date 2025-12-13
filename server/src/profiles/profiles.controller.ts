@@ -83,14 +83,14 @@ export class ProfilesController {
   ) {}
 
   @Get('me')
-  async me(@CurrentUser() user?: { userId: string; isPremium: boolean; isAdmin: boolean }) {
+  async me(@CurrentUser() user: { userId: string; isPremium: boolean; isAdmin: boolean }) {
     try {
-      const profile = await this.profiles.getByUserId(user!.userId);
+      const profile = await this.profiles.getByUserId(user.userId);
       return {
-        id: user!.userId,
+        id: user.userId,
         email: profile.email,
-        isPremium: user!.isPremium,
-        isAdmin: user!.isAdmin,
+        isPremium: user.isPremium,
+        isAdmin: user.isAdmin,
         profile: {
           displayName: profile.displayName,
           bio: profile.bio,
@@ -104,7 +104,11 @@ export class ProfilesController {
           sexualPosition: profile.sexualPosition,
           relationshipStatus: profile.relationshipStatus,
           lookingFor: profile.lookingFor,
-          profilePicture: null, // TODO: Add media relation
+          isDistanceHidden: profile.isDistanceHidden,
+          lat: profile.lat,
+          lng: profile.lng,
+          profilePicture: profile.profilePicture,
+          gallery: profile.gallery || []
         },
       };
     } catch (error) {
@@ -137,38 +141,34 @@ export class ProfilesController {
       console.error('Error in getProfile endpoint:', error);
       throw new NotFoundException('Profile not found');
     }
-        relationshipStatus: profile.relationshipStatus,
-        lookingFor: profile.lookingFor,
-        profilePicture: null, // TODO: Add media relation
-      },
-    };
   }
 
   @Patch('me')
-  update(@CurrentUser() user: { userId: string }, @Body() dto: UpdateProfileDto) {
-    return this.profiles.update(user.userId, dto);
-  }
-
-  @Get(':userId')
-  async getProfile(
-    @Param('userId') userId: string,
-    @CurrentUser() user: { userId: string; isPremium: boolean },
+  async update(
+    @CurrentUser() user: { userId: string }, 
+    @Body() dto: UpdateProfileDto
   ) {
-    // Record the profile view
-    await this.profileViews.recordView(user.userId, userId);
-    
-    return this.profiles.getByUserId(userId);
+    const updatedProfile = await this.profiles.update(user.userId, dto);
+    return {
+      message: 'Profile updated successfully',
+      profile: updatedProfile
+    };
   }
 
   @Patch('admin/:userId')
-  updateByAdmin(
-    @CurrentUser() current: { userId: string; isAdmin: boolean },
+  async updateByAdmin(
+    @CurrentUser() currentUser: { userId: string; isAdmin: boolean },
     @Param('userId') userId: string,
     @Body() dto: UpdateProfileDto,
   ) {
-    if (!current.isAdmin) {
+    if (!currentUser.isAdmin) {
       throw new ForbiddenException('Admin access required');
     }
-    return this.profiles.update(userId, dto);
+    
+    const updatedProfile = await this.profiles.update(userId, dto);
+    return {
+      message: 'Profile updated successfully by admin',
+      profile: updatedProfile
+    };
   }
 }
