@@ -225,6 +225,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.server.to(receiverSocketId).emit('message', messagePayload);
     }
 
+    if (sender) {
+      await this.notificationService.sendPushNotification(
+        data.receiverId,
+        `New message from ${sender.profile.displayName || 'User'}`,
+        data.content,
+        {
+          type: 'message',
+          senderId,
+          displayName: sender.profile.displayName || 'User',
+          messageId: savedMessage.id,
+        }
+      );
+    }
+
     // Confirm to sender
     client.emit('messageSent', messagePayload);
   }
