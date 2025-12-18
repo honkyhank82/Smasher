@@ -165,7 +165,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const senderId = client.data.userId;
 
     // Get sender's premium/admin status
-    const sender = await this.userRepository.findOne({ where: { id: senderId } });
+    const sender = await this.userRepository.findOne({ 
+      where: { id: senderId },
+      relations: ['profile'],
+    });
     const senderIsPremium =
       !!sender &&
       (sender.isAdmin ||
