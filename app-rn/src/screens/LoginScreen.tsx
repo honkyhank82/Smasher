@@ -6,6 +6,7 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  Image,
   ActivityIndicator,
 } from 'react-native';
 import { theme } from '../config/theme';
@@ -120,7 +121,11 @@ export const LoginScreen = ({ onLoginSuccess, onBack }: LoginScreenProps) => {
         </TouchableOpacity>
       </View>
       <View style={styles.content}>
-        <Text style={styles.logo}>SMASHER</Text>
+        <Image 
+          source={require('../../assets/logo.png')} 
+          style={styles.logoImage} 
+          resizeMode="contain" 
+        />
         <Text style={styles.subtitle}>Welcome back!</Text>
       </View>
       <View style={styles.form}>

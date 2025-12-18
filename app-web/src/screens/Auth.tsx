@@ -51,7 +51,7 @@ export default function Auth({ setIsAuthenticated }: AuthProps) {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h1>🔥 SMASHER</h1>
+        <img src="/logo.png" alt="SMASHER" className="auth-logo" />
         <p className="subtitle">Connect with people near you</p>
 
         {error && <div className="error-message">{error}</div>}

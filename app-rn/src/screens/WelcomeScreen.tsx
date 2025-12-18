@@ -16,7 +16,11 @@ export const WelcomeScreen = ({ onSignUp, onLogin }: WelcomeScreenProps) => {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.logo}>SMASHER</Text>
+        <Image 
+          source={require('../../assets/logo.png')} 
+          style={styles.logoImage} 
+          resizeMode="contain" 
+        />
         <Text style={styles.tagline}>Connect with people nearby</Text>
         
         <View style={styles.buttonContainer}>
@@ -48,6 +52,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  logoImage: {
+    width: 300,
+    height: 120,
+    marginBottom: theme.spacing.md,
   },
   logo: {
     fontSize: 48,
