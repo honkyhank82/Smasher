@@ -27,6 +27,7 @@ import { BackendServiceScreen } from '../screens/BackendServiceScreen';
 import { MainTabs } from './MainTabs';
 import { AdminScreen } from '../screens/AdminScreen';
 import { usePremium } from '../contexts/PremiumContext';
+import NotificationService from '../services/NotificationService';
 import { ActivityIndicator, View, StyleSheet, Text } from 'react-native';
 import { theme } from '../config/theme';
 import type { NavigationContainerRef } from '@react-navigation/native';
@@ -44,35 +45,6 @@ export const AppNavigator = () => {
       setNavigationRef(navigationRef.current);
     }
   }, [navigationRef.current]);
-
-  useEffect(() => {
-    // Handle notification responses (user tapped on notification)
-    const subscription = NotificationService.addNotificationResponseListener(response => {
-      const data = response.notification.request.content.data;
-      
-      if (data.type === 'message' && data.senderId) {
-        // Navigate to chat screen
-        if (navigationRef.current) {
-          navigationRef.current.navigate('Chat', {
-            userId: data.senderId,
-            displayName: data.displayName || 'User'
-          });
-        }
-      } else if (data.type === 'location_share_started' && data.senderUserId) {
-        // Navigate to shared location map
-        if (navigationRef.current) {
-          navigationRef.current.navigate('SharedLocationMap', {
-             shareId: data.senderUserId, // Assuming shareId maps to user ID for now or needs fetching
-             userName: 'User' // We might need to fetch name or include in payload
-          });
-        }
-      }
-    });
-
-    return () => {
-      subscription.remove();
-    };
-  }, []);
 
   useEffect(() => {
     console.log('🧭 AppNavigator state:', { isAuthenticated, loading, user: user?.email, hasProfile: user?.hasProfile });
