@@ -7,6 +7,7 @@ import { ChatController } from './chat.controller';
 import { Message } from './message.entity';
 import { User } from '../users/user.entity';
 import { GeoModule } from '../geo/geo.module';
+import { NotificationModule } from '../notifications/notification.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { GeoModule } from '../geo/geo.module';
       signOptions: { expiresIn: '7d' },
     }),
     GeoModule,
+    NotificationModule,
   ],
   controllers: [ChatController],
   providers: [ChatGateway, ChatService],

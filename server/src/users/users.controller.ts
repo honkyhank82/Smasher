@@ -102,6 +102,26 @@ export class UsersController {
     return { message: 'User unblocked successfully' };
   }
 
+  @Put('push-token')
+  @UseGuards(AuthGuard('jwt'))
+  @HttpCode(HttpStatus.OK)
+  async savePushToken(
+    @CurrentUser() user: { userId: string },
+    @Body() body: { pushToken: string },
+  ) {
+    await this.usersService.savePushToken(user.userId, body.pushToken);
+    return { message: 'Push token saved successfully' };
+  }
+
+  @Delete('push-token')
+  @UseGuards(AuthGuard('jwt'))
+  @HttpCode(HttpStatus.OK)
+  async removePushToken(@CurrentUser() user: { userId: string }) {
+    await this.usersService.removePushToken(user.userId);
+    return { message: 'Push token removed successfully' };
+  }
+}
+
   @Post('change-email')
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.OK)
