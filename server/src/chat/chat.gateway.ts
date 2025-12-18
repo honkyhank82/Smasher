@@ -16,6 +16,7 @@ import { User } from '../users/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { GeoService } from '../geo/geo.service';
+import { NotificationService } from '../notifications/notification.service';
 
 @WebSocketGateway({
   cors: {
@@ -38,6 +39,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private jwtService: JwtService,
     private eventEmitter: EventEmitter2,
     private geoService: GeoService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   async handleConnection(client: Socket) {
