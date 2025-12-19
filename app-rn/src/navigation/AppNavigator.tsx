@@ -150,10 +150,7 @@ export const AppNavigator = () => {
     return (
       <NavigationContainer>
         <Stack.Navigator
-          screenOptions={{
-            headerShown: false,
-            cardStyle: { backgroundColor: theme.colors.background },
-          }}
+          screenOptions={commonScreenOptions}
         >
           <Stack.Screen name="CreateProfile" component={CreateProfileScreen} />
         </Stack.Navigator>
@@ -165,10 +162,7 @@ export const AppNavigator = () => {
   return (
     <NavigationContainer ref={navigationRef}>
       <Stack.Navigator
-        screenOptions={{
-          headerShown: false,
-          cardStyle: { backgroundColor: theme.colors.background },
-        }}
+        screenOptions={commonScreenOptions}
       >
         <Stack.Screen name="Main" component={MainTabs} />
         <Stack.Screen name="EditProfile" component={EditProfileScreen} />
