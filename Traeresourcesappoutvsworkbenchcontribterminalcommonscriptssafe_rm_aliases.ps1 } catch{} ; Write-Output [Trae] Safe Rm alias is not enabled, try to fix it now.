@@ -14,3 +14,4 @@
   e  ^E  j  ^N  CR  *  Forward  one line   (or _N lines).
   y  ^Y  k  ^K  ^P  *  Backward one line   (or _N lines).
   ESC-j             *  Forward  one file line (or _N file lines).
+  ESC-k             *  Backward one file line (or _N file lines).
