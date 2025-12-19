@@ -24,6 +24,20 @@ import { LocationShareModule } from './location-share/location-share.module';
 import { NotificationModule } from './notifications/notification.module';
 import { HealthModule } from './health/health.module';
 
+function shouldUseSsl(databaseUrl: string): boolean {
+  const u = databaseUrl.toLowerCase();
+  if (u.includes('.flycast')) return false;
+  if (u.includes('localhost')) return false;
+  if (u.includes('127.0.0.1')) return false;
+  if (u.includes('@postgres:')) return false;
+  return true;
+}
+
+function shouldSynchronize(): boolean {
+  const v = (process.env.TYPEORM_SYNCHRONIZE ?? '').trim().toLowerCase();
+  return v === 'true' || v === '1' || v === 'yes';
+}
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -34,11 +48,14 @@ import { HealthModule } from './health/health.module';
           ? {
               type: 'postgres',
               url,
+              uuidExtension: 'pgcrypto',
               autoLoadEntities: true,
-              synchronize: false, // Disabled for production - use migrations instead
-              ssl: url.includes('.flycast') ? false : {
-                rejectUnauthorized: false,
-              },
+              synchronize: shouldSynchronize(),
+              ssl: shouldUseSsl(url)
+                ? {
+                    rejectUnauthorized: false,
+                  }
+                : false,
               retryAttempts: 5,
               retryDelay: 5000,
               connectTimeoutMS: 10000,

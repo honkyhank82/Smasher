@@ -105,18 +105,50 @@ function generateUserProfile(index: number, location: { city: string; lat: numbe
   };
 }
 
-async function seedProfiles() {
-  console.log('Starting profile seeding...');
-  
-  const dataSource = new DataSource({
-    type: 'postgres',
+function shouldSynchronize(): boolean {
+  const v = (process.env.TYPEORM_SYNCHRONIZE ?? '').trim().toLowerCase();
+  return v === 'true' || v === '1' || v === 'yes';
+}
+
+function getDbConfigFromEnv() {
+  const raw = (process.env.DATABASE_URL ?? '').trim();
+  if (raw) {
+    try {
+      const u = new URL(raw);
+      const database = (u.pathname || '').replace(/^\//, '');
+      return {
+        host: u.hostname,
+        port: u.port ? parseInt(u.port, 10) : 5432,
+        username: decodeURIComponent(u.username || ''),
+        password: decodeURIComponent(u.password || ''),
+        database,
+      };
+    } catch {
+    }
+  }
+
+  return {
     host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '5432'),
+    port: parseInt(process.env.DB_PORT || '5432', 10),
     username: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASSWORD || 'postgres',
     database: process.env.DB_NAME || 'smasher',
+  };
+}
+
+async function seedProfiles() {
+  console.log('Starting profile seeding...');
+  
+  const db = getDbConfigFromEnv();
+  const dataSource = new DataSource({
+    type: 'postgres',
+    host: db.host,
+    port: db.port,
+    username: db.username,
+    password: db.password,
+    database: db.database,
     entities: [User, Profile],
-    synchronize: false,
+    synchronize: shouldSynchronize(),
   });
 
   try {

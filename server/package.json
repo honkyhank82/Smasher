@@ -1,6 +1,6 @@
 {
   "name": "server",
-  "version": "1.0.51",
+  "version": "1.0.56",
   "description": "",
   "author": "",
   "private": true,
@@ -28,6 +28,7 @@
     "migration:run": "npm run typeorm -- migration:run -d src/data-source.ts",
     "migration:revert": "npm run typeorm -- migration:revert -d src/data-source.ts",
     "seed": "ts-node src/scripts/seed-test-data.ts",
+    "seed:profiles": "ts-node src/scripts/seed-profiles.ts",
     "deploy": "npm run build && fly deploy",
     "deploy:prod": "NODE_ENV=production npm run build && fly deploy"
   },

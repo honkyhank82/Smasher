@@ -2,8 +2,8 @@ import { MigrationInterface, QueryRunner, Table, TableForeignKey } from 'typeorm
 
 export class CreateBuddiesTable1710000000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // Enable UUID extension if not already enabled
-    await queryRunner.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`);
+    // Enable pgcrypto for gen_random_uuid()
+    await queryRunner.query(`CREATE EXTENSION IF NOT EXISTS "pgcrypto"`);
 
     // Create buddies table
     await queryRunner.createTable(
@@ -15,7 +15,7 @@ export class CreateBuddiesTable1710000000000 implements MigrationInterface {
             type: 'uuid',
             isPrimary: true,
             generationStrategy: 'uuid',
-            default: 'uuid_generate_v4()',
+            default: 'gen_random_uuid()',
           },
           {
             name: 'userId',
