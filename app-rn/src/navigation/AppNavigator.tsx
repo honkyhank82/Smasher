@@ -29,8 +29,25 @@ import { AdminScreen } from '../screens/AdminScreen';
 import { usePremium } from '../contexts/PremiumContext';
 import NotificationService from '../services/NotificationService';
 import { ActivityIndicator, View, StyleSheet, Text } from 'react-native';
+import { LogoHeader } from '../components/LogoHeader';
 import { theme } from '../config/theme';
 import type { NavigationContainerRef } from '@react-navigation/native';
+
+const commonScreenOptions = {
+  headerShown: true,
+  headerTitle: () => <LogoHeader />,
+  headerTitleAlign: 'center' as const,
+  headerStyle: {
+    backgroundColor: theme.colors.background,
+    elevation: 0,
+    shadowOpacity: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+  },
+  headerTintColor: theme.colors.text,
+  headerBackTitleVisible: false,
+  cardStyle: { backgroundColor: theme.colors.background },
+};
 
 const Stack = createStackNavigator();
 
