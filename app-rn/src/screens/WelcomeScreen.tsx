@@ -17,7 +17,7 @@ export const WelcomeScreen = ({ onSignUp, onLogin }: WelcomeScreenProps) => {
     <View style={styles.container}>
       <View style={styles.content}>
         <Image 
-          source={require('../../assets/logo.png')} 
+          source={require('../../assets/welcome-image.png')} 
           style={styles.logoImage} 
           resizeMode="contain" 
         />

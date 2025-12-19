@@ -32,6 +32,8 @@ import { ActivityIndicator, View, StyleSheet, Text } from 'react-native';
 import { theme } from '../config/theme';
 import type { NavigationContainerRef } from '@react-navigation/native';
 
+import { LogoHeader } from '../components/LogoHeader';
+
 const Stack = createStackNavigator();
 
 export const AppNavigator = () => {
