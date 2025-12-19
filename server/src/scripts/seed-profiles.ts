@@ -128,8 +128,18 @@ async function seedProfiles() {
 
     // Clear existing test data (optional, be careful with this in production)
     if (process.env.NODE_ENV !== 'production') {
-      await profileRepository.delete({});
-      await userRepository.delete({ email: /@example\.com$/ });
+      // First delete profiles to avoid foreign key constraint
+      await profileRepository.createQueryBuilder()
+        .delete()
+        .from(Profile)
+        .execute();
+        
+      // Then delete test users
+      await userRepository.createQueryBuilder()
+        .delete()
+        .from(User)
+        .where("email LIKE :email", { email: '%@example.com' })
+        .execute();
     }
 
     // Generate and save users
