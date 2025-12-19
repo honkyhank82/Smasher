@@ -32,8 +32,6 @@ import { ActivityIndicator, View, StyleSheet, Text } from 'react-native';
 import { theme } from '../config/theme';
 import type { NavigationContainerRef } from '@react-navigation/native';
 
-import { LogoHeader } from '../components/LogoHeader';
-
 const Stack = createStackNavigator();
 
 export const AppNavigator = () => {
@@ -100,18 +98,22 @@ export const AppNavigator = () => {
         <Stack.Navigator
           initialRouteName="Welcome"
           screenOptions={{
-            headerShown: false,
+            headerShown: true,
+            headerTitle: (props) => <LogoHeader />,
+            headerTitleAlign: 'center',
+            headerStyle: {
+              backgroundColor: theme.colors.background,
+              elevation: 0, // Remove shadow on Android
+              shadowOpacity: 0, // Remove shadow on iOS
+              borderBottomWidth: 1,
+              borderBottomColor: theme.colors.border,
+            },
+            headerTintColor: theme.colors.text,
+            headerBackTitleVisible: false,
             cardStyle: { backgroundColor: theme.colors.background },
           }}
         >
-          <Stack.Screen name="Welcome">
-            {({ navigation }) => (
-              <WelcomeScreen
-                onSignUp={() => navigation.navigate('AgeGate')}
-                onLogin={() => navigation.navigate('Login')}
-              />
-            )}
-          </Stack.Screen>
+          <Stack.Screen name="Welcome" component={WelcomeScreen} options={{ headerShown: true }} />
           <Stack.Screen name="AgeGate">
             {({ navigation }) => (
               <AgeGateScreen
