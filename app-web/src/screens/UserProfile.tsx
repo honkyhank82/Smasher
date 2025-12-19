@@ -42,6 +42,7 @@ export default function UserProfile() {
             isOnline: data.isOnline,
             // Include additional profile fields
             ...data
+          })
         }
       } catch (error) {
         console.error('Failed to load user profile:', error)
