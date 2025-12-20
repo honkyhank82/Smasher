@@ -5,31 +5,48 @@ import {
   StyleSheet,
   TouchableOpacity,
   ImageBackground,
+  Image,
 } from 'react-native';
 import { theme } from '../config/theme';
 
-interface WelcomeScreenProps {
-  onSignUp: () => void;
-  onLogin: () => void;
-}
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 
-export const WelcomeScreen = ({ onSignUp, onLogin }: WelcomeScreenProps) => {
+type RootStackParamList = {
+  AgeGate: undefined;
+  Login: undefined;
+};
+
+type WelcomeScreenNavigationProp = StackNavigationProp<RootStackParamList>;
+
+export const WelcomeScreen = () => {
+  const navigation = useNavigation<WelcomeScreenNavigationProp>();
+
+  const handleSignUp = () => {
+    navigation.navigate('AgeGate');
+  };
+
+  const handleLogin = () => {
+    navigation.navigate('Login');
+  };
+
   return (
-    <ImageBackground 
-      source={require('../../assets/welcome-image.png')} 
-      style={styles.container}
-      resizeMode="cover"
-    >
+    <View style={styles.container}>
+      <Image 
+        source={require('../../assets/welcome-image.png')} 
+        style={styles.backgroundImage}
+        resizeMode="cover"
+      />
       <View style={styles.overlay}>
         <View style={styles.content}>
           <Text style={styles.tagline}>Connect with people nearby</Text>
           
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.signupButton} onPress={onSignUp}>
+            <TouchableOpacity style={styles.signupButton} onPress={handleSignUp}>
               <Text style={styles.signupButtonText}>Create Account</Text>
             </TouchableOpacity>
             
-            <TouchableOpacity style={styles.loginButton} onPress={onLogin}>
+            <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
               <Text style={styles.loginButtonText}>I already have an account</Text>
             </TouchableOpacity>
           </View>
@@ -39,7 +56,7 @@ export const WelcomeScreen = ({ onSignUp, onLogin }: WelcomeScreenProps) => {
           By continuing, you agree to our Terms of Service and Privacy Policy
         </Text>
       </View>
-    </ImageBackground>
+    </View>
   );
 };
 
@@ -48,6 +65,15 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     height: '100%',
+    backgroundColor: '#000',
+  },
+  backgroundImage: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    transform: [{ rotate: '90deg' }],
   },
   overlay: {
     flex: 1,
