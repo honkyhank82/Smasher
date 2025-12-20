@@ -76,6 +76,14 @@ class ApiService {
   private serviceHealth: Record<string, { isHealthy: boolean; lastChecked: number }> = {};
 
   constructor() {
+    // Default to development environment in dev mode
+    if (__DEV__) {
+      const devIndex = this.services.findIndex(s => s.name === 'development');
+      if (devIndex !== -1) {
+        this.currentServiceIndex = devIndex;
+      }
+    }
+
     this.axiosInstance = this.createAxiosInstance(this.getActiveService());
     this.initializeHealthMonitoring();
     this.setupInterceptors();
@@ -409,6 +417,22 @@ class ApiService {
 
   public getActiveServiceName(): string {
     return this.getActiveService().name;
+  }
+
+  public getServices(): BackendService[] {
+    return this.services;
+  }
+
+  public switchService(serviceName: string): boolean {
+    const index = this.services.findIndex(s => s.name === serviceName);
+    if (index !== -1) {
+      this.currentServiceIndex = index;
+      this.axiosInstance = this.createAxiosInstance(this.getActiveService());
+      this.setupInterceptors();
+      console.log(`🔄 Switched to ${serviceName} service`);
+      return true;
+    }
+    return false;
   }
 
   public cleanup() {
