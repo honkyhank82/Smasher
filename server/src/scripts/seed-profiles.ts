@@ -3,6 +3,7 @@ import * as bcrypt from 'bcrypt';
 import { User } from '../users/user.entity';
 import { Profile } from '../profiles/profile.entity';
 import { faker } from '@faker-js/faker';
+import { Resend } from 'resend';
 
 // Initialize faker with consistent results
 faker.seed(42);
@@ -81,6 +82,7 @@ function generateUserProfile(index: number, location: { city: string; lat: numbe
       birthdate,
       isVerified: true,
       isPremium: Math.random() > 0.7, // 30% chance of premium
+      isSeeded: true,
       accountStatus: 'active' as const,
       ageConsentAt: new Date(),
       tosConsentAt: new Date(),
@@ -175,6 +177,7 @@ async function seedProfiles() {
     }
 
     // Generate and save users
+    const seededCredentials: {email: string, password: string, location: string}[] = [];
     for (let i = 0; i < LOCATIONS.length; i++) {
       const location = LOCATIONS[i];
       const { user: userData, profile: profileData } = generateUserProfile(i, location);
@@ -190,7 +193,61 @@ async function seedProfiles() {
       });
       await profileRepository.save(profile);
 
+      seededCredentials.push({
+        email: user.email,
+        password: 'password123',
+        location: location.city
+      });
+
       console.log(`Created user: ${user.email} in ${location.city}`);
+    }
+
+    // Send email with credentials
+    const resendApiKey = process.env.RESEND_API_KEY;
+    if (resendApiKey) {
+      console.log('Sending credentials email to admin...');
+      const resend = new Resend(resendApiKey);
+      const from = process.env.RESEND_FROM ?? 'no-reply@smasher.app';
+      
+      const htmlContent = `
+        <div style="font-family: Arial, sans-serif;">
+          <h1>Seeded Profiles Credentials</h1>
+          <p>Here are the login credentials for the newly seeded profiles:</p>
+          <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+            <thead style="background-color: #f2f2f2;">
+              <tr>
+                <th>Email</th>
+                <th>Password</th>
+                <th>Location</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${seededCredentials.map(c => `
+                <tr>
+                  <td>${c.email}</td>
+                  <td>${c.password}</td>
+                  <td>${c.location}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <p>Total profiles generated: ${seededCredentials.length}</p>
+        </div>
+      `;
+
+      try {
+        await resend.emails.send({
+          from,
+          to: 'admin@honkyhankinc.com',
+          subject: 'Seeded Profiles Login Information',
+          html: htmlContent,
+        });
+        console.log('✅ Seeded profiles email sent to admin@honkyhankinc.com');
+      } catch (emailError) {
+        console.error('❌ Failed to send seeded profiles email:', emailError);
+      }
+    } else {
+      console.warn('⚠️ RESEND_API_KEY not found, skipping email sending.');
     }
 
     console.log('Seeding completed successfully!');

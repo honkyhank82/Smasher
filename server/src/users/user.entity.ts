@@ -30,6 +30,10 @@ export class User {
   @Column({ type: 'boolean', default: false, name: 'is_admin' })
   isAdmin!: boolean;
 
+  @Exclude()
+  @Column({ type: 'boolean', default: false, name: 'is_seeded' })
+  isSeeded!: boolean;
+
   @Column({ type: process.env.DATABASE_URL ? 'timestamp' : 'datetime', name: 'premium_expires_at', nullable: true })
   premiumExpiresAt!: Date | null;
 

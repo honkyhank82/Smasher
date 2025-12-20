@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Profile } from './profile.entity';
 import { User } from '../users/user.entity';
 import { Media } from '../media/media.entity';
+import { MediaService } from '../media/media.service';
 
 @Injectable()
 export class ProfilesService {
@@ -11,6 +12,7 @@ export class ProfilesService {
     @InjectRepository(Profile) private readonly profiles: Repository<Profile>,
     @InjectRepository(User) private readonly users: Repository<User>,
     @InjectRepository(Media) private readonly media: Repository<Media>,
+    private readonly mediaService: MediaService,
   ) {}
 
   async getOrCreate(userId: string): Promise<Profile> {
@@ -74,9 +76,20 @@ export class ProfilesService {
 
     // Find profile picture
     const profilePic = userMedia.find(m => m.isProfilePicture);
+    let profilePicUrl: string | null = null;
+    if (profilePic) {
+      const { url } = await this.mediaService.createSignedDownloadUrl(profilePic.key);
+      profilePicUrl = url;
+    }
     
     // Get gallery items (non-profile pictures)
     const galleryItems = userMedia.filter(m => !m.isProfilePicture).slice(0, 6);
+    const galleryUrls = await Promise.all(
+      galleryItems.map(async (m) => {
+        const { url } = await this.mediaService.createSignedDownloadUrl(m.key);
+        return url;
+      })
+    );
 
     // Calculate age from birthdate if available
     let age: number | null = null;
@@ -108,14 +121,8 @@ export class ProfilesService {
       bio: profile.bio,
       distance: null, // Will be calculated by geo service
       heightIn,
-      profilePicture: profilePic ? this.getMediaUrl(profilePic.key) : null,
-      gallery: galleryItems.map(m => this.getMediaUrl(m.key)),
+      profilePicture: profilePicUrl,
+      gallery: galleryUrls,
     };
-  }
-
-  private getMediaUrl(key: string): string {
-    // This should match your R2 public URL or use signed URLs
-    // For now, return the key - you'll need to generate signed URLs in production
-    return key;
   }
 }

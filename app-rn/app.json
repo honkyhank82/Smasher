@@ -2,9 +2,9 @@
     "expo":  {
                  "name":  "SMASHER",
                  "slug":  "smasher-app",
-                 "version":  "4.0.24",
+                 "version":  "4.0.25",
                  "orientation":  "default",
-                 "icon":  "./assets/icon.png",
+                 "icon":  "./assets/adaptive-icon.png",
                  "userInterfaceStyle":  "automatic",
                  "splash":  {
                                 "image":  "./assets/splash.png",

@@ -8,11 +8,14 @@ import { ProfilesController } from './profiles.controller';
 import { ProfilesService } from './profiles.service';
 import { ProfileViewsModule } from '../profile-views/profile-views.module';
 
+import { MediaModule } from '../media/media.module';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([Profile, User, Media]), 
     PassportModule,
     ProfileViewsModule,
+    MediaModule,
   ],
   controllers: [ProfilesController],
   providers: [ProfilesService]

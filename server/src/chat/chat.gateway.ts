@@ -241,6 +241,77 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     // Confirm to sender
     client.emit('messageSent', messagePayload);
+
+    // Auto-reply for seeded users
+    const receiver = await this.userRepository.findOne({ 
+      where: { id: data.receiverId },
+      relations: ['profile']
+    });
+
+    if (receiver && receiver.isSeeded) {
+      // Simulate random delay between 15s and 60s
+      const delay = Math.floor(Math.random() * (60000 - 15000) + 15000);
+      
+      setTimeout(async () => {
+        try {
+          // Simulate user coming online to reply
+          this.eventEmitter.emit('user.online', { userId: receiver.id, timestamp: new Date() });
+          this.server.emit('userOnline', { userId: receiver.id, timestamp: new Date() });
+
+          const replyContent = "Hey! Thanks for the message. I'm a bit busy right now but I'll get back to you soon! 😊";
+          
+          const replyMessage = this.messageRepository.create({
+            sender: { id: receiver.id },
+            receiver: { id: senderId },
+            content: replyContent,
+            isRead: false,
+          });
+          
+          const savedReply = await this.messageRepository.save(replyMessage);
+          
+          const replyPayload = {
+            id: savedReply.id,
+            senderId: receiver.id,
+            receiverId: senderId,
+            content: replyContent,
+            createdAt: savedReply.createdAt,
+            isRead: false,
+            readAt: null,
+            senderIsPremium: receiver.isPremium || receiver.isAdmin,
+          };
+          
+          // Send to original sender (now receiver of reply)
+          const originalSenderSocketId = this.connectedUsers.get(senderId);
+          if (originalSenderSocketId) {
+            this.server.to(originalSenderSocketId).emit('message', replyPayload);
+          }
+          
+          // Send push notification
+          await this.notificationService.sendPushNotification(
+            senderId,
+            `New message from ${receiver.profile?.displayName || 'User'}`,
+            replyContent,
+            {
+              type: 'message',
+              senderId: receiver.id,
+              displayName: receiver.profile?.displayName || 'User',
+              messageId: savedReply.id,
+            }
+          );
+          
+          console.log(`Auto-replied to user ${senderId} from seeded user ${receiver.id}`);
+
+          // Simulate user going offline after reply
+          setTimeout(() => {
+             const lastSeen = new Date();
+             this.eventEmitter.emit('user.offline', { userId: receiver.id, timestamp: lastSeen });
+             this.server.emit('userOffline', { userId: receiver.id, timestamp: lastSeen });
+          }, 5000); // Stay "online" for 5 seconds after replying
+        } catch (error) {
+          console.error('Error sending auto-reply:', error);
+        }
+      }, delay);
+    }
   }
 
   @SubscribeMessage('markAsRead')
