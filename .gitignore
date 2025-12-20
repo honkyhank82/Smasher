@@ -1,52 +1,11 @@
-# General
-.DS_Store
-Thumbs.db
-*.log
 node_modules/
-.env
-.env.*
-
-# Flutter
-app/build/
-app/.dart_tool/
-app/.packages
-app/ios/
-app/android/app/release/
-app/coverage/
-
-# Server
-server/dist/
-server/node_modules/
-server/.cache/
-
-# IDE
-.vscode/
+.expo/
+dist/
+web-build/
 .idea/
-*.iml
-
-# Build artifacts
+.vscode/
 *.apk
 *.aab
-*.app
-dist/
-build/
-
-# Exception: allow AAB files in builds directory (for release artifacts)
-!builds/
-!builds/**/*.aab
-
-# Android build logs (explicit path ignores)
-app-rn/android/build-log.txt
-app-rn/android/*.log
-
-# Keystore files (base64 goes in GitHub Secrets only)
-KEYSTORE_BASE64.txt
-*.keystore
-*.jks
-
-# Android heavy artifacts
 app-rn/android/app/build/
-app-rn/android/.cxx/
-*.hprof
-# Backup files
-*.bak
+app-rn/android/.gradle/
+*.keystore

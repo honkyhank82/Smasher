@@ -8,7 +8,7 @@
 
 ## 📦 Current Version
 
-- **App Version:** `4.0.26`
+- **App Version:** `4.0.27`
 - **Platform:** Android (8.0 or newer)
 - **Download:**  
   👉 **Latest APK:** https://github.com/honkyhank82/Smasher/releases/latest

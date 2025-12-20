@@ -1,11 +1,10 @@
 {
     "name": "smasher-app",
-    "version": "4.0.26",
+    "version": "4.0.28",
     "private": true,
     "scripts": {
         "start": "expo start",
         "android": "expo run:android",
-        "ios": "expo run:ios",
         "web": "expo start --web",
         "build:web": "expo export:web",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx",

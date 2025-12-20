@@ -17,7 +17,7 @@
                                                       "backgroundColor":  "#000000"
                                                   },
                                  "package":  "com.smasher.app",
-                               "versionCode": 45,
+                               "versionCode": 46,
                                  "permissions":  [
                                                      "ACCESS_COARSE_LOCATION",
                                                      "ACCESS_FINE_LOCATION",
