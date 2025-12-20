@@ -32,7 +32,7 @@ export const WelcomeScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Image 
+      <ImageBackground 
         source={require('../../assets/welcome-image.png')} 
         style={styles.backgroundImage}
         resizeMode="cover"
@@ -73,7 +73,6 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     bottom: 0,
-    transform: [{ rotate: '90deg' }],
   },
   overlay: {
     flex: 1,

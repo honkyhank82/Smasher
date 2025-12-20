@@ -189,7 +189,6 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     bottom: 0,
-    transform: [{ rotate: '90deg' }], // Use vertical orientation for background
   },
   overlay: {
     flex: 1,
