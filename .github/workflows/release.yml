@@ -23,11 +23,14 @@ jobs:
       - name: Setup Expo CLI
         run: npm install -g @expo/cli
 
+      - name: Install EAS CLI
+        run: npm install -g eas-cli
+
       - name: Install dependencies
         run: cd app-rn && npm install
 
       - name: Build APK
-        run: cd app-rn && npx eas build --platform android --profile production-apk --non-interactive
+        run: cd app-rn && eas build --platform android --profile production-apk --non-interactive
         env:
           EAS_TOKEN: ${{ secrets.EAS_TOKEN }}
 
