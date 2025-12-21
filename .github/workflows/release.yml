@@ -30,15 +30,9 @@ jobs:
         run: cd app-rn && npm install
 
       - name: Build APK
-        run: cd app-rn && eas build --platform android --profile production-apk --non-interactive
+        run: cd app-rn && eas build --platform android --profile production-apk --non-interactive --output-path ../build
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-
-      - name: Download APK
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifacts
-          path: ./build
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
