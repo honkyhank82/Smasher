@@ -8,6 +8,9 @@ import {
   Alert,
   Image,
   ActivityIndicator,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { theme } from '../config/theme';
 import { useAuth } from '../context/AuthContext';
@@ -121,58 +124,68 @@ export const LoginScreen = ({ onLoginSuccess, onBack }: LoginScreenProps) => {
         resizeMode="cover"
       />
       <View style={styles.overlay}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={onBack}>
-            <Text style={styles.backButton}>← Back</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.content}>
-          <Image 
-            source={require('../../assets/logo.png')} 
-            style={styles.logoImage} 
-            resizeMode="contain" 
-          />
-          <Text style={styles.subtitle}>Welcome back!</Text>
-        </View>
-        <View style={styles.form}>
-          <Text style={styles.label}>Email Address</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your email"
-            placeholderTextColor={theme.colors.textSecondary}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoCorrect={false}
-            value={email}
-            onChangeText={setEmail}
-          />
-          <Text style={styles.label}>Password</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your password"
-            placeholderTextColor={theme.colors.textSecondary}
-            secureTextEntry
-            value={password}
-            onChangeText={setPassword}
-          />
-          <TouchableOpacity onPress={handleForgotPassword} style={styles.forgotPasswordContainer}>
-            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.button, loading && styles.buttonDisabled]}
-            onPress={handleLogin}
-            disabled={loading}
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.keyboardAvoidingView}
+        >
+          <ScrollView 
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
           >
-            {loading ? (
-              <ActivityIndicator color={theme.colors.text} />
-            ) : (
-              <Text style={styles.buttonText}>Login</Text>
-            )}
-          </TouchableOpacity>
-        </View>
-        <Text style={styles.disclaimer}>
-          Log in with your email and password.
-        </Text>
+            <View style={styles.header}>
+              <TouchableOpacity onPress={onBack}>
+                <Text style={styles.backButton}>← Back</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.content}>
+              <Image 
+                source={require('../../assets/logo.png')} 
+                style={styles.logoImage} 
+                resizeMode="contain" 
+              />
+              <Text style={styles.subtitle}>Welcome back!</Text>
+            </View>
+            <View style={styles.form}>
+              <Text style={styles.label}>Email Address</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your email"
+                placeholderTextColor={theme.colors.textSecondary}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                value={email}
+                onChangeText={setEmail}
+              />
+              <Text style={styles.label}>Password</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your password"
+                placeholderTextColor={theme.colors.textSecondary}
+                secureTextEntry
+                value={password}
+                onChangeText={setPassword}
+              />
+              <TouchableOpacity onPress={handleForgotPassword} style={styles.forgotPasswordContainer}>
+                <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.button, loading && styles.buttonDisabled]}
+                onPress={handleLogin}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color={theme.colors.text} />
+                ) : (
+                  <Text style={styles.buttonText}>Login</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.disclaimer}>
+              Log in with your email and password.
+            </Text>
+          </ScrollView>
+        </KeyboardAvoidingView>
       </View>
     </View>
   );
@@ -189,11 +202,20 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     bottom: 0,
+    width: '100%',
+    height: '100%',
   },
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.6)', // Darker overlay for readability
+  },
+  keyboardAvoidingView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
     padding: theme.spacing.lg,
+    paddingBottom: theme.spacing.xl * 2,
   },
   header: {
     marginBottom: theme.spacing.lg,

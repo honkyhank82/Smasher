@@ -1,6 +1,15 @@
 import * as ExpoLocation from 'expo-location';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import api from './api';
+
+// Default location for development (Johnson City, TN - where seeded users are)
+const DEV_LOCATION = {
+  latitude: 36.3134,
+  longitude: -82.3535,
+};
+
+// Set to true to force this location in development
+const FORCE_DEV_LOCATION = __DEV__;
 
 export interface Location {
   latitude: number;
@@ -21,6 +30,12 @@ class LocationService {
   }
 
   async getCurrentLocation(): Promise<Location | null> {
+    // In development, prioritize the seeded user location so the user sees data immediately
+    if (FORCE_DEV_LOCATION) {
+      console.log('📍 DEV MODE: Using default location (Johnson City, TN)');
+      return DEV_LOCATION;
+    }
+
     try {
       const { status } = await ExpoLocation.getForegroundPermissionsAsync();
       

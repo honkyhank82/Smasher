@@ -45,8 +45,8 @@ const BACKEND_SERVICES: BackendService[] = [
   },
   {
     name: 'development',
-    apiUrl: 'http://localhost:3000',
-    healthCheckUrl: 'http://localhost:3000/health',
+    apiUrl: Platform.OS === 'android' ? 'http://10.0.2.2:3001' : 'http://localhost:3001',
+    healthCheckUrl: Platform.OS === 'android' ? 'http://10.0.2.2:3001/health' : 'http://localhost:3001/health',
   },
 ];
 
@@ -76,6 +76,14 @@ class ApiService {
   private serviceHealth: Record<string, { isHealthy: boolean; lastChecked: number }> = {};
 
   constructor() {
+    // In development mode, prioritize the local development service
+    if (__DEV__) {
+      const devIndex = this.services.findIndex(s => s.name === 'development');
+      if (devIndex !== -1) {
+        this.currentServiceIndex = devIndex;
+      }
+    }
+
     this.axiosInstance = this.createAxiosInstance(this.getActiveService());
     this.initializeHealthMonitoring();
     this.setupInterceptors();
