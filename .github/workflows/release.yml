@@ -24,10 +24,10 @@ jobs:
         run: npm install -g @expo/cli
 
       - name: Install dependencies
-        run: npm install
+        run: cd app-rn && npm install
 
       - name: Build APK
-        run: npx eas build --platform android --profile production --non-interactive
+        run: cd app-rn && npx eas build --platform android --profile production-apk --non-interactive
         env:
           EAS_TOKEN: ${{ secrets.EAS_TOKEN }}
 
