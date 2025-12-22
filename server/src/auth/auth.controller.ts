@@ -1,7 +1,12 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
-import { LoginDto, RegisterDto, SendVerificationDto, VerifyDto } from './dto/auth.dto';
+import {
+  LoginDto,
+  RegisterDto,
+  SendVerificationDto,
+  VerifyDto,
+} from './dto/auth.dto';
 
 @Controller('auth')
 export class AuthController {

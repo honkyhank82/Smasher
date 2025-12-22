@@ -68,7 +68,12 @@ export class GeoService {
     maxDistance: number = 100,
   ): Promise<NearbyProfile[]> {
     try {
-      console.log('GeoService.getNearbyUsers called for user', userId, 'maxDistance', maxDistance);
+      console.log(
+        'GeoService.getNearbyUsers called for user',
+        userId,
+        'maxDistance',
+        maxDistance,
+      );
       const currentUser = await this.profileRepository.findOne({
         where: { user: { id: userId } },
       });
@@ -78,7 +83,9 @@ export class GeoService {
 
       // If current user doesn't have location, return a generic list of users
       if (userLat === null || userLng === null) {
-        console.log('Current user has no location set, returning generic nearby users list');
+        console.log(
+          'Current user has no location set, returning generic nearby users list',
+        );
 
         let profiles = await this.profileRepository
           .createQueryBuilder('profile')
@@ -90,10 +97,15 @@ export class GeoService {
           .limit(50)
           .getMany();
 
-        console.log('Generic nearby profiles with location count:', profiles.length);
+        console.log(
+          'Generic nearby profiles with location count:',
+          profiles.length,
+        );
 
         if (profiles.length === 0) {
-          console.log('No profiles with location found, falling back to recent profiles regardless of location');
+          console.log(
+            'No profiles with location found, falling back to recent profiles regardless of location',
+          );
           profiles = await this.profileRepository
             .createQueryBuilder('profile')
             .leftJoinAndSelect('profile.user', 'user')
@@ -103,9 +115,14 @@ export class GeoService {
             .getMany();
         }
 
-        const results = await Promise.all(profiles.map((profile) => this.buildProfileResponse(profile, null)));
+        const results = await Promise.all(
+          profiles.map((profile) => this.buildProfileResponse(profile, null)),
+        );
 
-        console.log('Returning generic nearby users results count:', results.length);
+        console.log(
+          'Returning generic nearby users results count:',
+          results.length,
+        );
 
         return results;
       }
@@ -138,7 +155,10 @@ export class GeoService {
         )
         .orderBy('distance', 'ASC')
         .limit(50)
-        .getRawAndEntities()) as { raw: Array<Record<string, unknown>>; entities: Profile[] };
+        .getRawAndEntities()) as {
+        raw: Array<Record<string, unknown>>;
+        entities: Profile[];
+      };
 
       console.log(
         'Nearby users found by distance:',
@@ -173,9 +193,16 @@ export class GeoService {
 
       const results = await Promise.all(
         nearbyUsers.entities.map((profile, index) => {
-          const rawRow = nearbyUsers.raw[index] as Record<string, unknown> | undefined;
+          const rawRow = nearbyUsers.raw[index] as
+            | Record<string, unknown>
+            | undefined;
           const distRaw = rawRow ? rawRow['distance'] : undefined;
-          const distNum = typeof distRaw === 'number' ? distRaw : typeof distRaw === 'string' ? parseFloat(distRaw) : NaN;
+          const distNum =
+            typeof distRaw === 'number'
+              ? distRaw
+              : typeof distRaw === 'string'
+                ? parseFloat(distRaw)
+                : NaN;
           const distance = Number.isFinite(distNum) ? distNum : null;
           return this.buildProfileResponse(profile, distance);
         }),
@@ -304,7 +331,9 @@ export class GeoService {
     };
   }
 
-  private calculateAge(user: { birthdate?: unknown } | null | undefined): number | null {
+  private calculateAge(
+    user: { birthdate?: unknown } | null | undefined,
+  ): number | null {
     // Ensure user exists and has a valid birthdate value
     if (!user || user.birthdate === undefined || user.birthdate === null) {
       const configuredDefault = process.env.DEFAULT_AGE;

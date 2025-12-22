@@ -12,12 +12,12 @@ import { MediaModule } from '../media/media.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Profile, User, Media]), 
+    TypeOrmModule.forFeature([Profile, User, Media]),
     PassportModule,
     ProfileViewsModule,
     MediaModule,
   ],
   controllers: [ProfilesController],
-  providers: [ProfilesService]
+  providers: [ProfilesService],
 })
 export class ProfilesModule {}

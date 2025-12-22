@@ -11,47 +11,104 @@ faker.seed(42);
 // Location data for the Tri-Cities area
 const LOCATIONS = [
   // Johnson City (8-10 profiles)
-  ...Array(9).fill(0).map(() => ({
-    city: 'Johnson City',
-    lat: 36.3134 + (Math.random() * 0.1 - 0.05), // Small random offset
-    lng: -82.3535 + (Math.random() * 0.1 - 0.05),
-  })),
+  ...Array(9)
+    .fill(0)
+    .map(() => ({
+      city: 'Johnson City',
+      lat: 36.3134 + (Math.random() * 0.1 - 0.05), // Small random offset
+      lng: -82.3535 + (Math.random() * 0.1 - 0.05),
+    })),
   // Kingsport (5-7 profiles)
-  ...Array(6).fill(0).map(() => ({
-    city: 'Kingsport',
-    lat: 36.5484 + (Math.random() * 0.1 - 0.05),
-    lng: -82.5620 + (Math.random() * 0.1 - 0.05),
-  })),
+  ...Array(6)
+    .fill(0)
+    .map(() => ({
+      city: 'Kingsport',
+      lat: 36.5484 + (Math.random() * 0.1 - 0.05),
+      lng: -82.562 + (Math.random() * 0.1 - 0.05),
+    })),
   // Bristol (4-6 profiles)
-  ...Array(5).fill(0).map(() => ({
-    city: 'Bristol',
-    lat: 36.5931 + (Math.random() * 0.1 - 0.05),
-    lng: -82.1866 + (Math.random() * 0.1 - 0.05),
-  })),
+  ...Array(5)
+    .fill(0)
+    .map(() => ({
+      city: 'Bristol',
+      lat: 36.5931 + (Math.random() * 0.1 - 0.05),
+      lng: -82.1866 + (Math.random() * 0.1 - 0.05),
+    })),
   // Abingdon (2-3 profiles)
-  ...Array(2).fill(0).map(() => ({
-    city: 'Abingdon',
-    lat: 36.7096 + (Math.random() * 0.1 - 0.05),
-    lng: -81.9774 + (Math.random() * 0.1 - 0.05),
-  })),
+  ...Array(2)
+    .fill(0)
+    .map(() => ({
+      city: 'Abingdon',
+      lat: 36.7096 + (Math.random() * 0.1 - 0.05),
+      lng: -81.9774 + (Math.random() * 0.1 - 0.05),
+    })),
 ];
 
 // Common interests and bios for the area
 const INTERESTS = [
-  'Hiking the Appalachian Trail', 'Local music scene', 'Craft beer enthusiast',
-  'Foodie exploring local restaurants', 'Fitness and health', 'Outdoor adventures',
-  'Coffee shop regular', 'Art and culture', 'Traveling the region', 'Sports fan',
-  'Gaming', 'Reading', 'Photography', 'Cooking', 'Live music', 'Camping',
-  'Fishing', 'Hunting', 'Mountain biking', 'Yoga', 'Running', 'Swimming'
+  'Hiking the Appalachian Trail',
+  'Local music scene',
+  'Craft beer enthusiast',
+  'Foodie exploring local restaurants',
+  'Fitness and health',
+  'Outdoor adventures',
+  'Coffee shop regular',
+  'Art and culture',
+  'Traveling the region',
+  'Sports fan',
+  'Gaming',
+  'Reading',
+  'Photography',
+  'Cooking',
+  'Live music',
+  'Camping',
+  'Fishing',
+  'Hunting',
+  'Mountain biking',
+  'Yoga',
+  'Running',
+  'Swimming',
 ];
 
-const BODY_TYPES = ['Slim', 'Athletic', 'Average', 'Muscular', 'Stocky', 'Heavy'];
-const ETHNICITIES = ['White', 'Black', 'Hispanic', 'Asian', 'Native American', 'Mixed', 'Other'];
-const SEXUAL_POSITIONS = ['Top', 'Versatile Top', 'Versatile', 'Versatile Bottom', 'Bottom', 'Side'];
-const RELATIONSHIP_STATUSES = ['Single', 'Dating', 'In a relationship', 'Married', 'Open relationship', 'It\'s complicated'];
+const BODY_TYPES = [
+  'Slim',
+  'Athletic',
+  'Average',
+  'Muscular',
+  'Stocky',
+  'Heavy',
+];
+const ETHNICITIES = [
+  'White',
+  'Black',
+  'Hispanic',
+  'Asian',
+  'Native American',
+  'Mixed',
+  'Other',
+];
+const SEXUAL_POSITIONS = [
+  'Top',
+  'Versatile Top',
+  'Versatile',
+  'Versatile Bottom',
+  'Bottom',
+  'Side',
+];
+const RELATIONSHIP_STATUSES = [
+  'Single',
+  'Dating',
+  'In a relationship',
+  'Married',
+  'Open relationship',
+  "It's complicated",
+];
 
 // Generate a single user profile
-function generateUserProfile(index: number, location: { city: string; lat: number; lng: number }) {
+function generateUserProfile(
+  index: number,
+  location: { city: string; lat: number; lng: number },
+) {
   const gender = faker.person.sexType();
   const firstName = faker.person.firstName(gender);
   const lastName = faker.person.lastName();
@@ -65,7 +122,7 @@ function generateUserProfile(index: number, location: { city: string; lat: numbe
   // Generate interests
   const interests = faker.helpers.arrayElements(
     INTERESTS,
-    faker.number.int({ min: 3, max: 8 })
+    faker.number.int({ min: 3, max: 8 }),
   );
 
   // Create bio with location and interests
@@ -100,10 +157,16 @@ function generateUserProfile(index: number, location: { city: string; lat: numbe
       bodyType: faker.helpers.arrayElement(BODY_TYPES),
       sexualPosition: faker.helpers.arrayElement(SEXUAL_POSITIONS),
       relationshipStatus: faker.helpers.arrayElement(RELATIONSHIP_STATUSES),
-      lookingFor: faker.helpers.arrayElement(['Friends', 'Dating', 'Relationship', 'Something casual', 'Not sure yet']),
+      lookingFor: faker.helpers.arrayElement([
+        'Friends',
+        'Dating',
+        'Relationship',
+        'Something casual',
+        'Not sure yet',
+      ]),
       isDistanceHidden: Math.random() > 0.8, // 20% chance of hiding distance
       showAge: Math.random() > 0.3, // 70% chance of showing age
-    }
+    },
   };
 }
 
@@ -125,8 +188,7 @@ function getDbConfigFromEnv() {
         password: decodeURIComponent(u.password || ''),
         database,
       };
-    } catch {
-    }
+    } catch {}
   }
 
   return {
@@ -140,7 +202,7 @@ function getDbConfigFromEnv() {
 
 async function seedProfiles() {
   console.log('Starting profile seeding...');
-  
+
   const db = getDbConfigFromEnv();
   const dataSource = new DataSource({
     type: 'postgres',
@@ -163,29 +225,38 @@ async function seedProfiles() {
     // Clear existing test data (optional, be careful with this in production)
     if (process.env.NODE_ENV !== 'production') {
       // First delete profiles to avoid foreign key constraint
-      await profileRepository.createQueryBuilder()
+      await profileRepository
+        .createQueryBuilder()
         .delete()
         .from(Profile)
         .execute();
-        
+
       // Then delete test users
-      await userRepository.createQueryBuilder()
+      await userRepository
+        .createQueryBuilder()
         .delete()
         .from(User)
-        .where("email LIKE :email", { email: '%@example.com' })
+        .where('email LIKE :email', { email: '%@example.com' })
         .execute();
     }
 
     // Generate and save users
-    const seededCredentials: {email: string, password: string, location: string}[] = [];
+    const seededCredentials: {
+      email: string;
+      password: string;
+      location: string;
+    }[] = [];
     for (let i = 0; i < LOCATIONS.length; i++) {
       const location = LOCATIONS[i];
-      const { user: userData, profile: profileData } = generateUserProfile(i, location);
-      
+      const { user: userData, profile: profileData } = generateUserProfile(
+        i,
+        location,
+      );
+
       // Create user
       const user = userRepository.create(userData);
       await userRepository.save(user);
-      
+
       // Create profile
       const profile = profileRepository.create({
         ...profileData,
@@ -196,7 +267,7 @@ async function seedProfiles() {
       seededCredentials.push({
         email: user.email,
         password: 'password123',
-        location: location.city
+        location: location.city,
       });
 
       console.log(`Created user: ${user.email} in ${location.city}`);
@@ -208,7 +279,7 @@ async function seedProfiles() {
       console.log('Sending credentials email to admin...');
       const resend = new Resend(resendApiKey);
       const from = process.env.RESEND_FROM ?? 'no-reply@smasher.app';
-      
+
       const htmlContent = `
         <div style="font-family: Arial, sans-serif;">
           <h1>Seeded Profiles Credentials</h1>
@@ -222,13 +293,17 @@ async function seedProfiles() {
               </tr>
             </thead>
             <tbody>
-              ${seededCredentials.map(c => `
+              ${seededCredentials
+                .map(
+                  (c) => `
                 <tr>
                   <td>${c.email}</td>
                   <td>${c.password}</td>
                   <td>${c.location}</td>
                 </tr>
-              `).join('')}
+              `,
+                )
+                .join('')}
             </tbody>
           </table>
           <p>Total profiles generated: ${seededCredentials.length}</p>

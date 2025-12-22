@@ -1,8 +1,19 @@
-import { Body, Controller, Post, Get, UseGuards, BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Get,
+  UseGuards,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import * as path from 'path';
 import { AuthGuard } from '@nestjs/passport';
 import { MediaService } from './media.service';
-import { CreateSignedUploadDto, CreateSignedDownloadDto } from './dto/signed-url.dto';
+import {
+  CreateSignedUploadDto,
+  CreateSignedDownloadDto,
+} from './dto/signed-url.dto';
 import { CurrentUser } from '../auth/current-user.decorator';
 
 @Controller('media')
@@ -31,14 +42,19 @@ export class MediaController {
   @UseGuards(AuthGuard('jwt'))
   async createSignedUpload(
     @CurrentUser() user: { userId: string },
-    @Body() body: { fileName: string; fileType: string; mediaType?: 'photo' | 'video' }
+    @Body()
+    body: { fileName: string; fileType: string; mediaType?: 'photo' | 'video' },
   ) {
     // Validate file type strictly: mediaType must match fileType
-    const isVideo = body.mediaType === 'video' || body.fileType.startsWith('video/');
-    const isPhoto = body.mediaType === 'photo' || body.fileType.startsWith('image/');
-    if ((!isVideo && !isPhoto) ||
-        (body.mediaType === 'video' && !body.fileType.startsWith('video/')) ||
-        (body.mediaType === 'photo' && !body.fileType.startsWith('image/'))) {
+    const isVideo =
+      body.mediaType === 'video' || body.fileType.startsWith('video/');
+    const isPhoto =
+      body.mediaType === 'photo' || body.fileType.startsWith('image/');
+    if (
+      (!isVideo && !isPhoto) ||
+      (body.mediaType === 'video' && !body.fileType.startsWith('video/')) ||
+      (body.mediaType === 'photo' && !body.fileType.startsWith('image/'))
+    ) {
       throw new BadRequestException('Only images and videos are allowed');
     }
 
@@ -47,7 +63,10 @@ export class MediaController {
     const mediaFolder = isVideo ? 'videos' : 'photos';
     const safeFileName = this.sanitizeFileName(body.fileName);
     const key = `users/${user.userId}/${mediaFolder}/${timestamp}-${safeFileName}`;
-    const result = await this.mediaService.createSignedUploadUrl(key, body.fileType);
+    const result = await this.mediaService.createSignedUploadUrl(
+      key,
+      body.fileType,
+    );
     return {
       uploadUrl: result.url,
       fileKey: result.key,
@@ -64,29 +83,47 @@ export class MediaController {
   @UseGuards(AuthGuard('jwt'))
   async uploadMedia(
     @CurrentUser() user: { userId: string },
-    @Body() body: { fileName: string; fileType: string; mediaType: 'photo' | 'video'; fileData: string }
+    @Body()
+    body: {
+      fileName: string;
+      fileType: string;
+      mediaType: 'photo' | 'video';
+      fileData: string;
+    },
   ) {
     const MAX_BASE64_SIZE = 50 * 1024 * 1024; // 50MB
     if (body.fileData && body.fileData.length > MAX_BASE64_SIZE) {
       throw new BadRequestException('File too large');
     }
-    return this.mediaService.uploadMediaBase64(user.userId, body.fileName, body.fileType, body.mediaType, body.fileData);
+    return this.mediaService.uploadMediaBase64(
+      user.userId,
+      body.fileName,
+      body.fileType,
+      body.mediaType,
+      body.fileData,
+    );
   }
 
   @Post('confirm-upload')
   @UseGuards(AuthGuard('jwt'))
   async confirmUpload(
     @CurrentUser() user: { userId: string },
-    @Body() body: { fileKey: string; fileType: string; mediaType: 'photo' | 'video' }
+    @Body()
+    body: { fileKey: string; fileType: string; mediaType: 'photo' | 'video' },
   ) {
-    return this.mediaService.createMediaRecord(user.userId, body.fileKey, body.fileType, body.mediaType);
+    return this.mediaService.createMediaRecord(
+      user.userId,
+      body.fileKey,
+      body.fileType,
+      body.mediaType,
+    );
   }
 
   @Post('set-profile-picture')
   @UseGuards(AuthGuard('jwt'))
   async setProfilePicture(
     @CurrentUser() user: { userId: string },
-    @Body() body: { mediaId: string }
+    @Body() body: { mediaId: string },
   ) {
     return this.mediaService.setProfilePicture(user.userId, body.mediaId);
   }
@@ -95,7 +132,7 @@ export class MediaController {
   @UseGuards(AuthGuard('jwt'))
   async deleteMedia(
     @CurrentUser() user: { userId: string },
-    @Body() body: { mediaId: string }
+    @Body() body: { mediaId: string },
   ) {
     return this.mediaService.deleteMedia(user.userId, body.mediaId);
   }

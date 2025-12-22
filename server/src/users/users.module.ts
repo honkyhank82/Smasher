@@ -16,6 +16,6 @@ import { AdminMessageService } from './admin-message.service';
   ],
   controllers: [UsersController],
   providers: [UsersService, AdminMessageService],
-  exports: [UsersService, AdminMessageService]
+  exports: [UsersService, AdminMessageService],
 })
 export class UsersModule {}

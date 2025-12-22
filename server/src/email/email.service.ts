@@ -10,7 +10,7 @@ export class EmailService {
   constructor() {
     const apiKey = process.env.RESEND_API_KEY;
     this.from = process.env.RESEND_FROM ?? 'no-reply@smasher.app';
-    
+
     if (!apiKey || apiKey.trim() === '') {
       this.logger.warn('RESEND_API_KEY not set. Email sending is disabled.');
       this.resend = undefined;
@@ -25,9 +25,14 @@ export class EmailService {
     }
   }
 
-  async sendVerificationEmail(to: string, codeOrLink: string): Promise<boolean> {
+  async sendVerificationEmail(
+    to: string,
+    codeOrLink: string,
+  ): Promise<boolean> {
     if (!this.hasKey() || !this.resend) {
-      this.logger.warn(`Skipping verification email to ${to}; missing RESEND_API_KEY`);
+      this.logger.warn(
+        `Skipping verification email to ${to}; missing RESEND_API_KEY`,
+      );
       return false;
     }
     try {
@@ -36,7 +41,7 @@ export class EmailService {
       await this.resend.emails.send({ from: this.from, to, subject, html });
       return true;
     } catch (err) {
-      this.logger.error('Failed to send verification email', err as any);
+      this.logger.error('Failed to send verification email', err);
       return false;
     }
   }
@@ -48,9 +53,11 @@ export class EmailService {
     if (isDev || debugFlag) {
       this.logger.log(`📧 VERIFICATION CODE for ${to}: ${code}`);
     }
-    
+
     if (!this.hasKey() || !this.resend) {
-      this.logger.warn(`⚠️  Email not sent - RESEND_API_KEY not configured. Use the code above.`);
+      this.logger.warn(
+        `⚠️  Email not sent - RESEND_API_KEY not configured. Use the code above.`,
+      );
       return false;
     }
     try {
@@ -71,21 +78,27 @@ export class EmailService {
       this.logger.log(`✅ Email also sent to ${to}`);
       return true;
     } catch (err) {
-      this.logger.error('Failed to send verification code email', err as any);
+      this.logger.error('Failed to send verification code email', err);
       return false;
     }
   }
 
-  async sendNotificationEmail(to: string, subject: string, html: string): Promise<boolean> {
+  async sendNotificationEmail(
+    to: string,
+    subject: string,
+    html: string,
+  ): Promise<boolean> {
     if (!this.hasKey() || !this.resend) {
-      this.logger.warn(`Skipping notification email to ${to}; missing RESEND_API_KEY`);
+      this.logger.warn(
+        `Skipping notification email to ${to}; missing RESEND_API_KEY`,
+      );
       return false;
     }
     try {
       await this.resend.emails.send({ from: this.from, to, subject, html });
       return true;
     } catch (err) {
-      this.logger.error('Failed to send notification email', err as any);
+      this.logger.error('Failed to send notification email', err);
       return false;
     }
   }

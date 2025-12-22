@@ -8,7 +8,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const secret = process.env.JWT_SECRET;
     if (!secret) {
       throw new Error(
-        'JWT_SECRET is not configured. Please set JWT_SECRET in your environment or configuration before starting the server.'
+        'JWT_SECRET is not configured. Please set JWT_SECRET in your environment or configuration before starting the server.',
       );
     }
     super({
@@ -18,8 +18,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: { sub: string; isPremium?: boolean; isAdmin?: boolean }) {
-    return { 
+  async validate(payload: {
+    sub: string;
+    isPremium?: boolean;
+    isAdmin?: boolean;
+  }) {
+    return {
       userId: payload.sub,
       isPremium: payload.isPremium || false,
       isAdmin: payload.isAdmin || false,

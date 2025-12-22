@@ -6,10 +6,7 @@ import { LocationShare } from './location-share.entity';
 import { NotificationModule } from '../notifications/notification.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([LocationShare]),
-    NotificationModule,
-  ],
+  imports: [TypeOrmModule.forFeature([LocationShare]), NotificationModule],
   controllers: [LocationShareController],
   providers: [LocationShareService],
   exports: [LocationShareService],

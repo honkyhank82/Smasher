@@ -1,4 +1,12 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { User } from '../users/user.entity';
 
 @Entity('subscriptions')
@@ -34,32 +42,64 @@ export class Subscription {
   @Column({ type: 'varchar', default: 'month' })
   interval!: string;
 
-  @Column({ 
-    type: 'varchar', 
+  @Column({
+    type: 'varchar',
     length: 50,
-    default: 'active'
+    default: 'active',
   })
-  status!: 'active' | 'canceled' | 'past_due' | 'unpaid' | 'incomplete' | 'trialing';
+  status!:
+    | 'active'
+    | 'canceled'
+    | 'past_due'
+    | 'unpaid'
+    | 'incomplete'
+    | 'trialing';
 
-  @Column({ type: process.env.DATABASE_URL ? 'timestamp' : 'datetime', name: 'current_period_start' })
+  @Column({
+    type: process.env.DATABASE_URL ? 'timestamp' : 'datetime',
+    name: 'current_period_start',
+  })
   currentPeriodStart!: Date;
 
-  @Column({ type: process.env.DATABASE_URL ? 'timestamp' : 'datetime', name: 'current_period_end' })
+  @Column({
+    type: process.env.DATABASE_URL ? 'timestamp' : 'datetime',
+    name: 'current_period_end',
+  })
   currentPeriodEnd!: Date;
 
-  @Column({ type: process.env.DATABASE_URL ? 'timestamp' : 'datetime', name: 'cancel_at', nullable: true })
+  @Column({
+    type: process.env.DATABASE_URL ? 'timestamp' : 'datetime',
+    name: 'cancel_at',
+    nullable: true,
+  })
   cancelAt!: Date | null;
 
-  @Column({ type: process.env.DATABASE_URL ? 'timestamp' : 'datetime', name: 'canceled_at', nullable: true })
+  @Column({
+    type: process.env.DATABASE_URL ? 'timestamp' : 'datetime',
+    name: 'canceled_at',
+    nullable: true,
+  })
   canceledAt!: Date | null;
 
-  @Column({ type: process.env.DATABASE_URL ? 'timestamp' : 'datetime', name: 'ended_at', nullable: true })
+  @Column({
+    type: process.env.DATABASE_URL ? 'timestamp' : 'datetime',
+    name: 'ended_at',
+    nullable: true,
+  })
   endedAt!: Date | null;
 
-  @Column({ type: process.env.DATABASE_URL ? 'timestamp' : 'datetime', name: 'trial_start', nullable: true })
+  @Column({
+    type: process.env.DATABASE_URL ? 'timestamp' : 'datetime',
+    name: 'trial_start',
+    nullable: true,
+  })
   trialStart!: Date | null;
 
-  @Column({ type: process.env.DATABASE_URL ? 'timestamp' : 'datetime', name: 'trial_end', nullable: true })
+  @Column({
+    type: process.env.DATABASE_URL ? 'timestamp' : 'datetime',
+    name: 'trial_end',
+    nullable: true,
+  })
   trialEnd!: Date | null;
 
   @Column({ type: 'boolean', name: 'cancel_at_period_end', default: false })

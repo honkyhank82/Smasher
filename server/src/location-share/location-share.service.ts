@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThan } from 'typeorm';
 import { Cron, CronExpression } from '@nestjs/schedule';
@@ -32,7 +36,9 @@ export class LocationShareService {
       // Update existing share
       existingShare.latitude = dto.latitude;
       existingShare.longitude = dto.longitude;
-      existingShare.expiresAt = new Date(Date.now() + dto.durationMinutes * 60 * 1000);
+      existingShare.expiresAt = new Date(
+        Date.now() + dto.durationMinutes * 60 * 1000,
+      );
       return this.locationShareRepository.save(existingShare);
     }
 
@@ -71,7 +77,9 @@ export class LocationShareService {
     }
 
     if (share.userId !== userId) {
-      throw new ForbiddenException('You can only stop your own location shares');
+      throw new ForbiddenException(
+        'You can only stop your own location shares',
+      );
     }
 
     share.isActive = false;
@@ -101,7 +109,9 @@ export class LocationShareService {
     }
 
     if (share.userId !== userId) {
-      throw new ForbiddenException('You can only update your own location shares');
+      throw new ForbiddenException(
+        'You can only update your own location shares',
+      );
     }
 
     if (!share.isActive) {
@@ -167,7 +177,9 @@ export class LocationShareService {
 
     // Check if user has access to this share
     if (share.userId !== userId && share.sharedWithUserId !== userId) {
-      throw new ForbiddenException('You do not have access to this location share');
+      throw new ForbiddenException(
+        'You do not have access to this location share',
+      );
     }
 
     // Check if expired
@@ -185,7 +197,7 @@ export class LocationShareService {
   @Cron(CronExpression.EVERY_5_MINUTES)
   async cleanupExpiredShares(): Promise<void> {
     const now = new Date();
-    
+
     const expiredShares = await this.locationShareRepository.find({
       where: {
         expiresAt: LessThan(now),

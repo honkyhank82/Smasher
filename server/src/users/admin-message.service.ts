@@ -21,7 +21,7 @@ export class AdminMessageService {
   @Cron(CronExpression.EVERY_5_MINUTES)
   async checkNewUsers() {
     this.logger.log('Checking for new users to send admin welcome message...');
-    
+
     // Find users created between 10 and 20 minutes ago
     const now = new Date();
     const twentyMinutesAgo = new Date(now.getTime() - 20 * 60 * 1000);
@@ -33,7 +33,7 @@ export class AdminMessageService {
         isSeeded: false, // Don't message seeded profiles
         isAdmin: false,
       },
-      relations: ['profile']
+      relations: ['profile'],
     });
 
     if (newUsers.length === 0) {
@@ -43,7 +43,7 @@ export class AdminMessageService {
     // Find an admin user to send messages from
     const adminUser = await this.userRepository.findOne({
       where: { isAdmin: true },
-      relations: ['profile']
+      relations: ['profile'],
     });
 
     if (!adminUser) {
@@ -57,7 +57,7 @@ export class AdminMessageService {
         where: {
           sender: { id: adminUser.id },
           receiver: { id: user.id },
-        }
+        },
       });
 
       if (!existingMessage) {
@@ -68,8 +68,9 @@ export class AdminMessageService {
 
   private async sendWelcomeMessage(admin: User, user: User) {
     try {
-      const content = "Welcome to Smasher! 👋 Thanks for joining. If you have any questions or need help getting started, feel free to ask here. Happy smashing!";
-      
+      const content =
+        'Welcome to Smasher! 👋 Thanks for joining. If you have any questions or need help getting started, feel free to ask here. Happy smashing!';
+
       const message = this.messageRepository.create({
         sender: { id: admin.id },
         receiver: { id: user.id },
@@ -89,10 +90,12 @@ export class AdminMessageService {
           senderId: admin.id,
           displayName: admin.profile?.displayName || 'Admin',
           messageId: message.id,
-        }
+        },
       );
 
-      this.logger.log(`Sent welcome message to user ${user.id} (${user.email})`);
+      this.logger.log(
+        `Sent welcome message to user ${user.id} (${user.email})`,
+      );
     } catch (error) {
       this.logger.error(`Failed to send welcome message to ${user.id}`, error);
     }

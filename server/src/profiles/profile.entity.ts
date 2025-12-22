@@ -1,4 +1,12 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { User } from '../users/user.entity';
 
 @Entity('profiles')
@@ -43,20 +51,30 @@ export class Profile {
   @Column({ name: 'weight_lbs', type: 'int', nullable: true })
   weightLbs!: number | null;
 
-   @Column({ name: 'ethnicity', type: 'varchar', length: 50, nullable: true })
-   ethnicity!: string | null;
+  @Column({ name: 'ethnicity', type: 'varchar', length: 50, nullable: true })
+  ethnicity!: string | null;
 
-   @Column({ name: 'body_type', type: 'varchar', length: 50, nullable: true })
-   bodyType!: string | null;
+  @Column({ name: 'body_type', type: 'varchar', length: 50, nullable: true })
+  bodyType!: string | null;
 
-   @Column({ name: 'sexual_position', type: 'varchar', length: 50, nullable: true })
-   sexualPosition!: string | null;
+  @Column({
+    name: 'sexual_position',
+    type: 'varchar',
+    length: 50,
+    nullable: true,
+  })
+  sexualPosition!: string | null;
 
-   @Column({ name: 'relationship_status', type: 'varchar', length: 50, nullable: true })
-   relationshipStatus!: string | null;
+  @Column({
+    name: 'relationship_status',
+    type: 'varchar',
+    length: 50,
+    nullable: true,
+  })
+  relationshipStatus!: string | null;
 
-   @Column({ name: 'looking_for', type: 'varchar', length: 100, nullable: true })
-   lookingFor!: string | null;
+  @Column({ name: 'looking_for', type: 'varchar', length: 100, nullable: true })
+  lookingFor!: string | null;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;

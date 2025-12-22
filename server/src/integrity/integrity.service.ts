@@ -12,7 +12,10 @@ export interface IntegrityTokenPayload {
     requestHash?: string;
   };
   appIntegrity: {
-    appRecognitionVerdict: 'PLAY_RECOGNIZED' | 'UNRECOGNIZED_VERSION' | 'UNEVALUATED';
+    appRecognitionVerdict:
+      | 'PLAY_RECOGNIZED'
+      | 'UNRECOGNIZED_VERSION'
+      | 'UNEVALUATED';
     packageName: string;
     certificateSha256Digest: string[];
     versionCode: string;
@@ -38,7 +41,8 @@ export interface IntegrityVerificationResult {
 @Injectable()
 export class IntegrityService {
   private readonly logger = new Logger(IntegrityService.name);
-  private readonly packageName = process.env.ANDROID_PACKAGE_NAME || 'com.smasherapp';
+  private readonly packageName =
+    process.env.ANDROID_PACKAGE_NAME || 'com.smasherapp';
   private readonly projectNumber = process.env.GOOGLE_CLOUD_PROJECT_NUMBER;
 
   /**
@@ -46,9 +50,7 @@ export class IntegrityService {
    * Must match the client-side hash computation
    */
   computeRequestHash(requestData: string): string {
-    return createHash('sha256')
-      .update(requestData)
-      .digest('base64');
+    return createHash('sha256').update(requestData).digest('base64');
   }
 
   /**
@@ -56,7 +58,9 @@ export class IntegrityService {
    * @param integrityToken The encrypted token from the app
    * @returns Decrypted and verified payload
    */
-  async decryptAndVerifyToken(integrityToken: string): Promise<IntegrityVerificationResult> {
+  async decryptAndVerifyToken(
+    integrityToken: string,
+  ): Promise<IntegrityVerificationResult> {
     try {
       // Initialize Google Auth with service account
       const auth = new google.auth.GoogleAuth({
@@ -78,7 +82,8 @@ export class IntegrityService {
         },
       });
 
-      const payload = response.data.tokenPayloadExternal as unknown as IntegrityTokenPayload;
+      const payload = response.data
+        .tokenPayloadExternal as unknown as IntegrityTokenPayload;
 
       if (!payload) {
         return {
@@ -103,37 +108,53 @@ export class IntegrityService {
    * @param payload The decrypted payload
    * @returns Verification result with warnings
    */
-  private verifyIntegrityPayload(payload: IntegrityTokenPayload): IntegrityVerificationResult {
+  private verifyIntegrityPayload(
+    payload: IntegrityTokenPayload,
+  ): IntegrityVerificationResult {
     const warnings: string[] = [];
     let isValid = true;
 
     // Check app integrity
     if (payload.appIntegrity.appRecognitionVerdict !== 'PLAY_RECOGNIZED') {
-      warnings.push(`App not recognized by Play Store: ${payload.appIntegrity.appRecognitionVerdict}`);
+      warnings.push(
+        `App not recognized by Play Store: ${payload.appIntegrity.appRecognitionVerdict}`,
+      );
       if (payload.appIntegrity.appRecognitionVerdict === 'UNEVALUATED') {
-        warnings.push('Possible replay attack detected - app verdict is UNEVALUATED');
+        warnings.push(
+          'Possible replay attack detected - app verdict is UNEVALUATED',
+        );
       }
       isValid = false;
     }
 
     // Check package name
     if (payload.requestDetails.requestPackageName !== this.packageName) {
-      warnings.push(`Package name mismatch: expected ${this.packageName}, got ${payload.requestDetails.requestPackageName}`);
+      warnings.push(
+        `Package name mismatch: expected ${this.packageName}, got ${payload.requestDetails.requestPackageName}`,
+      );
       isValid = false;
     }
 
     // Check device integrity
-    if (!payload.deviceIntegrity.deviceRecognitionVerdict || 
-        payload.deviceIntegrity.deviceRecognitionVerdict.length === 0) {
-      warnings.push('Device integrity verdict is empty - possible replay attack');
+    if (
+      !payload.deviceIntegrity.deviceRecognitionVerdict ||
+      payload.deviceIntegrity.deviceRecognitionVerdict.length === 0
+    ) {
+      warnings.push(
+        'Device integrity verdict is empty - possible replay attack',
+      );
       isValid = false;
     }
 
     // Check licensing
     if (payload.accountDetails.appLicensingVerdict !== 'LICENSED') {
-      warnings.push(`App licensing issue: ${payload.accountDetails.appLicensingVerdict}`);
+      warnings.push(
+        `App licensing issue: ${payload.accountDetails.appLicensingVerdict}`,
+      );
       if (payload.accountDetails.appLicensingVerdict === 'UNEVALUATED') {
-        warnings.push('Possible replay attack detected - licensing verdict is UNEVALUATED');
+        warnings.push(
+          'Possible replay attack detected - licensing verdict is UNEVALUATED',
+        );
       }
       isValid = false;
     }
@@ -142,7 +163,7 @@ export class IntegrityService {
     const tokenTimestamp = parseInt(payload.requestDetails.timestampMillis);
     const currentTimestamp = Date.now();
     const fiveMinutes = 5 * 60 * 1000;
-    
+
     if (currentTimestamp - tokenTimestamp > fiveMinutes) {
       warnings.push('Token is older than 5 minutes');
       isValid = false;
@@ -161,7 +182,10 @@ export class IntegrityService {
    * @param expectedRequestData The original request data
    * @returns true if hash matches
    */
-  verifyRequestHash(payload: IntegrityTokenPayload, expectedRequestData: string): boolean {
+  verifyRequestHash(
+    payload: IntegrityTokenPayload,
+    expectedRequestData: string,
+  ): boolean {
     if (!payload.requestDetails.requestHash) {
       this.logger.warn('No request hash in payload');
       return false;
@@ -199,7 +223,8 @@ export class IntegrityService {
       return {
         isValid: false,
         payload: result.payload,
-        error: 'Request hash verification failed - request may have been tampered with',
+        error:
+          'Request hash verification failed - request may have been tampered with',
         warnings: result.warnings,
       };
     }

@@ -1,6 +1,21 @@
-import { Body, Controller, Get, Patch, UseGuards, Param, ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Patch,
+  UseGuards,
+  Param,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { IsString, IsOptional, IsBoolean, IsNumber, MaxLength } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsBoolean,
+  IsNumber,
+  MaxLength,
+} from 'class-validator';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { ProfilesService } from './profiles.service';
 import { ProfileViewsService } from '../profile-views/profile-views.service';
@@ -83,7 +98,14 @@ export class ProfilesController {
   ) {}
 
   @Get('me')
-  async me(@CurrentUser() user: { userId: string; isPremium: boolean; isAdmin: boolean }) {
+  async me(
+    @CurrentUser()
+    user: {
+      userId: string;
+      isPremium: boolean;
+      isAdmin: boolean;
+    },
+  ) {
     try {
       const profile = await this.profiles.getByUserId(user.userId);
       return {
@@ -108,7 +130,7 @@ export class ProfilesController {
           lat: profile.lat,
           lng: profile.lng,
           profilePicture: profile.profilePicture,
-          gallery: profile.gallery || []
+          gallery: profile.gallery || [],
         },
       };
     } catch (error) {
@@ -119,7 +141,8 @@ export class ProfilesController {
 
   @Get(':id')
   async getProfile(
-    @CurrentUser() currentUser: { userId: string; isPremium: boolean; isAdmin: boolean },
+    @CurrentUser()
+    currentUser: { userId: string; isPremium: boolean; isAdmin: boolean },
     @Param('id') userId: string,
   ) {
     try {
@@ -130,7 +153,7 @@ export class ProfilesController {
 
       // For other users' profiles, get the profile and record the view
       const profile = await this.profiles.getByUserId(userId);
-      
+
       // Record the profile view (if not viewing your own profile)
       if (userId !== currentUser.userId) {
         await this.profileViews.recordView(currentUser.userId, userId);
@@ -145,13 +168,13 @@ export class ProfilesController {
 
   @Patch('me')
   async update(
-    @CurrentUser() user: { userId: string }, 
-    @Body() dto: UpdateProfileDto
+    @CurrentUser() user: { userId: string },
+    @Body() dto: UpdateProfileDto,
   ) {
     const updatedProfile = await this.profiles.update(user.userId, dto);
     return {
       message: 'Profile updated successfully',
-      profile: updatedProfile
+      profile: updatedProfile,
     };
   }
 
@@ -164,11 +187,11 @@ export class ProfilesController {
     if (!currentUser.isAdmin) {
       throw new ForbiddenException('Admin access required');
     }
-    
+
     const updatedProfile = await this.profiles.update(userId, dto);
     return {
       message: 'Profile updated successfully by admin',
-      profile: updatedProfile
+      profile: updatedProfile,
     };
   }
 }

@@ -28,7 +28,7 @@ export class NotificationService {
     data?: any,
   ): Promise<void> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
-    
+
     if (!user || !user.pushToken) {
       console.log(`No push token for user ${userId}`);
       return;
@@ -55,7 +55,10 @@ export class NotificationService {
       }
       console.log(`Push notification sent to user ${userId}`);
     } catch (error) {
-      console.error(`Error sending push notification to user ${userId}:`, error);
+      console.error(
+        `Error sending push notification to user ${userId}:`,
+        error,
+      );
     }
   }
 
@@ -89,11 +92,11 @@ export class NotificationService {
     senderUserId: string,
     durationMinutes: number,
   ): Promise<void> {
-    const sender = await this.userRepository.findOne({ 
+    const sender = await this.userRepository.findOne({
       where: { id: senderUserId },
       relations: ['profile'],
     });
-    
+
     if (!sender || !sender.profile) return;
 
     const durationText = this.formatDuration(durationMinutes);
@@ -121,11 +124,11 @@ export class NotificationService {
     recipientUserId: string,
     senderUserId: string,
   ): Promise<void> {
-    const sender = await this.userRepository.findOne({ 
+    const sender = await this.userRepository.findOne({
       where: { id: senderUserId },
       relations: ['profile'],
     });
-    
+
     if (!sender || !sender.profile) return;
 
     const title = '📍 Location Sharing Ended';
@@ -152,11 +155,11 @@ export class NotificationService {
     recipientUserId: string,
     senderUserId: string,
   ): Promise<void> {
-    const sender = await this.userRepository.findOne({ 
+    const sender = await this.userRepository.findOne({
       where: { id: senderUserId },
       relations: ['profile'],
     });
-    
+
     if (!sender || !sender.profile) return;
 
     const title = '📍 Location Sharing Expired';
@@ -179,7 +182,10 @@ export class NotificationService {
   /**
    * Get user notifications
    */
-  async getUserNotifications(userId: string, limit: number = 50): Promise<Notification[]> {
+  async getUserNotifications(
+    userId: string,
+    limit: number = 50,
+  ): Promise<Notification[]> {
     return this.notificationRepository.find({
       where: { userId },
       order: { createdAt: 'DESC' },

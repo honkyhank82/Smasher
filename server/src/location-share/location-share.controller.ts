@@ -35,7 +35,11 @@ export class LocationShareController {
     @Param('id') shareId: string,
     @Body() dto: UpdateLocationDto,
   ) {
-    return this.locationShareService.updateLocation(req.user.userId, shareId, dto);
+    return this.locationShareService.updateLocation(
+      req.user.userId,
+      shareId,
+      dto,
+    );
   }
 
   @Get('active')

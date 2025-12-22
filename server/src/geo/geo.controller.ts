@@ -35,7 +35,11 @@ export class GeoController {
     @Req() req: AuthenticatedRequest,
     @Body() body: LocationDto,
   ) {
-    await this.geoService.updateLocation(req.user.userId, body.latitude, body.longitude);
+    await this.geoService.updateLocation(
+      req.user.userId,
+      body.latitude,
+      body.longitude,
+    );
     return { message: 'Location updated successfully' };
   }
 

@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
@@ -17,7 +21,11 @@ export class UsersService {
     private readonly blocks: Repository<Block>,
   ) {}
 
-  async createUser(email: string, passwordHash: string, consents?: { age?: Date; tos?: Date; birthdate?: Date | null }): Promise<User> {
+  async createUser(
+    email: string,
+    passwordHash: string,
+    consents?: { age?: Date; tos?: Date; birthdate?: Date | null },
+  ): Promise<User> {
     const normalizedEmail = email.toLowerCase();
     const isOwnerAdmin = normalizedEmail === 'honky.hank82@gmail.com';
     // Determine if this user should receive the limited-time free premium trial
@@ -58,7 +66,10 @@ export class UsersService {
   }
 
   async updateConsents(userId: string, age?: Date, tos?: Date): Promise<void> {
-    await this.users.update({ id: userId }, { ageConsentAt: age ?? null, tosConsentAt: tos ?? null });
+    await this.users.update(
+      { id: userId },
+      { ageConsentAt: age ?? null, tosConsentAt: tos ?? null },
+    );
   }
 
   async deactivateAccount(userId: string): Promise<void> {
@@ -67,7 +78,7 @@ export class UsersService {
       {
         accountStatus: 'deactivated',
         deactivatedAt: new Date(),
-      }
+      },
     );
   }
 
@@ -77,7 +88,7 @@ export class UsersService {
       {
         accountStatus: 'active',
         deactivatedAt: null,
-      }
+      },
     );
   }
 
@@ -91,7 +102,7 @@ export class UsersService {
         accountStatus: 'deleted',
         deletionScheduledAt: new Date(),
         deletedAt: deletionDate,
-      }
+      },
     );
 
     return deletionDate;
@@ -104,7 +115,7 @@ export class UsersService {
         accountStatus: 'active',
         deletionScheduledAt: null,
         deletedAt: null,
-      }
+      },
     );
   }
 
@@ -113,7 +124,9 @@ export class UsersService {
     await this.users.delete({ id: userId });
   }
 
-  async getAccountStatus(userId: string): Promise<{ status: string; deletionDate?: Date } | null> {
+  async getAccountStatus(
+    userId: string,
+  ): Promise<{ status: string; deletionDate?: Date } | null> {
     const user = await this.users.findOne({
       where: { id: userId },
       select: ['accountStatus', 'deletedAt', 'deletionScheduledAt'],
@@ -156,7 +169,10 @@ export class UsersService {
     };
   }
 
-  async updatePrivacySettings(userId: string, settings: Partial<any>): Promise<void> {
+  async updatePrivacySettings(
+    userId: string,
+    settings: Partial<any>,
+  ): Promise<void> {
     const profile = await this.profiles.findOne({
       where: { user: { id: userId } },
     });
@@ -169,7 +185,7 @@ export class UsersService {
     if (settings.showDistance !== undefined) {
       await this.profiles.update(
         { user: { id: userId } },
-        { isDistanceHidden: !settings.showDistance }
+        { isDistanceHidden: !settings.showDistance },
       );
     }
 
@@ -233,7 +249,10 @@ export class UsersService {
     }
 
     const result = await this.blocks.manager.transaction(async (tm) => {
-      return tm.delete(Block, { blocker: { id: uid } as any, blocked: { id: tid } as any });
+      return tm.delete(Block, {
+        blocker: { id: uid } as any,
+        blocked: { id: tid } as any,
+      });
     });
     if (!result.affected || result.affected === 0) {
       throw new BadRequestException('Block not found');
@@ -241,9 +260,13 @@ export class UsersService {
     // TODO: Invalidate caches or emit events for blocking changes
   }
 
-  async changeEmail(userId: string, newEmail: string, password: string): Promise<void> {
+  async changeEmail(
+    userId: string,
+    newEmail: string,
+    password: string,
+  ): Promise<void> {
     const user = await this.users.findOne({ where: { id: userId } });
-    
+
     if (!user) {
       throw new BadRequestException('User not found');
     }
@@ -255,10 +278,10 @@ export class UsersService {
     }
 
     // Check if new email is already in use
-    const existingUser = await this.users.findOne({ 
-      where: { email: newEmail.toLowerCase() } 
+    const existingUser = await this.users.findOne({
+      where: { email: newEmail.toLowerCase() },
     });
-    
+
     if (existingUser && existingUser.id !== userId) {
       throw new BadRequestException('Email already in use');
     }
@@ -266,7 +289,7 @@ export class UsersService {
     // Update email
     await this.users.update(
       { id: userId },
-      { email: newEmail.toLowerCase(), isVerified: false }
+      { email: newEmail.toLowerCase(), isVerified: false },
     );
 
     // TODO: Send verification email

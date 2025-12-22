@@ -41,9 +41,11 @@ export class ChatService {
           WHEN message.sender_id = :userId THEN message.receiver_id 
           ELSE message.sender_id 
         END`,
-        'other_user_id'
+        'other_user_id',
       )
-      .where('message.sender_id = :userId OR message.receiver_id = :userId', { userId })
+      .where('message.sender_id = :userId OR message.receiver_id = :userId', {
+        userId,
+      })
       .groupBy('other_user_id')
       .orderBy('lastMessageTime', 'DESC')
       .getRawMany();
@@ -63,7 +65,7 @@ export class ChatService {
         .createQueryBuilder('message')
         .where(
           '(message.sender_id = :userId AND message.receiver_id = :otherUserId) OR (message.sender_id = :otherUserId AND message.receiver_id = :userId)',
-          { userId, otherUserId: conv.otherUserId }
+          { userId, otherUserId: conv.otherUserId },
         )
         .orderBy('message.created_at', 'DESC')
         .getOne();

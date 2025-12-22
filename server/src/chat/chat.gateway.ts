@@ -59,7 +59,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       // Emit online status event
       this.eventEmitter.emit('user.online', { userId, timestamp: new Date() });
-      
+
       // Broadcast online status to all connected users
       this.server.emit('userOnline', { userId, timestamp: new Date() });
 
@@ -76,13 +76,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.connectedUsers.delete(userId);
       const lastSeen = new Date();
       this.onlineStatus.set(userId, lastSeen);
-      
+
       // Emit offline status event
       this.eventEmitter.emit('user.offline', { userId, timestamp: lastSeen });
-      
+
       // Broadcast offline status to all connected users
       this.server.emit('userOffline', { userId, timestamp: lastSeen });
-      
+
       console.log(`User ${userId} disconnected`);
     }
   }
@@ -114,7 +114,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { userId: string },
   ) {
     const currentUserId = client.data.userId;
-    
+
     // Load message history between these two users
     const messages = await this.messageRepository
       .createQueryBuilder('message')
@@ -122,7 +122,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       .leftJoinAndSelect('message.receiver', 'receiver')
       .where(
         '(message.sender_id = :userId1 AND message.receiver_id = :userId2) OR (message.sender_id = :userId2 AND message.receiver_id = :userId1)',
-        { userId1: currentUserId, userId2: data.userId }
+        { userId1: currentUserId, userId2: data.userId },
       )
       .orderBy('message.created_at', 'ASC')
       .limit(100)
@@ -144,16 +144,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }));
 
     client.emit('messageHistory', formattedMessages);
-    
+
     // Mark messages as read when viewing chat
     await this.messageRepository
       .createQueryBuilder()
       .update(Message)
       .set({ isRead: true, readAt: new Date() })
-      .where('receiver_id = :currentUserId AND sender_id = :otherUserId AND is_read = false', {
-        currentUserId,
-        otherUserId: data.userId,
-      })
+      .where(
+        'receiver_id = :currentUserId AND sender_id = :otherUserId AND is_read = false',
+        {
+          currentUserId,
+          otherUserId: data.userId,
+        },
+      )
       .execute();
   }
 
@@ -165,7 +168,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const senderId = client.data.userId;
 
     // Get sender's premium/admin status
-    const sender = await this.userRepository.findOne({ 
+    const sender = await this.userRepository.findOne({
       where: { id: senderId },
       relations: ['profile'],
     });
@@ -186,8 +189,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     // If no existing messages and user is not premium, check distance restriction
     if (existingMessages === 0 && !senderIsPremium) {
-      const distance = await this.geoService.calculateDistanceBetweenUsers(senderId, data.receiverId);
-      
+      const distance = await this.geoService.calculateDistanceBetweenUsers(
+        senderId,
+        data.receiverId,
+      );
+
       if (distance !== null && distance > 10) {
         client.emit('messageError', {
           error: 'DISTANCE_RESTRICTION',
@@ -235,7 +241,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           senderId,
           displayName: sender.profile.displayName || 'User',
           messageId: savedMessage.id,
-        }
+        },
       );
     }
 
@@ -243,32 +249,39 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     client.emit('messageSent', messagePayload);
 
     // Auto-reply for seeded users
-    const receiver = await this.userRepository.findOne({ 
+    const receiver = await this.userRepository.findOne({
       where: { id: data.receiverId },
-      relations: ['profile']
+      relations: ['profile'],
     });
 
     if (receiver && receiver.isSeeded) {
       // Simulate random delay between 15s and 60s
       const delay = Math.floor(Math.random() * (60000 - 15000) + 15000);
-      
+
       setTimeout(async () => {
         try {
           // Simulate user coming online to reply
-          this.eventEmitter.emit('user.online', { userId: receiver.id, timestamp: new Date() });
-          this.server.emit('userOnline', { userId: receiver.id, timestamp: new Date() });
+          this.eventEmitter.emit('user.online', {
+            userId: receiver.id,
+            timestamp: new Date(),
+          });
+          this.server.emit('userOnline', {
+            userId: receiver.id,
+            timestamp: new Date(),
+          });
 
-          const replyContent = "Hey! Thanks for the message. I'm a bit busy right now but I'll get back to you soon! 😊";
-          
+          const replyContent =
+            "Hey! Thanks for the message. I'm a bit busy right now but I'll get back to you soon! 😊";
+
           const replyMessage = this.messageRepository.create({
             sender: { id: receiver.id },
             receiver: { id: senderId },
             content: replyContent,
             isRead: false,
           });
-          
+
           const savedReply = await this.messageRepository.save(replyMessage);
-          
+
           const replyPayload = {
             id: savedReply.id,
             senderId: receiver.id,
@@ -279,13 +292,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             readAt: null,
             senderIsPremium: receiver.isPremium || receiver.isAdmin,
           };
-          
+
           // Send to original sender (now receiver of reply)
           const originalSenderSocketId = this.connectedUsers.get(senderId);
           if (originalSenderSocketId) {
-            this.server.to(originalSenderSocketId).emit('message', replyPayload);
+            this.server
+              .to(originalSenderSocketId)
+              .emit('message', replyPayload);
           }
-          
+
           // Send push notification
           await this.notificationService.sendPushNotification(
             senderId,
@@ -296,16 +311,24 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
               senderId: receiver.id,
               displayName: receiver.profile?.displayName || 'User',
               messageId: savedReply.id,
-            }
+            },
           );
-          
-          console.log(`Auto-replied to user ${senderId} from seeded user ${receiver.id}`);
+
+          console.log(
+            `Auto-replied to user ${senderId} from seeded user ${receiver.id}`,
+          );
 
           // Simulate user going offline after reply
           setTimeout(() => {
-             const lastSeen = new Date();
-             this.eventEmitter.emit('user.offline', { userId: receiver.id, timestamp: lastSeen });
-             this.server.emit('userOffline', { userId: receiver.id, timestamp: lastSeen });
+            const lastSeen = new Date();
+            this.eventEmitter.emit('user.offline', {
+              userId: receiver.id,
+              timestamp: lastSeen,
+            });
+            this.server.emit('userOffline', {
+              userId: receiver.id,
+              timestamp: lastSeen,
+            });
           }, 5000); // Stay "online" for 5 seconds after replying
         } catch (error) {
           console.error('Error sending auto-reply:', error);
@@ -342,8 +365,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     // Notify senders that their messages were read (only if sender is premium or admin)
     for (const msg of messages) {
-      const sender = await this.userRepository.findOne({ where: { id: msg.senderId } });
-      
+      const sender = await this.userRepository.findOne({
+        where: { id: msg.senderId },
+      });
+
       // Only send read receipts if the sender has an active premium subscription or is admin
       if (
         sender &&

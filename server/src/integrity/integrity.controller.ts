@@ -1,4 +1,11 @@
-import { Controller, Post, Body, Logger, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Logger,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { IntegrityService } from './integrity.service';
@@ -6,7 +13,6 @@ import { SubmitScoreDto } from './dto/submit-score.dto';
 import { ProcessPurchaseDto } from './dto/process-purchase.dto';
 import { VerifyActionDto } from './dto/verify-action.dto';
 import { ScoreSubmission } from './score-submission.entity';
-
 
 @Controller('integrity')
 export class IntegrityController {
@@ -26,15 +32,17 @@ export class IntegrityController {
     // Reconstruct request data deterministically using URLSearchParams
     const params = new URLSearchParams();
     // Fixed key order, only include defined values
-    if (dto.score !== undefined && dto.score !== null) params.append('score', String(dto.score));
+    if (dto.score !== undefined && dto.score !== null)
+      params.append('score', String(dto.score));
     if (dto.userId) params.append('userId', dto.userId);
     const requestData = params.toString();
 
     // Verify integrity token with request hash
-    const verification = await this.integrityService.verifyIntegrityWithRequestHash(
-      dto.integrityToken,
-      requestData,
-    );
+    const verification =
+      await this.integrityService.verifyIntegrityWithRequestHash(
+        dto.integrityToken,
+        requestData,
+      );
 
     if (!verification.isValid) {
       this.logger.warn('Score submission failed integrity check', {
@@ -62,14 +70,26 @@ export class IntegrityController {
     }
 
     // Integrity verified - proceed with score submission
-    this.logger.log('Score submission verified', { userId: dto.userId, score: dto.score });
+    this.logger.log('Score submission verified', {
+      userId: dto.userId,
+      score: dto.score,
+    });
     // Persist score to database
     try {
-      const record = this.scoreRepo.create({ userId: dto.userId, score: dto.score });
+      const record = this.scoreRepo.create({
+        userId: dto.userId,
+        score: dto.score,
+      });
       await this.scoreRepo.save(record);
     } catch (err) {
-      this.logger.error('Failed to persist score submission', { userId: dto.userId, error: err?.message || String(err) });
-      throw new HttpException({ message: 'Failed to save score' }, HttpStatus.INTERNAL_SERVER_ERROR);
+      this.logger.error('Failed to persist score submission', {
+        userId: dto.userId,
+        error: err?.message || String(err),
+      });
+      throw new HttpException(
+        { message: 'Failed to save score' },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
 
     return {
@@ -87,15 +107,17 @@ export class IntegrityController {
     // Reconstruct request data deterministically
     const params = new URLSearchParams();
     if (dto.itemId) params.append('itemId', dto.itemId);
-    if (dto.amount !== undefined && dto.amount !== null) params.append('amount', dto.amount.toFixed(2));
+    if (dto.amount !== undefined && dto.amount !== null)
+      params.append('amount', dto.amount.toFixed(2));
     if (dto.userId) params.append('userId', dto.userId);
     const requestData = params.toString();
 
     // Verify integrity token
-    const verification = await this.integrityService.verifyIntegrityWithRequestHash(
-      dto.integrityToken,
-      requestData,
-    );
+    const verification =
+      await this.integrityService.verifyIntegrityWithRequestHash(
+        dto.integrityToken,
+        requestData,
+      );
 
     if (!verification.isValid) {
       this.logger.error('Purchase failed integrity check', {
@@ -114,7 +136,9 @@ export class IntegrityController {
     }
 
     // Additional checks for purchases
-    if (verification.payload?.accountDetails.appLicensingVerdict !== 'LICENSED') {
+    if (
+      verification.payload?.accountDetails.appLicensingVerdict !== 'LICENSED'
+    ) {
       throw new HttpException(
         {
           message: 'App is not licensed',
@@ -150,10 +174,11 @@ export class IntegrityController {
     const requestData = params.toString();
 
     // Verify integrity token
-    const verification = await this.integrityService.verifyIntegrityWithRequestHash(
-      dto.integrityToken,
-      requestData,
-    );
+    const verification =
+      await this.integrityService.verifyIntegrityWithRequestHash(
+        dto.integrityToken,
+        requestData,
+      );
 
     if (!verification.isValid) {
       this.logger.warn('Action failed integrity check', {
@@ -185,7 +210,9 @@ export class IntegrityController {
    */
   @Post('verify-token')
   async verifyToken(@Body() body: { integrityToken: string }) {
-    const verification = await this.integrityService.decryptAndVerifyToken(body.integrityToken);
+    const verification = await this.integrityService.decryptAndVerifyToken(
+      body.integrityToken,
+    );
 
     if (!verification.isValid) {
       throw new HttpException(

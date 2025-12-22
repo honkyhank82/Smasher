@@ -1,4 +1,16 @@
-import { Controller, Post, Get, Delete, Body, Req, UseGuards, Headers, HttpCode, HttpStatus, Logger } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Delete,
+  Body,
+  Req,
+  UseGuards,
+  Headers,
+  HttpCode,
+  HttpStatus,
+  Logger,
+} from '@nestjs/common';
 import type { RawBodyRequest } from '@nestjs/common';
 import { Request } from 'express';
 import { SubscriptionsService } from './subscriptions.service';
@@ -11,9 +23,7 @@ export class SubscriptionsController {
   private stripe: Stripe;
   private webhookSecret: string;
 
-  constructor(
-    private readonly subscriptionsService: SubscriptionsService,
-  ) {
+  constructor(private readonly subscriptionsService: SubscriptionsService) {
     const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
     if (stripeSecretKey) {
       this.stripe = new Stripe(stripeSecretKey, {
@@ -48,12 +58,12 @@ export class SubscriptionsController {
    */
   @Post('portal')
   @UseGuards(JwtAuthGuard)
-  async createPortal(
-    @Req() req: any,
-    @Body() body: { returnUrl: string },
-  ) {
+  async createPortal(@Req() req: any, @Body() body: { returnUrl: string }) {
     const userId = req.user.userId;
-    return this.subscriptionsService.createPortalSession(userId, body.returnUrl);
+    return this.subscriptionsService.createPortalSession(
+      userId,
+      body.returnUrl,
+    );
   }
 
   /**
@@ -92,7 +102,7 @@ export class SubscriptionsController {
   /**
    * Stripe webhook endpoint
    * POST /subscriptions/webhook
-   * 
+   *
    * This endpoint receives events from Stripe when subscriptions change
    * Must be publicly accessible (no auth guard)
    */
@@ -125,7 +135,9 @@ export class SubscriptionsController {
 
       this.logger.log(`Received webhook event: ${event.type}`);
     } catch (err) {
-      this.logger.error(`Webhook signature verification failed: ${err.message}`);
+      this.logger.error(
+        `Webhook signature verification failed: ${err.message}`,
+      );
       throw new Error(`Webhook Error: ${err.message}`);
     }
 

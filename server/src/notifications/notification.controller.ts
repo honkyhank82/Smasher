@@ -26,11 +26,16 @@ export class NotificationController {
     @Query() query: NotificationsQueryDto,
   ) {
     const limitNum = query.limit ?? 50;
-    return this.notificationService.getUserNotifications(req.user.userId, limitNum);
+    return this.notificationService.getUserNotifications(
+      req.user.userId,
+      limitNum,
+    );
   }
 
   @Post(':id/read')
-  async markAsRead(@Param('id', new ParseUUIDPipe({ version: '4' })) notificationId: string) {
+  async markAsRead(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) notificationId: string,
+  ) {
     await this.notificationService.markAsRead(notificationId);
     return { message: 'Notification marked as read' };
   }

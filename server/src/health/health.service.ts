@@ -22,7 +22,7 @@ export class HealthService {
 
   async detailedCheck() {
     const startTime = Date.now();
-    
+
     // Check database connectivity
     let dbStatus = 'healthy';
     let dbResponseTime = 0;
@@ -43,12 +43,16 @@ export class HealthService {
 
     // Check CPU usage
     const cpus = os.cpus();
-    const cpuUsage = cpus.map(cpu => {
-      const total = Object.values(cpu.times).reduce((acc, time) => acc + time, 0);
+    const cpuUsage = cpus.map((cpu) => {
+      const total = Object.values(cpu.times).reduce(
+        (acc, time) => acc + time,
+        0,
+      );
       const idle = cpu.times.idle;
       return ((total - idle) / total) * 100;
     });
-    const avgCpuUsage = cpuUsage.reduce((acc, usage) => acc + usage, 0) / cpuUsage.length;
+    const avgCpuUsage =
+      cpuUsage.reduce((acc, usage) => acc + usage, 0) / cpuUsage.length;
 
     const responseTime = Date.now() - startTime;
 

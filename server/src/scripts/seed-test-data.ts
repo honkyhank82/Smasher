@@ -16,8 +16,7 @@ function getDbConfigFromEnv() {
         password: decodeURIComponent(u.password || ''),
         database,
       };
-    } catch {
-    }
+    } catch {}
   }
 
   return {
@@ -52,7 +51,7 @@ const TEST_USERS = [
     displayName: 'Alex',
     bio: 'Coffee enthusiast ☕ | Loves hiking and photography',
     birthdate: new Date('1996-03-15'),
-    lat: 40.7580,
+    lat: 40.758,
     lng: -73.9855,
   },
   {
@@ -61,7 +60,7 @@ const TEST_USERS = [
     bio: 'Fitness trainer 💪 | Marathon runner | Plant-based diet advocate',
     birthdate: new Date('1998-07-22'),
     lat: 40.7489,
-    lng: -73.9680,
+    lng: -73.968,
   },
   {
     email: 'sam@test.com',
@@ -101,14 +100,14 @@ const TEST_USERS = [
     bio: 'Chef 👨‍🍳 | Food photographer | Loves experimenting with fusion cuisine',
     birthdate: new Date('2000-04-18'),
     lat: 40.7489,
-    lng: -73.9680,
+    lng: -73.968,
   },
   {
     email: 'avery@test.com',
     displayName: 'Avery',
     bio: 'Bookworm 📚 | Writer | Coffee shop regular',
     birthdate: new Date('1993-12-03'),
-    lat: 40.7580,
+    lat: 40.758,
     lng: -73.9855,
   },
 ];
@@ -168,7 +167,6 @@ async function seedTestData() {
     console.log('\n📝 Test credentials:');
     console.log('   Email: alex@test.com (or any other test email)');
     console.log('   Password: password123');
-
   } catch (error) {
     console.error('❌ Error seeding test data:', error);
     throw error;

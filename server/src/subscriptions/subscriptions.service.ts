@@ -39,7 +39,10 @@ export class SubscriptionsService {
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : String(err);
       const errStack = err instanceof Error ? err.stack : undefined;
-      this.logger.error(`Failed to initialize SubscriptionsService: ${errMsg}`, errStack);
+      this.logger.error(
+        `Failed to initialize SubscriptionsService: ${errMsg}`,
+        errStack,
+      );
     }
   }
 
@@ -259,11 +262,14 @@ export class SubscriptionsService {
 
     const getIdFromUnknown = (v: unknown): string | undefined => {
       if (typeof v === 'string') return v;
-      if (v && typeof (v as Record<string, unknown>)['id'] === 'string') return String((v as Record<string, unknown>)['id']);
+      if (v && typeof (v as Record<string, unknown>)['id'] === 'string')
+        return String((v as Record<string, unknown>)['id']);
       return undefined;
     };
     const sessionSubId = getIdFromUnknown(session.subscription) ?? 'unknown';
-    this.logger.log(`Checkout completed for user ${userId}, subscription: ${sessionSubId}`);
+    this.logger.log(
+      `Checkout completed for user ${userId}, subscription: ${sessionSubId}`,
+    );
 
     // If there's a subscription ID, ensure it's persisted (fallback for delayed subscription.created events)
     if (session.subscription) {
@@ -297,7 +303,10 @@ export class SubscriptionsService {
         } catch (err: unknown) {
           const errMsg = err instanceof Error ? err.message : String(err);
           const errStack = err instanceof Error ? err.stack : undefined;
-          this.logger.error(`Failed to create subscription from checkout session: ${errMsg}`, errStack);
+          this.logger.error(
+            `Failed to create subscription from checkout session: ${errMsg}`,
+            errStack,
+          );
         }
       }
     }
@@ -308,8 +317,17 @@ export class SubscriptionsService {
    */
   private normalizeStatus(status: unknown): Subscription['status'] {
     const s = String(status);
-    const allowed = ['active','canceled','past_due','unpaid','incomplete','trialing'] as const;
-    return (allowed.includes(s as any) ? (s as Subscription['status']) : 'active');
+    const allowed = [
+      'active',
+      'canceled',
+      'past_due',
+      'unpaid',
+      'incomplete',
+      'trialing',
+    ] as const;
+    return allowed.includes(s as any)
+      ? (s as Subscription['status'])
+      : 'active';
   }
 
   private async handleSubscriptionCreated(
@@ -346,13 +364,19 @@ export class SubscriptionsService {
     const firstItem = stripeSubscription.items?.data?.[0];
     const price = firstItem?.price;
     const stripePriceId = typeof price?.id === 'string' ? price.id : 'unknown';
-    const amount = (typeof price?.unit_amount === 'number' ? price.unit_amount : 999) / 100;
+    const amount =
+      (typeof price?.unit_amount === 'number' ? price.unit_amount : 999) / 100;
     const currency = (price?.currency || 'USD').toUpperCase();
     const interval = price?.recurring?.interval || 'month';
 
     let stripeCustomerId: string | undefined;
-    if (typeof stripeSubscription.customer === 'string') stripeCustomerId = stripeSubscription.customer;
-    else if (stripeSubscription.customer && typeof (stripeSubscription.customer as Stripe.Customer).id === 'string') stripeCustomerId = (stripeSubscription.customer as Stripe.Customer).id;
+    if (typeof stripeSubscription.customer === 'string')
+      stripeCustomerId = stripeSubscription.customer;
+    else if (
+      stripeSubscription.customer &&
+      typeof (stripeSubscription.customer as Stripe.Customer).id === 'string'
+    )
+      stripeCustomerId = (stripeSubscription.customer as Stripe.Customer).id;
 
     const normalizedStatus = this.normalizeStatus(stripeSubscription.status);
     const subscription = this.subscriptionRepository.create({
@@ -427,7 +451,9 @@ export class SubscriptionsService {
     subscription.canceledAt = stripeSubscription.canceled_at
       ? new Date(stripeSubscription.canceled_at * 1000)
       : null;
-    const cancelAtPeriodEndRaw = (stripeSubscription as unknown as Record<string, unknown>)['cancel_at_period_end'];
+    const cancelAtPeriodEndRaw = (
+      stripeSubscription as unknown as Record<string, unknown>
+    )['cancel_at_period_end'];
     subscription.cancelAtPeriodEnd = Boolean(cancelAtPeriodEndRaw);
 
     await this.subscriptionRepository.save(subscription);
@@ -495,7 +521,11 @@ export class SubscriptionsService {
     }
     let subscriptionId: string | undefined;
     if (typeof invoiceSub === 'string') subscriptionId = invoiceSub;
-    else if (invoiceSub && typeof (invoiceSub as { id?: unknown }).id === 'string') subscriptionId = (invoiceSub as { id: string }).id;
+    else if (
+      invoiceSub &&
+      typeof (invoiceSub as { id?: unknown }).id === 'string'
+    )
+      subscriptionId = (invoiceSub as { id: string }).id;
     else {
       this.logger.warn('Invoice missing subscription id');
       return;
@@ -520,7 +550,11 @@ export class SubscriptionsService {
     }
     let subscriptionId: string | undefined;
     if (typeof invoiceSub === 'string') subscriptionId = invoiceSub;
-    else if (invoiceSub && typeof (invoiceSub as { id?: unknown }).id === 'string') subscriptionId = (invoiceSub as { id: string }).id;
+    else if (
+      invoiceSub &&
+      typeof (invoiceSub as { id?: unknown }).id === 'string'
+    )
+      subscriptionId = (invoiceSub as { id: string }).id;
     else {
       this.logger.warn('Invoice missing subscription id');
       return;
@@ -568,10 +602,16 @@ export class SubscriptionsService {
       },
     );
 
-    const updatedRaw = updatedSubscription as unknown as Record<string, unknown>;
+    const updatedRaw = updatedSubscription as unknown as Record<
+      string,
+      unknown
+    >;
     const updatedCpe = updatedRaw['current_period_end'];
     subscription.cancelAtPeriodEnd = true;
-    subscription.cancelAt = typeof updatedCpe === 'number' ? new Date(updatedCpe * 1000) : subscription.cancelAt;
+    subscription.cancelAt =
+      typeof updatedCpe === 'number'
+        ? new Date(updatedCpe * 1000)
+        : subscription.cancelAt;
     await this.subscriptionRepository.save(subscription);
 
     this.logger.log(

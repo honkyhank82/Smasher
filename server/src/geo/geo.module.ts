@@ -7,10 +7,7 @@ import { Media } from '../media/media.entity';
 import { MediaModule } from '../media/media.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Profile, Media]),
-    MediaModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Profile, Media]), MediaModule],
   controllers: [GeoController],
   providers: [GeoService],
   exports: [GeoService],

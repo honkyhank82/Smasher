@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Buddy } from './buddy.entity';
@@ -59,7 +64,9 @@ export class BuddiesService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    const existing = await this.buddyRepository.findOne({ where: { userId: uid, buddyId: bid } });
+    const existing = await this.buddyRepository.findOne({
+      where: { userId: uid, buddyId: bid },
+    });
     if (!existing) {
       throw new NotFoundException('Buddy relationship not found');
     }
@@ -83,7 +90,9 @@ export class BuddiesService {
   async isBuddy(userId: string, buddyId: string): Promise<boolean> {
     const uid = (userId ?? '').trim();
     const bid = (buddyId ?? '').trim();
-    const buddy = await this.buddyRepository.findOne({ where: { userId: uid, buddyId: bid } });
+    const buddy = await this.buddyRepository.findOne({
+      where: { userId: uid, buddyId: bid },
+    });
 
     return !!buddy;
   }

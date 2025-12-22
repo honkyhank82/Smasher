@@ -9,7 +9,8 @@ import { Media } from '../media/media.entity';
 @Injectable()
 export class ProfileViewsService {
   constructor(
-    @InjectRepository(ProfileView) private readonly profileViews: Repository<ProfileView>,
+    @InjectRepository(ProfileView)
+    private readonly profileViews: Repository<ProfileView>,
     @InjectRepository(User) private readonly users: Repository<User>,
     @InjectRepository(Profile) private readonly profiles: Repository<Profile>,
     @InjectRepository(Media) private readonly media: Repository<Media>,
@@ -24,7 +25,7 @@ export class ProfileViewsService {
     // Check if already viewed today
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     const existingView = await this.profileViews.findOne({
       where: {
         viewerId,
@@ -82,7 +83,7 @@ export class ProfileViewsService {
           order: { createdAt: 'DESC' },
         });
 
-        const profilePic = userMedia.find(m => m.isProfilePicture);
+        const profilePic = userMedia.find((m) => m.isProfilePicture);
 
         // Calculate age
         let age = 25;
@@ -91,7 +92,10 @@ export class ProfileViewsService {
           const birthDate = new Date(view.viewer.birthdate);
           age = today.getFullYear() - birthDate.getFullYear();
           const monthDiff = today.getMonth() - birthDate.getMonth();
-          if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+          if (
+            monthDiff < 0 ||
+            (monthDiff === 0 && today.getDate() < birthDate.getDate())
+          ) {
             age--;
           }
         }
@@ -101,13 +105,17 @@ export class ProfileViewsService {
 
         return {
           id: view.viewerId,
-          displayName: isBlurred ? '???' : (profile?.displayName || 'Anonymous'),
+          displayName: isBlurred ? '???' : profile?.displayName || 'Anonymous',
           age: isBlurred ? null : age,
-          profilePicture: isBlurred ? null : (profilePic ? this.getMediaUrl(profilePic.key) : null),
+          profilePicture: isBlurred
+            ? null
+            : profilePic
+              ? this.getMediaUrl(profilePic.key)
+              : null,
           viewedAt: view.viewedAt,
           isBlurred,
         };
-      })
+      }),
     );
 
     return result;
@@ -119,7 +127,7 @@ export class ProfileViewsService {
     });
 
     // Count unique viewers
-    const uniqueViewers = new Set(views.map(v => v.viewerId));
+    const uniqueViewers = new Set(views.map((v) => v.viewerId));
     return uniqueViewers.size;
   }
 
@@ -131,15 +139,15 @@ export class ProfileViewsService {
         // Construct public URL with proper encoding
         return `${publicBaseUrl.replace(/\/$/, '')}/${encodeURIComponent(key)}`;
       }
-      
+
       // Fallback: construct R2 public URL if account and bucket are configured
       const r2AccountId = process.env.R2_ACCOUNT_ID;
       const r2Bucket = process.env.S3_BUCKET || 'smasher-media';
-      
+
       if (r2AccountId) {
         return `https://${r2AccountId}.r2.cloudflarestorage.com/${r2Bucket}/${encodeURIComponent(key)}`;
       }
-      
+
       // If no configuration available, return empty string to avoid broken URLs
       return '';
     } catch (error) {

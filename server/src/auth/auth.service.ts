@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException, BadRequestException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+  Logger,
+} from '@nestjs/common';
 import { randomInt, createHmac } from 'crypto';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
@@ -34,13 +39,15 @@ export class AuthService {
       const hasJwt = !!(process.env.JWT_SECRET ?? '').trim();
       this.logger.warn(
         `[AuthService] VERIFICATION_CODE_PEPPER is missing or empty. NODE_ENV=${nodeEnv}, JWT_SECRET set=${hasJwt}. ` +
-        'Using fallback pepper derived from JWT_SECRET or a built-in default. Configure VERIFICATION_CODE_PEPPER as soon as possible.',
+          'Using fallback pepper derived from JWT_SECRET or a built-in default. Configure VERIFICATION_CODE_PEPPER as soon as possible.',
       );
 
       const jwtSecret = (process.env.JWT_SECRET ?? '').trim();
       if (jwtSecret) {
         // Derive a stable fallback pepper from JWT_SECRET so codes remain verifiable across restarts
-        this.pepper = createHmac('sha256', 'verification-pepper-fallback').update(jwtSecret).digest('hex');
+        this.pepper = createHmac('sha256', 'verification-pepper-fallback')
+          .update(jwtSecret)
+          .digest('hex');
       } else {
         // Last-resort fallback; verification codes will still be hashed, but all environments share this pepper
         this.pepper = 'fallback-verification-pepper-change-me';
@@ -72,7 +79,7 @@ export class AuthService {
       if (age < 18) {
         throw new BadRequestException('Must be 18 or older to register');
       }
-      
+
       // Hash password
       const passwordHash = await bcrypt.hash(params.password, 10);
       const user = await this.users.createUser(params.email, passwordHash, {
@@ -112,7 +119,10 @@ export class AuthService {
         try {
           await this.email.sendNotificationEmail(user.email, subject, html);
         } catch (emailError) {
-          this.logger.error('Failed to send free premium welcome email', emailError as any);
+          this.logger.error(
+            'Failed to send free premium welcome email',
+            emailError,
+          );
         }
       }
 
@@ -132,9 +142,12 @@ export class AuthService {
       if (!user) {
         throw new UnauthorizedException('Invalid credentials');
       }
-      
+
       // Verify password
-      const isPasswordValid = await bcrypt.compare(params.password, user.passwordHash);
+      const isPasswordValid = await bcrypt.compare(
+        params.password,
+        user.passwordHash,
+      );
       if (!isPasswordValid) {
         throw new UnauthorizedException('Invalid credentials');
       }
@@ -184,7 +197,9 @@ export class AuthService {
     const now = new Date();
     const codeToSend = randomInt(100000, 1000000).toString();
     const expiresAt = new Date(now.getTime() + 15 * 60_000);
-    const codeHash = createHmac('sha256', this.pepper).update(codeToSend).digest('hex');
+    const codeHash = createHmac('sha256', this.pepper)
+      .update(codeToSend)
+      .digest('hex');
 
     const newRecord = this.codes.create({
       email: normalizedEmail,
@@ -215,7 +230,9 @@ export class AuthService {
 
     const normalizedEmail = trimmedEmail.toLowerCase();
     const now = new Date();
-    const codeHash = createHmac('sha256', this.pepper).update(trimmedCode).digest('hex');
+    const codeHash = createHmac('sha256', this.pepper)
+      .update(trimmedCode)
+      .digest('hex');
 
     // Atomically mark code as used if it is valid and unexpired (match by hash)
     const updateResult = await this.codes
@@ -236,7 +253,9 @@ export class AuthService {
     const user = await this.users.findByEmail(normalizedEmail);
     if (!user) {
       // Require registration so birthdate and ToS acceptance are collected and validated
-      throw new BadRequestException('Registration required before passwordless login');
+      throw new BadRequestException(
+        'Registration required before passwordless login',
+      );
     }
 
     // Mark verified
@@ -273,7 +292,9 @@ export class AuthService {
         expiresAt: LessThan(now),
       });
       if (result.affected && result.affected > 0) {
-        this.logger.log(`CleanupExpiredCodes deleted ${result.affected} records.`);
+        this.logger.log(
+          `CleanupExpiredCodes deleted ${result.affected} records.`,
+        );
       }
     } catch (err) {
       this.logger.error('CleanupExpiredCodes failed', err as Error);

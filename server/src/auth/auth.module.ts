@@ -21,12 +21,15 @@ import { VerificationCode } from './verification-code.entity';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET') || process.env.JWT_SECRET,
-        signOptions: { expiresIn: configService.get<string>('JWT_EXPIRES_IN') || '7d' },
+        secret:
+          configService.get<string>('JWT_SECRET') || process.env.JWT_SECRET,
+        signOptions: {
+          expiresIn: configService.get<string>('JWT_EXPIRES_IN') || '7d',
+        },
       }),
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy]
+  providers: [AuthService, JwtStrategy],
 })
 export class AuthModule {}
