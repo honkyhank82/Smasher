@@ -1,0 +1,206 @@
+import { Injectable, Logger } from '@nestjs/common';
+import { createHash } from 'crypto';
+import { google } from 'googleapis';
+
+/**
+ * Interface for the decrypted integrity token response
+ */
+export interface IntegrityTokenPayload {
+  requestDetails: {
+    timestampMillis: string;
+    requestHash?: string;
+  };
+  appIntegrity: {
+    appRecognitionVerdict: 'PLAY_RECOGNIZED' | 'UNRECOGNIZED_VERSION' | 'UNEVALUATED';
+    packageName: string;
+    certificateSha256Digest: string[];
+    versionCode: string;
+  };
+  deviceIntegrity: {
+    deviceRecognitionVerdict: string[];
+  };
+  accountDetails: {
+    appLicensingVerdict: 'LICENSED' | 'UNLICENSED' | 'UNEVALUATED';
+  };
+}
+
+/**
+ * Interface for integrity verification result
+ */
+export interface IntegrityVerificationResult {
+  isValid: boolean;
+  payload?: IntegrityTokenPayload;
+  error?: string;
+  warnings?: string[];
+}
+
+export class IntegrityService {
+  private readonly packageName = process.env.ANDROID_PACKAGE_NAME || 'com.smasherapp';
+  private readonly logger = new Logger(IntegrityService.name);
+
+  /**
+   * Compute SHA-256 hash of request data
+   * Must match the client-side hash computation
+   */
+  computeRequestHash(requestData: string): string {
+    return createHash('sha256')
+      .update(requestData)
+      .digest('base64');
+  }
+
+  /**
+   * Decrypt and verify integrity token from Google Play
+   * @param integrityToken The encrypted token from the app
+   * @returns Decrypted and verified payload
+   */
+  async decryptAndVerifyToken(integrityToken: string): Promise<IntegrityVerificationResult> {
+    try {
+      // Initialize Google Auth with service account
+      const auth = new google.auth.GoogleAuth({
+        keyFile: process.env.GOOGLE_SERVICE_ACCOUNT_KEY_PATH,
+        scopes: ['https://www.googleapis.com/auth/playintegrity'],
+      });
+
+      const client = await auth.getClient();
+      const playintegrity = google.playintegrity({
+        version: 'v1',
+        auth: client as any,
+      });
+
+      // Decrypt the token
+      const response = await playintegrity.v1.decodeIntegrityToken({
+        packageName: this.packageName,
+        requestBody: {
+          integrityToken,
+        },
+      });
+
+      const payload = response.data.tokenPayloadExternal as unknown as IntegrityTokenPayload;
+
+      if (!payload) {
+        return {
+          isValid: false,
+          error: 'Failed to decrypt integrity token',
+        };
+      }
+
+      // Verify the token
+      return this.verifyIntegrityPayload(payload);
+    } catch (error) {
+      this.logger.error('Failed to decrypt integrity token', error);
+      return {
+        isValid: false,
+        error: error.message || 'Unknown error during token decryption',
+      };
+    }
+  }
+
+  /**
+   * Verify the integrity payload and check for issues
+   * @param payload The decrypted payload
+   * @returns Verification result with warnings
+   */
+  private verifyIntegrityPayload(payload: IntegrityTokenPayload): IntegrityVerificationResult {
+    const warnings: string[] = [];
+    let isValid = true;
+
+    // Check app integrity
+    if (payload.appIntegrity.appRecognitionVerdict !== 'PLAY_RECOGNIZED') {
+      warnings.push(`App not recognized by Play Store: ${payload.appIntegrity.appRecognitionVerdict}`);
+      if (payload.appIntegrity.appRecognitionVerdict === 'UNEVALUATED') {
+        warnings.push('Possible replay attack detected - app verdict is UNEVALUATED');
+      }
+      isValid = false;
+    }
+
+    // Check package name
+    if (payload.requestDetails.requestPackageName !== this.packageName) {
+      warnings.push(`Package name mismatch: expected ${this.packageName}, got ${payload.requestDetails.requestPackageName}`);
+      isValid = false;
+    }
+
+    // Check device integrity
+    if (!payload.deviceIntegrity.deviceRecognitionVerdict || 
+        payload.deviceIntegrity.deviceRecognitionVerdict.length === 0) {
+      warnings.push('Device integrity verdict is empty - possible replay attack');
+      isValid = false;
+    }
+
+    // Check licensing
+    if (payload.accountDetails.appLicensingVerdict !== 'LICENSED') {
+      warnings.push(`App licensing issue: ${payload.accountDetails.appLicensingVerdict}`);
+      if (payload.accountDetails.appLicensingVerdict === 'UNEVALUATED') {
+        warnings.push('Possible replay attack detected - licensing verdict is UNEVALUATED');
+      }
+      isValid = false;
+    }
+
+    // Check timestamp (token should be recent)
+    const tokenTimestamp = parseInt(payload.requestDetails.timestampMillis);
+    const currentTimestamp = Date.now();
+    const fiveMinutes = 5 * 60 * 1000;
+    
+    if (currentTimestamp - tokenTimestamp > fiveMinutes) {
+      warnings.push('Token is older than 5 minutes');
+      isValid = false;
+    }
+
+    return {
+      isValid,
+      payload,
+      warnings: warnings.length > 0 ? warnings : undefined,
+    };
+  }
+
+  /**
+   * Verify request hash matches the expected value
+   * @param payload The decrypted payload
+   * @param expectedRequestData The original request data
+   * @returns true if hash matches
+   */
+  verifyRequestHash(payload: IntegrityTokenPayload, expectedRequestData: string): boolean {
+    if (!payload.requestDetails.requestHash) {
+      this.logger.warn('No request hash in payload');
+      return false;
+    }
+
+    const expectedHash = this.computeRequestHash(expectedRequestData);
+    const matches = payload.requestDetails.requestHash === expectedHash;
+
+    if (!matches) {
+      this.logger.warn('Request hash mismatch - possible tampering detected');
+    }
+
+    return matches;
+  }
+
+  /**
+   * Complete verification: decrypt token and verify request hash
+   * @param integrityToken The encrypted token from the app
+   * @param requestData The original request data to verify
+   * @returns Complete verification result
+   */
+  async verifyIntegrityWithRequestHash(
+    integrityToken: string,
+    requestData: string,
+  ): Promise<IntegrityVerificationResult> {
+    const result = await this.decryptAndVerifyToken(integrityToken);
+
+    if (!result.isValid || !result.payload) {
+      return result;
+    }
+
+    // Verify request hash
+    const hashMatches = this.verifyRequestHash(result.payload, requestData);
+    if (!hashMatches) {
+      return {
+        isValid: false,
+        payload: result.payload,
+        error: 'Request hash verification failed - request may have been tampered with',
+        warnings: result.warnings,
+      };
+    }
+
+    return result;
+  }
+}

@@ -1,479 +1,457 @@
-# 🔥 SMASHER - Meet Gay Men Nearby
+# 🔥 SMASHER – Meet Gay Men Nearby
 
-**A free app to meet, chat, and connect with gay men around you.**
+**A free Android app to meet, chat, and connect with gay men around you.**
+
+***Unfortunately no IOS version yet;, however, there is also a web-version with all of the same features/functionality of the app. Please visit https://smasher-6xw7nhn0y-honkyhanks-projects.vercel.app for Smasher-Web.***
+
+---
+
+## 📦 Current Version
+
+- **App Version:** `4.0.27`
+- **Platform:** Android (8.0 or newer)
+- **Download:**  
+  👉 **Latest APK:** https://github.com/honkyhank82/Smasher/releases/latest
+
+Go to the latest GitHub Release and install the attached APK on your Android device.
+
+> **Note:** SMASHER is distributed outside the Google Play Store.  
+> You may need to enable **“install unknown apps”** for your browser or file manager.
+> Step‑by‑step install instructions are included below.
 
 ---
 
 ## 🤔 What is SMASHER?
 
-SMASHER is a **location-based social app** that helps you:
+SMASHER is a **location-based social app for gay men**. It helps you:
 
-- 📍 **Find gay men near you** - See who's within 5 to 100 miles
-- 💬 **Chat instantly** - Send messages in real-time
-- 📸 **Share photos** - Upload up to 6 photos to your profile
-- 🗺️ **Share your location** - Let someone know where you are
-- 🔔 **Get notifications** - Never miss a message
+- 📍 **Find gay men near you** – see who’s nearby in miles
+- 💬 **Chat instantly** – 1:1 real‑time messaging
+- ⭐ **Save favorites** – keep track of guys you’re interested in
+- 📸 **Share photos** – profile picture plus gallery
+- 🗺️ **Share your location** – optionally let someone know where you are
+- 🔒 **Stay safer** – with privacy controls and **screenshot blocking** on Android
 
-**Think of it like:** Tinder + WhatsApp + Location Sharing, all in one app.
-
-**Who is it for?** Adults 18+ looking to meet gay men, date, or make connections.
+**Who is it for?**  
+Adults **18+** looking to meet gay men to chat, date, or hook up.
 
 ---
 
 ## ✨ What Can You Do With SMASHER?
 
-### 1. **Create Your Profile**
-- Add your name, age, and bio
-- Upload up to 6 photos
-- Tell gay men about yourself
+### 1. Create Your Profile
 
-### 2. **Find Gay Men Nearby**
-- See profiles of gay men around you
-- Filter by distance (5, 10, 25, 50, or 100 miles)
-- Swipe through profiles
+Make a profile that actually represents you:
 
-### 3. **Chat With Matches**
-- Send unlimited messages
-- Real-time chat (like texting)
-- Share photos and videos
-- Share your live location on a map
+- Add a **display name** and **bio**
+- Upload a **profile picture** and gallery photos
+- Fill in **profile details**:
+  - Show / hide age (age visibility toggle)
+  - Height (**inches**)
+  - Weight (**lbs**)
+  - Ethnicity
+  - Body type
+  - Sexual position (Top, Bottom, Vers, Vers Top, Vers Bottom, etc.)
+  - Relationship status
+  - What you’re looking for (friends, dates, chat, relationship, hookup)
 
-### 4. **Stay Safe & Private**
-- Block users you don't like
-- Report inappropriate behavior
-- Control who sees your profile
-- Delete your account anytime
-
-### 5. **Premium Features** (Optional)
-- See who viewed your profile
-- Send unlimited messages
-- Get more visibility
-- Remove ads
+You can edit these any time from the **Profile** / **Settings** screens.
 
 ---
 
-## 📱 How to Download & Install
+### 2. Find Gay Men Nearby
 
-### **For Android Users:**
+SMASHER uses your location (with your permission) to show you men near you.
 
-#### Step 1: Download the App
-
-1. **Click this link on your phone:** [Download SMASHER](https://github.com/honkyhank82/smasher-app/releases/latest)
-   
-2. **Tap the APK file** (it will say something like `SMASHER-v1.0.12.apk`)
-
-3. **Wait for it to download** (about 100MB - may take 1-2 minutes)
-
-#### Step 2: Install the App
-
-1. **Open your phone's Downloads folder**
-   - Or tap the notification that says "Download complete"
-
-2. **Tap the SMASHER file** you just downloaded
-
-3. **You might see a warning** that says:
-   - ⚠️ "For your security, your phone is not allowed to install unknown apps"
-   - **This is normal!** The app is safe, it's just not from the Google Play Store yet.
-
-4. **Tap "Settings"** on that warning
-
-5. **Enable "Allow from this source"** or "Install unknown apps"
-   - Toggle the switch to ON
-   - Tap the back button
-
-6. **Tap "Install"**
-
-7. **Wait 10-20 seconds** for installation
-
-8. **Tap "Open"** when it's done
-
-#### Step 3: Set Up Your Account
-
-1. **Enter your email address**
-   - Use a real email you can access
-
-2. **Check your email** for a 6-digit code
-   - Should arrive in 1-2 minutes
-   - Check spam folder if you don't see it
-
-3. **Enter the 6-digit code** in the app
-
-4. **Create your profile:**
-   - Enter your name
-   - Enter your age (must be 18+)
-   - Write a short bio about yourself
-   - Add at least 1 photo
-
-5. **Allow permissions** when asked:
-- ✅ **Location** - So we can show you gay men nearby
-   - ✅ **Camera** - So you can take profile photos
-   - ✅ **Photos** - So you can upload photos
-   - ✅ **Notifications** - So you get message alerts
-
-6. **Start meeting gay men!** 🎉
+- See a list/feed of nearby profiles
+- Distance shown in **miles** (e.g., “3 miles away”)
+- Filter who you see by distance range
+- Tap a profile to:
+  - View bio and photos
+  - See distance
+  - Open chat
 
 ---
 
-## 🎯 How to Use SMASHER
+### 3. Chat in Real Time
 
-### **Home Screen** (Finding Gay Men)
+Start conversations and keep them going:
 
-- **Swipe through profiles** of gay men near you
-- **Tap a profile** to see more photos and info
-- **Tap the chat icon** to send a message
-- **Use the filter icon** to change your distance range
-
-### **Chats Screen** (Your Messages)
-
-- **See all your conversations** in one place
-- **Tap a chat** to open the conversation
-- **Send messages, photos, or videos**
-- **Tap the map icon** to share your location
-
-### **Profile Screen** (Your Profile)
-
-- **View your own profile** as others see it
-- **Tap "Edit Profile"** to change your info
-- **Add or remove photos**
-- **See who viewed your profile** (Premium feature)
-
-### **Settings Screen**
-
-- **Change your email**
-- **Adjust privacy settings**
-- **Block or report users**
-- **Delete your account**
-- **Contact support**
+- 1:1 **real‑time chat**
+- Send text messages
+- See all conversations on the **Chats** screen
+- Get notified when you receive new messages (if notifications are enabled)
 
 ---
 
-## ⚠️ Requirements
+### 4. Favorite People You Like
 
-**To use SMASHER, you need:**
+You don’t have to remember everyone:
 
-- ✅ **Android phone** with Android 8.0 or newer
-- ✅ **At least 100MB** of free storage space
-- ✅ **Internet connection** (WiFi or mobile data)
-- ✅ **Be 18 years or older**
-- ✅ **Valid email address**
-
-**Not supported yet:**
-- ❌ iPhone/iOS (coming soon!)
-- ❌ Tablets (works but not optimized)
+- Tap to **favorite** a profile you like
+- Manage them from the **Favorites** tab
+- Quickly jump back into chatting with people you care about
 
 ---
 
-## 🆘 Troubleshooting
+### 5. Share Your Location (Optional)
 
-### **Problem: "Install blocked" or "Can't install app"**
+If you want to meet up:
 
-**Solution:**
-1. Go to your phone's **Settings**
-2. Tap **Security** or **Apps**
-3. Find **Install unknown apps** or **Special app access**
-4. Select your **browser** (Chrome, Firefox, etc.)
-5. Turn ON **Allow from this source**
-6. Go back and try installing again
+- Use location actions (from chat or other entry points) to share where you are
+- You stay in control – **you decide when** to share
 
-### **Problem: "App not installed" error**
+---
 
-**Solution:**
-1. Make sure you have **Android 8.0 or higher**
-   - Go to Settings → About Phone → Android Version
-2. Make sure you have **100MB free space**
-   - Go to Settings → Storage
-3. **Uninstall any old version** of SMASHER first
-4. **Restart your phone** and try again
+### 6. Safety, Privacy, and Screenshot Blocking
 
-### **Problem: "Harmful app blocked" warning**
+SMASHER is built with privacy in mind:
 
-**Solution:**
-- This is a **false warning** from Google Play Protect
-- The app is **safe** - it's just not on Google Play Store yet
-- Tap **"More details"** or **"Install anyway"**
-- The app has been scanned and is virus-free
+- 🔒 **Screenshot protection** on Android  
+  The app uses Android’s `FLAG_SECURE` so the system **blocks screenshots and
+  screen recording** of the app UI.
+- 🚫 **Block users** who make you uncomfortable
+- 🚩 **Report users** for harassment, spam, or inappropriate content
+- 👻 **Hide your age** if you prefer (age visibility toggle)
+- 🗑️ **Delete your account** at any time from Settings
 
-### **Problem: Didn't receive verification code**
+> This app is for adults 18+ only. We take violations of this policy seriously.
 
-**Solution:**
-1. **Check your spam/junk folder**
-2. **Wait 2-3 minutes** (sometimes delayed)
-3. **Make sure you typed your email correctly**
-4. **Tap "Resend code"** in the app
-5. **Try a different email** (Gmail works best)
+---
 
-### **Problem: App crashes or won't open**
+## 📱 How to Download & Install (Android)
 
-**Solution:**
-1. **Restart your phone**
-2. **Clear the app cache:**
-   - Settings → Apps → SMASHER → Storage → Clear Cache
-3. **Reinstall the app:**
-   - Uninstall SMASHER
-   - Download and install again
-4. **Update your Android** if possible
+### Step 1: Download the APK
 
-### **Problem: Can't see gay men nearby**
+1. On your Android phone, open this link in your browser:  
+   👉 **https://github.com/honkyhank82/Smasher/releases/latest**
+2. Scroll to **Assets** and tap the latest `.apk` file  
+   (e.g., `SMASHER-v4.0.25.apk`).
+3. Wait for the download to finish (around ~100MB).
 
-**Solution:**
-1. **Make sure Location is enabled:**
-   - Settings → Location → Turn ON
-2. **Give SMASHER location permission:**
+---
+
+### Step 2: Allow “Unknown” Apps (First Time Only)
+
+If you’ve never installed an app from a browser before, Android may block it:
+
+1. When you tap the downloaded file, you might see:  
+   **“For your security, your phone is not allowed to install unknown apps.”**
+2. Tap **Settings** on that prompt.
+3. Enable **Allow from this source** (for your browser, e.g., Chrome).
+4. Tap Back.
+5. Tap the APK again and choose **Install**.
+
+> This warning is normal for apps installed outside Google Play.
+> SMASHER is simply being installed directly from GitHub.
+
+---
+
+### Step 3: Install the App
+
+1. Open your **Downloads** folder or tap the download notification.
+2. Tap the **SMASHER APK** file (e.g., `SMASHER-v4.0.25.apk`).
+3. Tap **Install**.
+4. When it’s done, tap **Open** to launch the app.
+
+---
+
+## 👤 Account Setup: Sign‑Up & Login
+
+### 1. Age Gate
+
+- You must **confirm that you are 18 or older** before creating an account.
+- The backend enforces an 18+ age requirement based on your birthdate.
+
+### 2. Registration
+
+To create an account:
+
+1. Open SMASHER.
+2. Choose **Sign Up** (or similar button).
+3. Enter:
+   - **Email**
+   - **Password**
+   - **Birthdate** (must be 18+)
+4. Submit and wait for confirmation.
+
+### 3. Login
+
+To log in later:
+
+1. Open SMASHER.
+2. Enter your **email** and **password**.
+3. Tap **Log In**.
+4. You’ll be taken to the app, or into **Create Profile** if you haven’t set one up yet.
+
+> If you forget your password, use the **Forgot Password** option (if available)
+> or contact support for help.
+
+---
+
+## 🎨 Using SMASHER Day‑to‑Day
+
+### Home / Nearby Screen
+
+- See nearby gay men in a list or card feed
+- Distances shown in **miles**
+- Tap a profile to:
+  - View photos
+  - Read bio and details
+  - Start chatting
+- Use filters (where available) to adjust distance range or refine who you see
+
+---
+
+### Chat Screen
+
+- Shows all your current conversations
+- Tap a conversation to:
+  - Send and receive messages in real time
+  - Continue where you left off
+- You can navigate back to see all chats at any time
+
+---
+
+### Favorites Screen
+
+- Shows users you’ve **favorited**
+- Lets you quickly jump back to:
+  - View their profile
+  - Open chat
+
+---
+
+### Profile & Settings
+
+From your own profile:
+
+- **Edit Profile** – change display name, bio, and profile details
+- Update:
+  - Profile picture and gallery
+  - Height (inches) and weight (lbs)
+  - Ethnicity, body type, sexual position
+  - Relationship status and “looking for”
+  - Age visibility (show / hide age)
+- Access **Settings** to:
+  - Manage notifications
+  - Manage privacy options
+  - Block / unblock users
+  - Delete your account
+
+---
+
+## ⚙️ Requirements
+
+To use SMASHER, you’ll need:
+
+- ✅ Android phone with **Android 8.0 (Oreo) or newer**
+- ✅ At least **100MB** of free storage
+- ✅ **Internet connection** (Wi‑Fi or mobile data)
+- ✅ A **valid email address**
+- ✅ You are **18 years or older**
+
+Currently **not officially supported**:
+
+- ❌ iPhone / iOS
+- ❌ Tablets (may work, but not optimized)
+
+
+
+---
+
+## 🆘 Troubleshooting & Common Issues
+
+### “Install blocked” or “Can’t install app”
+
+1. Go to **Settings → Security** or **Apps**.
+2. Look for **Install unknown apps** or **Special app access**.
+3. Select your **browser** (Chrome, Firefox, etc.).
+4. Turn on **Allow from this source**.
+5. Try installing again.
+
+---
+
+### “App not installed” or install fails
+
+1. Make sure you have **Android 8.0+**:
+   - Settings → About Phone → Android Version
+2. Confirm you have enough storage:
+   - Settings → Storage
+3. Uninstall any **old version** of SMASHER first.
+4. Restart your phone and retry.
+
+---
+
+### Can’t Log In
+
+- Double‑check your **email** and **password**.
+- If you recently registered, confirm the account finished creation.
+- Use **Forgot Password** (if available) or contact support at `admin@honkyhankinc.com`.
+
+---
+
+### Can’t See Nearby Users
+
+1. Make sure **Location** is enabled on your phone:
+   - Settings → Location → On
+2. Ensure SMASHER has location permission:
    - Settings → Apps → SMASHER → Permissions → Location → Allow
-3. **Make sure you have internet connection**
-4. **Try increasing your distance filter** (in app settings)
+3. Check your internet connection.
+4. Increase your distance filter inside the app (if adjustable).
 
-### **Problem: Messages not sending**
+---
 
-**Solution:**
-1. **Check your internet connection**
-2. **Close and reopen the app**
-3. **Make sure the other person didn't block you**
-4. **Try sending a different message**
+### Messages Not Sending
+
+- Check Wi‑Fi / data connection.
+- Try closing and reopening the app.
+- If a specific user blocked you, you won’t be able to message them.
 
 ---
 
 ## 🔒 Privacy & Safety
 
-### **Your Data is Protected**
+### Your Data
 
-- ✅ Your **exact location is never shared** - only approximate distance
-- ✅ Your **messages are private** - we don't read them
-- ✅ Your **email is never shown** to other users
-- ✅ Your **photos are stored securely**
-- ✅ You can **delete your account** and all data anytime
+- Your **exact GPS location is never shown** to other users – only approximate distance.
+- Your **messages** are private between you and the other user.
+- Your **email address** is never displayed publicly.
+- You can **delete your account** and associated data from Settings.
 
-### **Stay Safe**
+### Screenshot Protection
 
-**DO:**
-- ✅ Meet in public places for first dates
-- ✅ Tell a friend where you're going
-- ✅ Trust your instincts
-- ✅ Block anyone who makes you uncomfortable
-- ✅ Report inappropriate behavior
+- On Android, SMASHER uses `FLAG_SECURE` so:
+  - Screenshots and screen recording of the app are **blocked** by the OS.
+  - This helps protect your chats and profile from being captured.
 
-**DON'T:**
-- ❌ Share your home address
-- ❌ Share financial information
-- ❌ Send money to gay men you haven't met
-- ❌ Share passwords or personal details
-- ❌ Meet in private locations for first dates
+### Safety Tips
 
-### **Reporting & Blocking**
+**Do:**
 
-**To block someone:**
-1. Open their profile
-2. Tap the **three dots** (⋮) in the top right
-3. Tap **"Block User"**
-4. They won't be able to message you anymore
+- ✅ Meet in public places for first meetups
+- ✅ Tell a friend where you’re going
+- ✅ Trust your instincts – if something feels off, end it
+- ✅ Use the **Block** and **Report** tools when necessary
 
-**To report someone:**
-1. Open their profile
-2. Tap the **three dots** (⋮) in the top right
-3. Tap **"Report User"**
-4. Select a reason (harassment, fake profile, inappropriate content, etc.)
-5. We'll review and take action within 24 hours
+**Don’t:**
+
+- ❌ Share financial information or passwords
+- ❌ Send money to people you just met online
+- ❌ Share your home address too quickly
+- ❌ Ignore red flags in behavior or communication
 
 ---
 
 ## 💰 Is SMASHER Free?
 
-**YES!** SMASHER is **100% free** to download and use.
+SMASHER is **free to download and use**.
 
-### **Free Features:**
-- ✅ Create profile
-- ✅ Upload 5 photos
-- ✅ Unlimited messages
-- ✅ Find gay men within 15 miles
-- ✅ See first 2 profile viewers
-- ✅ Share location
-- ✅ Get notifications
-
-### **Premium Features** (Optional - $9.99/month):
-- ⭐ Upload 6 photos (free: 5 photos)
-- ⭐ See ALL profile viewers (free: first 2 only, rest blurred)
-- ⭐ Extended range (interact beyond 15 miles)
-- ⭐ Advanced search filters
-- ⭐ Profile boost (10x more visibility)
-- ⭐ No ads
-- ⭐ Read receipts
-- ⭐ Priority support
-
-**Payment:** Secure billing through Stripe. Cancel anytime from Settings.
-
-**You don't need Premium to use the app!** All core features are free forever.
+- You can:
+  - Create a profile
+  - Browse nearby profiles
+  - Chat with other users
+  - Use favorites
+- Some **advanced / premium features** may be added or expanded over time.  
+  Details will be announced in the app and in release notes when they go live.
 
 ---
 
-## 📸 Screenshots
+## 📸 Screenshots (Optional Section)
 
-### Home Screen
-*See gay men nearby and swipe through profiles*
+You can add screenshots here if you’d like, for example:
 
-### Chat Screen
-*Send messages, photos, and share your location*
+- **Home / Nearby Screen** – see profiles and distance in miles
+- **Chat Screen** – 1:1 conversations
+- **Profile Screen** – your photos and details
+- **Settings Screen** – privacy, notifications, account options
 
-### Profile Screen
-*Your profile with photos and bio*
-
-### Settings Screen
-*Control your privacy and preferences*
+*(Add actual images in the GitHub README once you upload them to the repo.)*
 
 ---
 
-## ❓ Frequently Asked Questions
+## ❓ FAQ (Quick)
 
-### **Q: Is SMASHER really free?**
-**A:** Yes! Download, create account, and use all basic features for free. Premium is optional.
+**Q: Is SMASHER only for gay men?**  
+**A:** Yes, it’s designed specifically for gay and queer men.
 
-### **Q: Do I need to be on a dating app to use this?**
-**A:** No! SMASHER is standalone. You don't need Tinder, Bumble, or any other app.
+**Q: Do I have to show my age?**  
+**A:** No. There’s a **Show Age** toggle in profile settings. If you turn it off,
+your age will not be shown publicly.
 
-### **Q: Can gay men see my exact location?**
-**A:** No. Gay men only see approximate distance (e.g., "5 miles away"). You can share your exact location in chat if you choose to.
+**Q: Why do you need my location?**  
+**A:** To show you men who are actually near you. Distance is shown in **miles** only.
 
-### **Q: What if I don't want to be found?**
-**A:** You can turn on "Invisible Mode" in Settings. You'll still see others, but they won't see you.
+**Q: Can I delete my account?**  
+**A:** Yes. Go to **Settings → Account / Delete Account**. This removes your
+account and associated data.
 
-### **Q: Can I use this on iPhone?**
-**A:** Not yet, but iOS version is coming soon! For now, Android only.
-
-### **Q: How do I delete my account?**
-**A:** Settings → Account → Delete Account. All your data will be permanently removed.
-
-### **Q: What if someone is harassing me?**
-**A:** Block them immediately (tap their profile → ⋮ → Block). Then report them (⋮ → Report).
-
-### **Q: Why do you need my location?**
-**A:** To show you gay men nearby. That's the whole point of the app! We never share your exact location.
-
-### **Q: Can I use this without location?**
-**A:** No, location is required. The app is designed to help you meet gay men near you.
-
-### **Q: Is my data sold to advertisers?**
-**A:** No. We don't sell your personal data. We show ads to keep the app free, but your data stays private.
-
-### **Q: What ages can use SMASHER?**
-**A:** 18+ only. You must verify your age during signup.
-
-### **Q: How do I get Premium?**
-**A:** Tap "Upgrade to Premium" in Settings. You can pay with PayPal, credit card, or crypto.
-
-### **Q: Can I cancel Premium anytime?**
-**A:** Yes! Cancel anytime, no questions asked. You'll keep Premium until the end of your billing period.
+**Q: Is my data sold to advertisers?**  
+**A:** No. The app is not built around selling personal data.
+Any analytics or logs are for improving the app and safety.
 
 ---
 
-## 📞 Need Help?
+## 🛠 Tech & Project Info
 
-### **Contact Support:**
-- **Email:** smashermain@gmail.com
-- **Response time:** Usually within 24 hours
+- **Frontend:** React Native + Expo
+- **Backend:** NestJS (TypeScript) + TypeORM
+- **Database:** PostgreSQL (hosted on Fly.io)
+- **Realtime:** Uses web sockets for chat
 
-### **Report a Bug:**
-- Go to Settings → Help & Support → Report Bug
-- Or email: smashermain@gmail.com
+Repo structure (simplified):
 
-### **Suggest a Feature:**
-- Go to Settings → Help & Support → Suggest Feature
-- Or email: smashermain@gmail.com
-
-
----
-
-## 🎉 Ready to Meet Gay Men?
-
-### **Download SMASHER now:**
-
-**[⬇️ DOWNLOAD FOR ANDROID](https://github.com/honkyhank82/smasher-app/releases/latest)**
-
-*File size: ~100MB | Android 8.0+ required | 100% Free*
+- `app-rn/` – React Native mobile app
+- `server/` – API server and database access
+- `legal/` – policies and license (if present)
+- `docs/`, `store-listing/` – documentation and listing assets (if present)
 
 ---
 
-## 📋 Quick Checklist
+## 📞 Support & Contact
 
-Before you start, make sure you have:
+If you:
 
-- [ ] Android phone (version 8.0 or higher)
-- [ ] 100MB free storage space
-- [ ] Internet connection (WiFi or data)
-- [ ] Valid email address
-- [ ] You are 18 years or older
-- [ ] Enabled "Install unknown apps" in Settings
+- Found a bug
+- Have a feature request
+- Need help installing or using SMASHER
 
----
+contact:
 
-## 🔄 Updates
+- **Email:** `admin@honkyhankinc.com`
 
-**Current Version:** 1.0.12
-
-**What's New:**
-- ✨ Improved chat performance
-- 🐛 Fixed notification bugs
-- 🎨 Updated UI design
-- 🔒 Enhanced security
-
-**Coming Soon:**
-- 📱 iOS version
-- 🎥 Video calls
-- 🎁 Rewards system
-- 🌍 More languages
+Or open an issue on the GitHub repo (if issues are enabled).
 
 ---
 
-## ⚖️ Legal Stuff
-
-**Age Requirement:** You must be 18 or older to use SMASHER.
-
-**Privacy:** We respect your privacy. Read our [Privacy Policy](PRIVACY_POLICY.md).
-
-**Terms:** By using SMASHER, you agree to our [Terms of Service](TERMS_OF_SERVICE.md).
-
-**Content:** NSFW content is allowed in private galleries (18+), but profile pictures must be appropriate.
-
-**Safety:** We have zero tolerance for harassment, fake profiles, or illegal activity.
-
----
-
-<div align="center">
-
-## 💝 Made for Gay Men Who Want to Connect
-
-**Download SMASHER today and start meeting gay men nearby!**
-
-**[⬇️ DOWNLOAD NOW](https://github.com/honkyhank82/smasher-app/releases/latest)**
-
----
-
-*Questions? Email smashermain@gmail.com*
-
-## 📄 License
+## 📄 License & Usage
 
 **Personal Use Only License**
 
-This software is provided **STRICTLY FOR PERSONAL, NON-COMMERCIAL USE ONLY**.
+This software is provided **STRICTLY FOR PERSONAL, NON‑COMMERCIAL USE ONLY.**
 
-### ✅ **Permitted:**
-- Personal use on your own devices
-- Testing and evaluation for personal projects
+### ✅ Permitted
+
+- Personal use on your own devices  
+- Testing and evaluation for personal projects  
 - Learning and experimentation
 
-### ❌ **PROHIBITED:**
-- Any commercial use or business applications
-- Redistribution, resale, or licensing to third parties
-- Use in any commercial product or service
-- Modification for commercial purposes
-- Hosting as a service for others
+### ❌ Prohibited
+
+- Any commercial use or business applications  
+- Redistribution, resale, or licensing to third parties  
+- Use in any commercial product or service  
+- Modification for commercial purposes  
+- Hosting as a service for others  
 - Use in any production environment serving customers
 
-**By using this software, you agree to these terms.**
+By using this software, you agree to these terms.
+
+> For commercial licensing or enterprise use, please contact  
+> **admin@honkyhankinc.com**.
 
 ---
 
-*For commercial licensing or enterprise use, please contact smashermain@gmail.com.*
+**Download the latest APK and start meeting gay men near you today:**
 
-
-
-
-</div>
+👉 https://github.com/honkyhank82/Smasher/releases/latest

@@ -1,0 +1,77 @@
+services:
+  - type: web
+    name: smasher-api
+    env: node
+    rootDir: server
+    repo: https://github.com/honkyhank82/Smasher
+    branch: master
+    
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: DATABASE_URL
+        fromDatabase:
+          name: smasher-db
+          property: connectionString
+      - key: STRIPE_SECRET_KEY
+        fromSecret: stripe_secret_key
+      - key: STRIPE_WEBHOOK_SECRET
+        fromSecret: stripe_webhook_secret
+      - key: STRIPE_PRICE_ID
+        value: price_1SNBIbCKpcCZj0lLEYh12CC5
+      - key: JWT_SECRET
+        fromSecret: jwt_secret
+      - key: RESEND_API_KEY
+        fromSecret: resend_api_key
+      - key: VERIFICATION_CODE_PEPPER
+        fromSecret: verification_code_pepper
+      - key: RESEND_FROM
+        value: noreply@smasher.app
+      - key: FROM_EMAIL
+        value: noreply@smasher.app
+      - key: R2_ACCOUNT_ID
+        fromSecret: r2_account_id
+      - key: R2_ACCESS_KEY_ID
+        fromSecret: r2_access_key_id
+      - key: R2_SECRET_ACCESS_KEY
+        fromSecret: r2_secret_access_key
+      - key: R2_BUCKET_NAME
+        value: smasher-media
+      - key: R2_PUBLIC_URL
+        value: https://r2.smasher.app
+      - key: S3_ENDPOINT
+        value: https://d106b8f0544da6022da7de38fb440af4.r2.cloudflarestorage.com
+      - key: S3_REGION
+        value: auto
+      - key: S3_ACCESS_KEY_ID
+        fromSecret: r2_access_key_id
+      - key: S3_SECRET_ACCESS_KEY
+        fromSecret: r2_secret_access_key
+      - key: S3_BUCKET
+        value: smasher-media
+      - key: PUBLIC_MEDIA_BASE_URL
+        value: https://r2.smasher.app
+    
+    healthCheckPath: /health
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start:prod
+    
+    domains:
+      - smasher.onrender.com
+    
+    resources:
+      cpu: 500m
+      memory: 512MB
+      disk: 1GB
+    
+    autoDeploy: true
+    
+    # Node runtime does not require explicit Docker volumes
+
+databases:
+  - name: smasher-db
+    databaseName: smasher
+    plan: standard
+    postgresVersion: "14"

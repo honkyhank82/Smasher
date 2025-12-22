@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMASHER Icon Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        h1 {
+            text-align: center;
+            color: #ff3333;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        .icon-preview {
+            text-align: center;
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        canvas {
+            border: 2px solid #444;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        button {
+            background: #ff3333;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #cc0000;
+        }
+        .instructions {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .instructions h2 {
+            color: #ff3333;
+        }
+        .instructions ol {
+            line-height: 1.8;
+        }
+        .instructions code {
+            background: #1a1a1a;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #ff3333;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎨 SMASHER Icon Generator</h1>
+    
+    <div class="instructions">
+        <h2>Instructions:</h2>
+        <ol>
+            <li>Click the "Download" button under each icon size</li>
+            <li>Save the files to your <code>app-rn/assets/</code> folder</li>
+            <li>Replace the existing icon files</li>
+            <li>Run <code>npx expo prebuild --clean</code> to regenerate native projects</li>
+            <li>Rebuild your app to see the new icon</li>
+        </ol>
+    </div>
+
+    <div class="container" id="iconContainer"></div>
+
+    <script>
+        const sizes = [
+            { name: 'icon.png', size: 1024, desc: 'Main App Icon' },
+            { name: 'adaptive-icon.png', size: 1024, desc: 'Android Adaptive Icon' },
+            { name: 'favicon.png', size: 48, desc: 'Web Favicon' }
+        ];
+
+        function drawIcon(canvas, size) {
+            const ctx = canvas.getContext('2d');
+            canvas.width = size;
+            canvas.height = size;
+
+            // Black background
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, size, size);
+
+            // Calculate font size proportionally
+            const fontSize = size * 0.7;
+            
+            // Draw chrome outline
+            ctx.save();
+            ctx.font = `bold italic ${fontSize}px "Brush Script MT", "Lucida Handwriting", "Segoe Script", cursive`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // Chrome gradient for outline
+            const chromeGradient = ctx.createLinearGradient(0, 0, 0, size);
+            chromeGradient.addColorStop(0, '#ffffff');
+            chromeGradient.addColorStop(0.2, '#e8e8e8');
+            chromeGradient.addColorStop(0.4, '#c0c0c0');
+            chromeGradient.addColorStop(0.6, '#a0a0a0');
+            chromeGradient.addColorStop(0.8, '#d0d0d0');
+            chromeGradient.addColorStop(1, '#ffffff');
+            
+            // Draw chrome outline (thick)
+            ctx.strokeStyle = chromeGradient;
+            ctx.lineWidth = size * 0.032;
+            ctx.strokeText('S', size / 2, size * 0.55);
+            
+            // Inner chrome shine
+            ctx.globalAlpha = 0.6;
+            ctx.lineWidth = size * 0.024;
+            const shineGradient = ctx.createLinearGradient(0, 0, size, size);
+            shineGradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
+            shineGradient.addColorStop(0.5, 'rgba(192, 192, 192, 0.3)');
+            shineGradient.addColorStop(1, 'rgba(255, 255, 255, 0.8)');
+            ctx.strokeStyle = shineGradient;
+            ctx.strokeText('S', size / 2, size * 0.55);
+            ctx.globalAlpha = 1.0;
+            
+            // Red gradient fill
+            const redGradient = ctx.createLinearGradient(0, 0, 0, size);
+            redGradient.addColorStop(0, '#ff3333');
+            redGradient.addColorStop(0.5, '#cc0000');
+            redGradient.addColorStop(1, '#ff1a1a');
+            ctx.fillStyle = redGradient;
+            ctx.fillText('S', size / 2, size * 0.55);
+            
+            // Highlight
+            ctx.globalAlpha = 0.4;
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = size * 0.004;
+            ctx.strokeText('S', size / 2 - size * 0.002, size * 0.55 - size * 0.005);
+            ctx.globalAlpha = 1.0;
+            
+            ctx.restore();
+        }
+
+        function downloadCanvas(canvas, filename) {
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // Generate all icon sizes
+        sizes.forEach(({ name, size, desc }) => {
+            const div = document.createElement('div');
+            div.className = 'icon-preview';
+            
+            const title = document.createElement('h3');
+            title.textContent = desc;
+            div.appendChild(title);
+            
+            const sizeLabel = document.createElement('p');
+            sizeLabel.textContent = `${size}x${size}px`;
+            sizeLabel.style.color = '#888';
+            div.appendChild(sizeLabel);
+            
+            const canvas = document.createElement('canvas');
+            drawIcon(canvas, size);
+            div.appendChild(canvas);
+            
+            const downloadBtn = document.createElement('button');
+            downloadBtn.textContent = `Download ${name}`;
+            downloadBtn.onclick = () => downloadCanvas(canvas, name);
+            div.appendChild(downloadBtn);
+            
+            document.getElementById('iconContainer').appendChild(div);
+        });
+
+        console.log('✨ Icon generator loaded! Click download buttons to save icons.');
+    </script>
+</body>
+</html>

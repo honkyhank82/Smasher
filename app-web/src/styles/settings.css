@@ -1,0 +1,44 @@
+.settings-container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 0 16px;
+  color: #fff;
+}
+
+.settings-section {
+  margin-bottom: 24px;
+}
+
+.settings-section h3 {
+  margin-bottom: 8px;
+}
+
+.settings-section ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.settings-section li {
+  margin-bottom: 4px;
+}
+
+.backend-info {
+  font-size: 14px;
+}
+
+.backend-info code {
+  background: #111;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.legal-page {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 0 16px;
+  color: #fff;
+}
+
+.legal-page ul {
+  padding-left: 20px;
+}

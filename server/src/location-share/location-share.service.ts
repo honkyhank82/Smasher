@@ -1,0 +1,222 @@
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, LessThan } from 'typeorm';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { LocationShare } from './location-share.entity';
+import { StartShareDto } from './dto/start-share.dto';
+import { UpdateLocationDto } from './dto/update-location.dto';
+import { NotificationService } from '../notifications/notification.service';
+
+@Injectable()
+export class LocationShareService {
+  constructor(
+    @InjectRepository(LocationShare)
+    private locationShareRepository: Repository<LocationShare>,
+    private notificationService: NotificationService,
+  ) {}
+
+  /**
+   * Start sharing location with a user
+   */
+  async startShare(userId: string, dto: StartShareDto): Promise<LocationShare> {
+    // Check if already sharing with this user
+    const existingShare = await this.locationShareRepository.findOne({
+      where: {
+        userId,
+        sharedWithUserId: dto.sharedWithUserId,
+        isActive: true,
+      },
+    });
+
+    if (existingShare) {
+      // Update existing share
+      existingShare.latitude = dto.latitude;
+      existingShare.longitude = dto.longitude;
+      existingShare.expiresAt = new Date(Date.now() + dto.durationMinutes * 60 * 1000);
+      return this.locationShareRepository.save(existingShare);
+    }
+
+    // Create new share
+    const share = this.locationShareRepository.create({
+      userId,
+      sharedWithUserId: dto.sharedWithUserId,
+      latitude: dto.latitude,
+      longitude: dto.longitude,
+      expiresAt: new Date(Date.now() + dto.durationMinutes * 60 * 1000),
+      isActive: true,
+    });
+
+    const savedShare = await this.locationShareRepository.save(share);
+
+    // Send notification
+    await this.notificationService.sendLocationShareStarted(
+      dto.sharedWithUserId,
+      userId,
+      dto.durationMinutes,
+    );
+
+    return savedShare;
+  }
+
+  /**
+   * Stop sharing location
+   */
+  async stopShare(userId: string, shareId: string): Promise<void> {
+    const share = await this.locationShareRepository.findOne({
+      where: { id: shareId },
+    });
+
+    if (!share) {
+      throw new NotFoundException('Location share not found');
+    }
+
+    if (share.userId !== userId) {
+      throw new ForbiddenException('You can only stop your own location shares');
+    }
+
+    share.isActive = false;
+    await this.locationShareRepository.save(share);
+
+    // Send notification
+    await this.notificationService.sendLocationShareStopped(
+      share.sharedWithUserId,
+      userId,
+    );
+  }
+
+  /**
+   * Update location for an active share
+   */
+  async updateLocation(
+    userId: string,
+    shareId: string,
+    dto: UpdateLocationDto,
+  ): Promise<LocationShare> {
+    const share = await this.locationShareRepository.findOne({
+      where: { id: shareId },
+    });
+
+    if (!share) {
+      throw new NotFoundException('Location share not found');
+    }
+
+    if (share.userId !== userId) {
+      throw new ForbiddenException('You can only update your own location shares');
+    }
+
+    if (!share.isActive) {
+      throw new ForbiddenException('This location share is no longer active');
+    }
+
+    if (new Date() > share.expiresAt) {
+      share.isActive = false;
+      await this.locationShareRepository.save(share);
+      throw new ForbiddenException('This location share has expired');
+    }
+
+    share.latitude = dto.latitude;
+    share.longitude = dto.longitude;
+    return this.locationShareRepository.save(share);
+  }
+
+  /**
+   * Get active shares where others are sharing with me
+   */
+  async getActiveShares(userId: string): Promise<LocationShare[]> {
+    const now = new Date();
+    return this.locationShareRepository.find({
+      where: {
+        sharedWithUserId: userId,
+        isActive: true,
+      },
+      relations: ['user'],
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+  }
+
+  /**
+   * Get my active shares (locations I'm sharing)
+   */
+  async getMyShares(userId: string): Promise<LocationShare[]> {
+    return this.locationShareRepository.find({
+      where: {
+        userId,
+        isActive: true,
+      },
+      relations: ['sharedWithUser'],
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+  }
+
+  /**
+   * Get specific share
+   */
+  async getShare(userId: string, shareId: string): Promise<LocationShare> {
+    const share = await this.locationShareRepository.findOne({
+      where: { id: shareId },
+      relations: ['user', 'sharedWithUser'],
+    });
+
+    if (!share) {
+      throw new NotFoundException('Location share not found');
+    }
+
+    // Check if user has access to this share
+    if (share.userId !== userId && share.sharedWithUserId !== userId) {
+      throw new ForbiddenException('You do not have access to this location share');
+    }
+
+    // Check if expired
+    if (new Date() > share.expiresAt && share.isActive) {
+      share.isActive = false;
+      await this.locationShareRepository.save(share);
+    }
+
+    return share;
+  }
+
+  /**
+   * Cleanup expired shares (runs every 5 minutes)
+   */
+  @Cron(CronExpression.EVERY_5_MINUTES)
+  async cleanupExpiredShares(): Promise<void> {
+    const now = new Date();
+    
+    const expiredShares = await this.locationShareRepository.find({
+      where: {
+        expiresAt: LessThan(now),
+        isActive: true,
+      },
+      relations: ['sharedWithUser'],
+    });
+
+    for (const share of expiredShares) {
+      share.isActive = false;
+      await this.locationShareRepository.save(share);
+
+      // Send expiry notification
+      await this.notificationService.sendLocationShareExpired(
+        share.sharedWithUserId,
+        share.userId,
+      );
+    }
+
+    if (expiredShares.length > 0) {
+      console.log(`Cleaned up ${expiredShares.length} expired location shares`);
+    }
+  }
+
+  /**
+   * Stop all shares for a user (on logout)
+   */
+  async stopAllSharesForUser(userId: string): Promise<void> {
+    await this.locationShareRepository.update(
+      { userId, isActive: true },
+      { isActive: false },
+    );
+  }
+}
