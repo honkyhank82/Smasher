@@ -1,3 +1,10 @@
+## [4.2.5](https://github.com/honkyhank82/Smasher/compare/v4.2.4...v4.2.5) (2025-12-22)
+
+
+### Bug Fixes
+
+* add missing App.js file for EAS builds ([5a0a067](https://github.com/honkyhank82/Smasher/commit/5a0a067288cbf34d909170c19731791e26c7b4cb))
+
 ## [4.2.4](https://github.com/honkyhank82/Smasher/compare/v4.2.3...v4.2.4) (2025-12-22)
 
 
