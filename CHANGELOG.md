@@ -1,3 +1,10 @@
+## [4.2.4](https://github.com/honkyhank82/Smasher/compare/v4.2.3...v4.2.4) (2025-12-22)
+
+
+### Bug Fixes
+
+* move eas.json to root directory for GitHub builds ([2b7c930](https://github.com/honkyhank82/Smasher/commit/2b7c930ec55e4f96d3f13beefc50357e02c8c352))
+
 ## [4.2.3](https://github.com/honkyhank82/Smasher/compare/v4.2.2...v4.2.3) (2025-12-22)
 
 
