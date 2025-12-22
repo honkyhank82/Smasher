@@ -1,3 +1,10 @@
+## [4.2.3](https://github.com/honkyhank82/Smasher/compare/v4.2.2...v4.2.3) (2025-12-22)
+
+
+### Bug Fixes
+
+* use production profile instead of production-apk for EAS build ([b35a52f](https://github.com/honkyhank82/Smasher/commit/b35a52f2b297315477e5947e38fa3e001bd60804))
+
 ## [4.2.2](https://github.com/honkyhank82/Smasher/compare/v4.2.1...v4.2.2) (2025-12-22)
 
 
