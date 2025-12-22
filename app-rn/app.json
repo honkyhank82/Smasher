@@ -1,10 +1,1 @@
-{
-  "expo": {
-    "extra": {
-      "eas": {
-        "projectId": "edef8952-a01b-408f-abeb-e3922973df75"
-      }
-    },
-    "owner": "smashermain"
-  }
-}
+{"expo": {"name": "smasher-app", "slug": "smasher-app", "version": "4.2.0", "orientation": "portrait", "icon": "./assets/icon.png", "userInterfaceStyle": "automatic", "splash": {"image": "./assets/splash.png", "resizeMode": "contain", "backgroundColor": "#ffffff"}, "assetBundlePatterns": ["**/*"], "ios": {"supportsTablet": true}, "android": {"package": "com.smashermain.app", "adaptiveIcon": {"foregroundImage": "./assets/adaptive-icon.png", "backgroundColor": "#FFFFFF"}}, "web": {"favicon": "./assets/favicon.png"}, "extra": {"eas": {"projectId": "edef8952-a01b-408f-abeb-e3922973df75"}}, "owner": "smashermain"}}
