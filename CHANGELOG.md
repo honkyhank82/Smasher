@@ -1,3 +1,10 @@
+## [4.2.6](https://github.com/honkyhank82/Smasher/compare/v4.2.5...v4.2.6) (2025-12-22)
+
+
+### Bug Fixes
+
+* add welcome-image.png asset for EAS builds ([95aac15](https://github.com/honkyhank82/Smasher/commit/95aac15bae064c0cbe6f3fafb110c074bc676cb6))
+
 ## [4.2.5](https://github.com/honkyhank82/Smasher/compare/v4.2.4...v4.2.5) (2025-12-22)
 
 
