@@ -1,3 +1,10 @@
+## [4.2.2](https://github.com/honkyhank82/Smasher/compare/v4.2.1...v4.2.2) (2025-12-22)
+
+
+### Bug Fixes
+
+* simplify app.json to only required fields for EAS build ([f78dc7f](https://github.com/honkyhank82/Smasher/commit/f78dc7fad1b207778dce115cf43291817acab6d2))
+
 ## [4.2.1](https://github.com/honkyhank82/Smasher/compare/v4.2.0...v4.2.1) (2025-12-22)
 
 
