@@ -1,3 +1,10 @@
+## [4.2.1](https://github.com/honkyhank82/Smasher/compare/v4.2.0...v4.2.1) (2025-12-22)
+
+
+### Bug Fixes
+
+* add complete app.json configuration with Android package ([957819a](https://github.com/honkyhank82/Smasher/commit/957819ae124d3d14263e7792a92a484a5016f370))
+
 # [4.2.0](https://github.com/honkyhank82/Smasher/compare/v4.1.0...v4.2.0) (2025-12-22)
 
 
