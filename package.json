@@ -11,7 +11,14 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "sync:web-assets": "node scripts/copy-assets-to-web.js",
-    "release": "semantic-release"
+    "release": "semantic-release",
+    "prepare": "husky install",
+    "commit": "cz"
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
   },
   "devDependencies": {
     "semantic-release": "^21.0.0",
@@ -19,8 +26,14 @@
     "@semantic-release/commit-analyzer": "^9.0.0",
     "@semantic-release/release-notes-generator": "^10.0.0",
     "@semantic-release/github": "^10.0.0",
-    "@semantic-release/git": "^11.0.0",
-    "@semantic-release/exec": "^6.0.0"
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/exec": "^6.0.0",
+    "@commitlint/config-conventional": "^17.5.0",
+    "@commitlint/cli": "^17.5.0",
+    "commitizen": "^4.3.0",
+    "cz-conventional-changelog": "^3.3.0",
+    "husky": "^8.0.0",
+    "lint-staged": "^13.0.3"
   },
   "dependencies": {
     "expo": "^54.0.30",
