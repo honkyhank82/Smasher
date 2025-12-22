@@ -6,6 +6,19 @@ import { Media } from '../media/media.entity';
 import { MediaService } from '../media/media.service';
 import { OnEvent } from '@nestjs/event-emitter';
 
+type GalleryItem = { id: string; type: string; url: string };
+export type NearbyProfile = {
+  id: string;
+  displayName: string | null;
+  age: number | null;
+  bio: string | null;
+  distance: number | null;
+  profilePicture: string | null;
+  gallery: GalleryItem[];
+  isOnline: boolean;
+  lastSeen: Date | null;
+};
+
 @Injectable()
 export class GeoService {
   private onlineUsers: Map<string, Date> = new Map(); // userId -> last online timestamp
@@ -46,14 +59,14 @@ export class GeoService {
   ): Promise<void> {
     await this.profileRepository.update(
       { user: { id: userId } },
-      { lat: latitude, lng: longitude }
+      { lat: latitude, lng: longitude },
     );
   }
 
   async getNearbyUsers(
     userId: string,
     maxDistance: number = 100,
-  ): Promise<any[]> {
+  ): Promise<NearbyProfile[]> {
     try {
       console.log('GeoService.getNearbyUsers called for user', userId, 'maxDistance', maxDistance);
       const currentUser = await this.profileRepository.findOne({
@@ -62,7 +75,7 @@ export class GeoService {
       if (!currentUser) return [];
       const userLat = currentUser.lat;
       const userLng = currentUser.lng;
-      
+
       // If current user doesn't have location, return a generic list of users
       if (userLat === null || userLng === null) {
         console.log('Current user has no location set, returning generic nearby users list');
@@ -90,18 +103,14 @@ export class GeoService {
             .getMany();
         }
 
-        const results = await Promise.all(
-          profiles.map(async (profile) =>
-            this.buildProfileResponse(profile, null),
-          ),
-        );
+        const results = await Promise.all(profiles.map((profile) => this.buildProfileResponse(profile, null)));
 
         console.log('Returning generic nearby users results count:', results.length);
 
         return results;
       }
-      
-      const nearbyUsers = await this.profileRepository
+
+      const nearbyUsers = (await this.profileRepository
         .createQueryBuilder('profile')
         .leftJoinAndSelect('profile.user', 'user')
         .where('user.id != :userId', { userId })
@@ -115,7 +124,7 @@ export class GeoService {
               sin(radians(:userLat)) * sin(radians(profile.lat))
             )
           )`,
-          'distance'
+          'distance',
         )
         .andWhere(
           `(
@@ -125,16 +134,21 @@ export class GeoService {
               sin(radians(:userLat)) * sin(radians(profile.lat))
             )
           ) <= :maxDistance`,
-          { userLat, userLng, maxDistance }
+          { userLat, userLng, maxDistance },
         )
         .orderBy('distance', 'ASC')
         .limit(50)
-        .getRawAndEntities();
+        .getRawAndEntities()) as { raw: Array<Record<string, unknown>>; entities: Profile[] };
 
-      console.log('Nearby users found by distance:', nearbyUsers.entities.length);
+      console.log(
+        'Nearby users found by distance:',
+        nearbyUsers.entities.length,
+      );
 
       if (nearbyUsers.entities.length === 0) {
-        console.log('No nearby users found within distance, falling back to recent profiles regardless of location');
+        console.log(
+          'No nearby users found within distance, falling back to recent profiles regardless of location',
+        );
 
         const fallbackProfiles = await this.profileRepository
           .createQueryBuilder('profile')
@@ -150,23 +164,31 @@ export class GeoService {
           ),
         );
 
-        console.log('Returning fallback recent profiles count:', fallbackResults.length);
+        console.log(
+          'Returning fallback recent profiles count:',
+          fallbackResults.length,
+        );
         return fallbackResults;
       }
 
       const results = await Promise.all(
-        nearbyUsers.entities.map((profile, index) =>
-          this.buildProfileResponse(
-            profile,
-            parseFloat(nearbyUsers.raw[index].distance),
-          ),
-        ),
+        nearbyUsers.entities.map((profile, index) => {
+          const rawRow = nearbyUsers.raw[index] as Record<string, unknown> | undefined;
+          const distRaw = rawRow ? rawRow['distance'] : undefined;
+          const distNum = typeof distRaw === 'number' ? distRaw : typeof distRaw === 'string' ? parseFloat(distRaw) : NaN;
+          const distance = Number.isFinite(distNum) ? distNum : null;
+          return this.buildProfileResponse(profile, distance);
+        }),
       );
 
-      console.log('Returning distance-based nearby users count:', results.length);
+      console.log(
+        'Returning distance-based nearby users count:',
+        results.length,
+      );
       return results;
-    } catch (error) {
-      console.error('Error fetching nearby users:', error);
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      console.error('Error fetching nearby users:', errMsg);
       return [];
     }
   }
@@ -174,7 +196,10 @@ export class GeoService {
   /**
    * Calculate distance between two users in miles
    */
-  async calculateDistanceBetweenUsers(userId1: string, userId2: string): Promise<number | null> {
+  async calculateDistanceBetweenUsers(
+    userId1: string,
+    userId2: string,
+  ): Promise<number | null> {
     const profile1 = await this.profileRepository.findOne({
       where: { user: { id: userId1 } },
     });
@@ -182,9 +207,14 @@ export class GeoService {
       where: { user: { id: userId2 } },
     });
 
-    if (!profile1 || !profile2 || 
-        profile1.lat === null || profile1.lng === null ||
-        profile2.lat === null || profile2.lng === null) {
+    if (
+      !profile1 ||
+      !profile2 ||
+      profile1.lat === null ||
+      profile1.lng === null ||
+      profile2.lat === null ||
+      profile2.lng === null
+    ) {
       return null;
     }
 
@@ -198,10 +228,12 @@ export class GeoService {
     const dLat = this.toRadians(lat2 - lat1);
     const dLng = this.toRadians(lng2 - lng1);
 
-    const a = 
+    const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(this.toRadians(lat1)) * Math.cos(this.toRadians(lat2)) *
-      Math.sin(dLng / 2) * Math.sin(dLng / 2);
+      Math.cos(this.toRadians(lat1)) *
+        Math.cos(this.toRadians(lat2)) *
+        Math.sin(dLng / 2) *
+        Math.sin(dLng / 2);
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const distance = R * c;
@@ -213,7 +245,10 @@ export class GeoService {
     return degrees * (Math.PI / 180);
   }
 
-  private async buildProfileResponse(profile: Profile, distanceMiles: number | null) {
+  private async buildProfileResponse(
+    profile: Profile,
+    distanceMiles: number | null,
+  ) {
     // Get profile picture
     const profilePicture = await this.mediaRepository.findOne({
       where: { owner: { id: profile.user.id }, isProfilePicture: true },
@@ -221,7 +256,9 @@ export class GeoService {
 
     let profilePictureUrl: string | null = null;
     if (profilePicture) {
-      const { url } = await this.mediaService.createSignedDownloadUrl(profilePicture.key);
+      const { url } = await this.mediaService.createSignedDownloadUrl(
+        profilePicture.key,
+      );
       profilePictureUrl = url;
     }
 
@@ -234,7 +271,9 @@ export class GeoService {
 
     const gallery = await Promise.all(
       galleryMedia.map(async (media) => {
-        const { url } = await this.mediaService.createSignedDownloadUrl(media.key);
+        const { url } = await this.mediaService.createSignedDownloadUrl(
+          media.key,
+        );
         return {
           id: media.id,
           type: media.type,
@@ -265,17 +304,27 @@ export class GeoService {
     };
   }
 
-  private calculateAge(user: any): number | null {
-    if (!user.birthdate) {
+  private calculateAge(user: { birthdate?: unknown } | null | undefined): number | null {
+    // Ensure user exists and has a valid birthdate value
+    if (!user || user.birthdate === undefined || user.birthdate === null) {
       const configuredDefault = process.env.DEFAULT_AGE;
-      const defaultAge = configuredDefault ? parseInt(configuredDefault, 10) : NaN;
+      const defaultAge = configuredDefault
+        ? parseInt(configuredDefault, 10)
+        : NaN;
       return Number.isFinite(defaultAge) ? defaultAge : null;
     }
-    const birthDate = new Date(user.birthdate);
+
+    const bd = user.birthdate;
+    const birthDate = bd instanceof Date ? bd : new Date(String(bd));
+    if (isNaN(birthDate.getTime())) return null;
+
     const today = new Date();
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
       age--;
     }
     return age;

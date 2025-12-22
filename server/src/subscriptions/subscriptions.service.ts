@@ -1,4 +1,9 @@
-import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import Stripe from 'stripe';
@@ -20,30 +25,41 @@ export class SubscriptionsService {
     try {
       const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
       if (!stripeSecretKey) {
-        this.logger.warn('STRIPE_SECRET_KEY is not configured - subscriptions disabled');
+        this.logger.warn(
+          'STRIPE_SECRET_KEY is not configured - subscriptions disabled',
+        );
         return;
       }
       this.stripe = new Stripe(stripeSecretKey, {
         apiVersion: '2025-09-30.clover',
       });
-      this.priceId = process.env.STRIPE_PRICE_ID || 'price_1SNBIbCKpcCZj0lLEYh12CC5';
+      this.priceId =
+        process.env.STRIPE_PRICE_ID || 'price_1SNBIbCKpcCZj0lLEYh12CC5';
       this.logger.log('Subscriptions service initialized successfully');
-    } catch (error) {
-      this.logger.error('Failed to initialize SubscriptionsService', error);
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      const errStack = err instanceof Error ? err.stack : undefined;
+      this.logger.error(`Failed to initialize SubscriptionsService: ${errMsg}`, errStack);
     }
   }
 
   /** Ensure Stripe client and price ID are initialized */
   private ensureStripeInitialized(): void {
     if (!this.stripe || !this.priceId) {
-      throw new BadRequestException('Stripe not initialized: missing STRIPE_SECRET_KEY or STRIPE_PRICE_ID');
+      throw new BadRequestException(
+        'Stripe not initialized: missing STRIPE_SECRET_KEY or STRIPE_PRICE_ID',
+      );
     }
   }
 
   /**
    * Create a Stripe checkout session for a user to subscribe
    */
-  async createCheckoutSession(userId: string, successUrl: string, cancelUrl: string) {
+  async createCheckoutSession(
+    userId: string,
+    successUrl: string,
+    cancelUrl: string,
+  ) {
     this.ensureStripeInitialized();
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
@@ -94,7 +110,9 @@ export class SubscriptionsService {
       },
     });
 
-    this.logger.log(`Created checkout session ${session.id} for user ${userId}`);
+    this.logger.log(
+      `Created checkout session ${session.id} for user ${userId}`,
+    );
     return {
       sessionId: session.id,
       url: session.url,
@@ -170,14 +188,16 @@ export class SubscriptionsService {
     return {
       isPremium: user.isAdmin || user.isPremium,
       isFreeTrial,
-      subscription: subscription ? {
-        status: subscription.status,
-        currentPeriodEnd: subscription.currentPeriodEnd,
-        cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
-        planName: subscription.planName,
-        amount: subscription.amount,
-        currency: subscription.currency,
-      } : null,
+      subscription: subscription
+        ? {
+            status: subscription.status,
+            currentPeriodEnd: subscription.currentPeriodEnd,
+            cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
+            planName: subscription.planName,
+            amount: subscription.amount,
+            currency: subscription.currency,
+          }
+        : null,
     };
   }
 
@@ -191,74 +211,93 @@ export class SubscriptionsService {
     try {
       switch (event.type) {
         case 'checkout.session.completed':
-          await this.handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session);
+          await this.handleCheckoutSessionCompleted(event.data.object);
           break;
 
         case 'customer.subscription.created':
-          await this.handleSubscriptionCreated(event.data.object as Stripe.Subscription);
+          await this.handleSubscriptionCreated(event.data.object);
           break;
 
         case 'customer.subscription.updated':
-          await this.handleSubscriptionUpdated(event.data.object as Stripe.Subscription);
+          await this.handleSubscriptionUpdated(event.data.object);
           break;
 
         case 'customer.subscription.deleted':
-          await this.handleSubscriptionDeleted(event.data.object as Stripe.Subscription);
+          await this.handleSubscriptionDeleted(event.data.object);
           break;
 
         case 'invoice.payment_succeeded':
-          await this.handleInvoicePaymentSucceeded(event.data.object as Stripe.Invoice);
+          await this.handleInvoicePaymentSucceeded(event.data.object);
           break;
 
         case 'invoice.payment_failed':
-          await this.handleInvoicePaymentFailed(event.data.object as Stripe.Invoice);
+          await this.handleInvoicePaymentFailed(event.data.object);
           break;
 
         default:
           this.logger.log(`Unhandled event type: ${event.type}`);
       }
-    } catch (error) {
-      this.logger.error(`Error processing webhook: ${error.message}`, error.stack);
-      throw error;
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      const errStack = err instanceof Error ? err.stack : undefined;
+      this.logger.error(`Error processing webhook: ${errMsg}`, errStack);
+      throw new Error(errMsg);
     }
   }
 
   /**
    * Handle checkout session completed
    */
-  private async handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
+  private async handleCheckoutSessionCompleted(
+    session: Stripe.Checkout.Session,
+  ) {
     const userId = session.metadata?.userId;
     if (!userId) {
       this.logger.error('No userId in checkout session metadata');
       return;
     }
 
-    this.logger.log(`Checkout completed for user ${userId}, subscription: ${session.subscription}`);
+    const getIdFromUnknown = (v: unknown): string | undefined => {
+      if (typeof v === 'string') return v;
+      if (v && typeof (v as Record<string, unknown>)['id'] === 'string') return String((v as Record<string, unknown>)['id']);
+      return undefined;
+    };
+    const sessionSubId = getIdFromUnknown(session.subscription) ?? 'unknown';
+    this.logger.log(`Checkout completed for user ${userId}, subscription: ${sessionSubId}`);
 
     // If there's a subscription ID, ensure it's persisted (fallback for delayed subscription.created events)
     if (session.subscription) {
-      const subscriptionId = typeof session.subscription === 'string' 
-        ? session.subscription 
-        : session.subscription.id;
+      const subscriptionId = getIdFromUnknown(session.subscription);
+      if (!subscriptionId) {
+        this.logger.warn('Could not determine subscription id from session');
+        return;
+      }
 
       // Check if subscription already exists
       const existingSubscription = await this.subscriptionRepository.findOne({
-        where: { stripeSubscriptionId: subscriptionId }
+        where: { stripeSubscriptionId: subscriptionId },
       });
 
       if (!existingSubscription) {
-        this.logger.warn(`Subscription ${subscriptionId} not found, creating from checkout session`);
-        
+        this.logger.warn(
+          `Subscription ${subscriptionId} not found, creating from checkout session`,
+        );
+
         try {
           // Fetch the full subscription from Stripe
-          const stripeSubscription = await this.stripe.subscriptions.retrieve(subscriptionId);
-          
+          const stripeSubscription =
+            await this.stripe.subscriptions.retrieve(subscriptionId);
+
           // Create subscription using the same logic as handleSubscriptionCreated
           await this.createSubscriptionFromStripe(stripeSubscription);
-          
-          this.logger.log(`Subscription ${subscriptionId} created from checkout session`);
-        } catch (error) {
-          this.logger.error(`Failed to create subscription from checkout session: ${error.message}`, error.stack);
+
+          this.logger.log(
+            `Subscription ${subscriptionId} created from checkout session`,
+          );
+        } catch (err: unknown) {
+          const errMsg = err instanceof Error ? err.message : String(err);
+          const errStack = err instanceof Error ? err.stack : undefined;
+          this.logger.error(`Failed to create subscription from checkout session: ${errMsg}`, errStack);
         }
       }
     }
@@ -267,14 +306,24 @@ export class SubscriptionsService {
   /**
    * Handle subscription created
    */
-  private async handleSubscriptionCreated(stripeSubscription: Stripe.Subscription) {
+  private normalizeStatus(status: unknown): Subscription['status'] {
+    const s = String(status);
+    const allowed = ['active','canceled','past_due','unpaid','incomplete','trialing'] as const;
+    return (allowed.includes(s as any) ? (s as Subscription['status']) : 'active');
+  }
+
+  private async handleSubscriptionCreated(
+    stripeSubscription: Stripe.Subscription,
+  ) {
     await this.createSubscriptionFromStripe(stripeSubscription);
   }
 
   /**
    * Create subscription record from Stripe subscription data
    */
-  private async createSubscriptionFromStripe(stripeSubscription: Stripe.Subscription) {
+  private async createSubscriptionFromStripe(
+    stripeSubscription: Stripe.Subscription,
+  ) {
     const userId = stripeSubscription.metadata?.userId;
     if (!userId) {
       this.logger.error('No userId in subscription metadata');
@@ -287,33 +336,59 @@ export class SubscriptionsService {
       return;
     }
 
-    const stripeSubAny = stripeSubscription as any;
+    const stripeRaw = stripeSubscription as unknown as Record<string, unknown>;
+    const cps = stripeRaw['current_period_start'];
+    const cpe = stripeRaw['current_period_end'];
+    const cpsMs = typeof cps === 'number' ? cps * 1000 : Date.now();
+    const cpeMs = typeof cpe === 'number' ? cpe * 1000 : Date.now();
 
-    // Create subscription record
+    // Normalize Stripe objects safely
+    const firstItem = stripeSubscription.items?.data?.[0];
+    const price = firstItem?.price;
+    const stripePriceId = typeof price?.id === 'string' ? price.id : 'unknown';
+    const amount = (typeof price?.unit_amount === 'number' ? price.unit_amount : 999) / 100;
+    const currency = (price?.currency || 'USD').toUpperCase();
+    const interval = price?.recurring?.interval || 'month';
+
+    let stripeCustomerId: string | undefined;
+    if (typeof stripeSubscription.customer === 'string') stripeCustomerId = stripeSubscription.customer;
+    else if (stripeSubscription.customer && typeof (stripeSubscription.customer as Stripe.Customer).id === 'string') stripeCustomerId = (stripeSubscription.customer as Stripe.Customer).id;
+
+    const normalizedStatus = this.normalizeStatus(stripeSubscription.status);
     const subscription = this.subscriptionRepository.create({
       userId,
-      stripeCustomerId: stripeSubscription.customer as string,
+      stripeCustomerId,
       stripeSubscriptionId: stripeSubscription.id,
-      stripePriceId: stripeSubscription.items.data[0].price.id,
+      stripePriceId,
       planName: 'premium',
-      amount: (stripeSubscription.items.data[0].price.unit_amount || 999) / 100,
-      currency: stripeSubscription.items.data[0].price.currency.toUpperCase(),
-      interval: stripeSubscription.items.data[0].price.recurring?.interval || 'month',
-      status: stripeSubscription.status as any,
-      currentPeriodStart: new Date((stripeSubAny.current_period_start as number) * 1000),
-      currentPeriodEnd: new Date((stripeSubAny.current_period_end as number) * 1000),
-      cancelAt: stripeSubscription.cancel_at ? new Date(stripeSubscription.cancel_at * 1000) : null,
-      canceledAt: stripeSubscription.canceled_at ? new Date(stripeSubscription.canceled_at * 1000) : null,
-      trialStart: stripeSubscription.trial_start ? new Date(stripeSubscription.trial_start * 1000) : null,
-      trialEnd: stripeSubscription.trial_end ? new Date(stripeSubscription.trial_end * 1000) : null,
-      cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
-    });
+      amount,
+      currency,
+      interval,
+      status: normalizedStatus,
+      currentPeriodStart: new Date(cpsMs),
+      currentPeriodEnd: new Date(cpeMs),
+      cancelAt: stripeSubscription.cancel_at
+        ? new Date(stripeSubscription.cancel_at * 1000)
+        : null,
+      canceledAt: stripeSubscription.canceled_at
+        ? new Date(stripeSubscription.canceled_at * 1000)
+        : null,
+      trialStart: stripeSubscription.trial_start
+        ? new Date(stripeSubscription.trial_start * 1000)
+        : null,
+      trialEnd: stripeSubscription.trial_end
+        ? new Date(stripeSubscription.trial_end * 1000)
+        : null,
+      cancelAtPeriodEnd: !!stripeSubscription.cancel_at_period_end,
+    } as unknown as Partial<Subscription>);
 
     await this.subscriptionRepository.save(subscription);
 
     // Update user premium status
-    user.isPremium = stripeSubscription.status === 'active' || stripeSubscription.status === 'trialing';
-    user.premiumExpiresAt = new Date((stripeSubAny.current_period_end as number) * 1000);
+    user.isPremium =
+      stripeSubscription.status === 'active' ||
+      stripeSubscription.status === 'trialing';
+    user.premiumExpiresAt = new Date(cpeMs);
     await this.userRepository.save(user);
 
     this.logger.log(`Subscription created for user ${userId}`);
@@ -322,49 +397,72 @@ export class SubscriptionsService {
   /**
    * Handle subscription updated
    */
-  private async handleSubscriptionUpdated(stripeSubscription: Stripe.Subscription) {
+  private async handleSubscriptionUpdated(
+    stripeSubscription: Stripe.Subscription,
+  ) {
     const subscription = await this.subscriptionRepository.findOne({
       where: { stripeSubscriptionId: stripeSubscription.id },
     });
 
     if (!subscription) {
-      this.logger.error(`Subscription ${stripeSubscription.id} not found in database`);
+      this.logger.error(
+        `Subscription ${stripeSubscription.id} not found in database`,
+      );
       return;
     }
 
-    const stripeSubAny = stripeSubscription as any;
+    const stripeRaw = stripeSubscription as unknown as Record<string, unknown>;
+    const cps = stripeRaw['current_period_start'];
+    const cpe = stripeRaw['current_period_end'];
+    const cpsMs = typeof cps === 'number' ? cps * 1000 : Date.now();
+    const cpeMs = typeof cpe === 'number' ? cpe * 1000 : Date.now();
 
     // Update subscription
-    subscription.status = stripeSubscription.status as any;
-    subscription.currentPeriodStart = new Date((stripeSubAny.current_period_start as number) * 1000);
-    subscription.currentPeriodEnd = new Date((stripeSubAny.current_period_end as number) * 1000);
-    subscription.cancelAt = stripeSubscription.cancel_at ? new Date(stripeSubscription.cancel_at * 1000) : null;
-    subscription.canceledAt = stripeSubscription.canceled_at ? new Date(stripeSubscription.canceled_at * 1000) : null;
-    subscription.cancelAtPeriodEnd = stripeSubscription.cancel_at_period_end;
+    subscription.status = this.normalizeStatus(stripeSubscription.status);
+    subscription.currentPeriodStart = new Date(cpsMs);
+    subscription.currentPeriodEnd = new Date(cpeMs);
+    subscription.cancelAt = stripeSubscription.cancel_at
+      ? new Date(stripeSubscription.cancel_at * 1000)
+      : null;
+    subscription.canceledAt = stripeSubscription.canceled_at
+      ? new Date(stripeSubscription.canceled_at * 1000)
+      : null;
+    const cancelAtPeriodEndRaw = (stripeSubscription as unknown as Record<string, unknown>)['cancel_at_period_end'];
+    subscription.cancelAtPeriodEnd = Boolean(cancelAtPeriodEndRaw);
 
     await this.subscriptionRepository.save(subscription);
 
     // Update user premium status
-    const user = await this.userRepository.findOne({ where: { id: subscription.userId } });
+    const user = await this.userRepository.findOne({
+      where: { id: subscription.userId },
+    });
     if (user) {
-      user.isPremium = stripeSubscription.status === 'active' || stripeSubscription.status === 'trialing';
-      user.premiumExpiresAt = new Date((stripeSubAny.current_period_end as number) * 1000);
+      user.isPremium =
+        stripeSubscription.status === 'active' ||
+        stripeSubscription.status === 'trialing';
+      user.premiumExpiresAt = new Date(cpeMs);
       await this.userRepository.save(user);
     }
 
-    this.logger.log(`Subscription updated for user ${subscription.userId}, status: ${stripeSubscription.status}`);
+    this.logger.log(
+      `Subscription updated for user ${subscription.userId}, status: ${stripeSubscription.status}`,
+    );
   }
 
   /**
    * Handle subscription deleted/canceled
    */
-  private async handleSubscriptionDeleted(stripeSubscription: Stripe.Subscription) {
+  private async handleSubscriptionDeleted(
+    stripeSubscription: Stripe.Subscription,
+  ) {
     const subscription = await this.subscriptionRepository.findOne({
       where: { stripeSubscriptionId: stripeSubscription.id },
     });
 
     if (!subscription) {
-      this.logger.error(`Subscription ${stripeSubscription.id} not found in database`);
+      this.logger.error(
+        `Subscription ${stripeSubscription.id} not found in database`,
+      );
       return;
     }
 
@@ -374,7 +472,9 @@ export class SubscriptionsService {
     await this.subscriptionRepository.save(subscription);
 
     // Update user premium status
-    const user = await this.userRepository.findOne({ where: { id: subscription.userId } });
+    const user = await this.userRepository.findOne({
+      where: { id: subscription.userId },
+    });
     if (user) {
       user.isPremium = false;
       user.premiumExpiresAt = null;
@@ -388,14 +488,18 @@ export class SubscriptionsService {
    * Handle successful payment
    */
   private async handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
-    const invoiceAny = invoice as any;
-    if (!invoiceAny.subscription) {
+    const invoiceRaw = invoice as unknown as Record<string, unknown>;
+    const invoiceSub = invoiceRaw['subscription'];
+    if (!invoiceSub) {
       return;
     }
-    const subscriptionId =
-      typeof invoiceAny.subscription === 'string'
-        ? invoiceAny.subscription
-        : invoiceAny.subscription.id;
+    let subscriptionId: string | undefined;
+    if (typeof invoiceSub === 'string') subscriptionId = invoiceSub;
+    else if (invoiceSub && typeof (invoiceSub as { id?: unknown }).id === 'string') subscriptionId = (invoiceSub as { id: string }).id;
+    else {
+      this.logger.warn('Invoice missing subscription id');
+      return;
+    }
     const subscription = await this.subscriptionRepository.findOne({
       where: { stripeSubscriptionId: subscriptionId },
     });
@@ -409,14 +513,18 @@ export class SubscriptionsService {
    * Handle failed payment
    */
   private async handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
-    const invoiceAny = invoice as any;
-    if (!invoiceAny.subscription) {
+    const invoiceRaw = invoice as unknown as Record<string, unknown>;
+    const invoiceSub = invoiceRaw['subscription'];
+    if (!invoiceSub) {
       return;
     }
-    const subscriptionId =
-      typeof invoiceAny.subscription === 'string'
-        ? invoiceAny.subscription
-        : invoiceAny.subscription.id;
+    let subscriptionId: string | undefined;
+    if (typeof invoiceSub === 'string') subscriptionId = invoiceSub;
+    else if (invoiceSub && typeof (invoiceSub as { id?: unknown }).id === 'string') subscriptionId = (invoiceSub as { id: string }).id;
+    else {
+      this.logger.warn('Invoice missing subscription id');
+      return;
+    }
     const subscription = await this.subscriptionRepository.findOne({
       where: { stripeSubscriptionId: subscriptionId },
     });
@@ -460,12 +568,15 @@ export class SubscriptionsService {
       },
     );
 
-    const updatedSubAny = updatedSubscription as any;
+    const updatedRaw = updatedSubscription as unknown as Record<string, unknown>;
+    const updatedCpe = updatedRaw['current_period_end'];
     subscription.cancelAtPeriodEnd = true;
-    subscription.cancelAt = new Date((updatedSubAny.current_period_end as number) * 1000);
+    subscription.cancelAt = typeof updatedCpe === 'number' ? new Date(updatedCpe * 1000) : subscription.cancelAt;
     await this.subscriptionRepository.save(subscription);
 
-    this.logger.log(`Subscription ${subscription.id} will cancel at period end`);
+    this.logger.log(
+      `Subscription ${subscription.id} will cancel at period end`,
+    );
     return { success: true, cancelAt: subscription.cancelAt };
   }
 
@@ -482,12 +593,9 @@ export class SubscriptionsService {
       throw new NotFoundException('No canceled subscription found');
     }
 
-    await this.stripe.subscriptions.update(
-      subscription.stripeSubscriptionId,
-      {
-        cancel_at_period_end: false,
-      },
-    );
+    await this.stripe.subscriptions.update(subscription.stripeSubscriptionId, {
+      cancel_at_period_end: false,
+    });
 
     subscription.cancelAtPeriodEnd = false;
     subscription.cancelAt = null;

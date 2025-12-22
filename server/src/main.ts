@@ -1,13 +1,17 @@
 import 'reflect-metadata';
 
 // Polyfill for crypto in production
-if (typeof global.crypto === 'undefined') {
-  global.crypto = require('crypto').webcrypto;
+import { webcrypto as nodeWebCrypto } from 'crypto';
+
+// Assign node webcrypto to globalThis.crypto if not present (avoid redeclaring global var)
+if (typeof (globalThis as any).crypto === 'undefined') {
+  (globalThis as any).crypto = nodeWebCrypto as unknown as Crypto;
 }
 
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import express from 'express';
 
 process.on('unhandledRejection', (reason) => {
   console.error('[startup] UnhandledRejection', reason);
@@ -21,7 +25,7 @@ async function bootstrap() {
     console.log('===== BOOTSTRAP FUNCTION STARTED =====');
     console.log('===== THIS IS OUR CUSTOM CODE =====');
     // Removed synchronous file logging to avoid blocking the event loop
-    
+
     // Early env visibility before NestFactory.create
     const envDbUrl = process.env['DATABASE_URL'];
     if (envDbUrl) {
@@ -30,7 +34,9 @@ async function bootstrap() {
         const msg = `[startup] (pre-create) DATABASE_URL host=${u.host} db=${u.pathname.replace('/', '')}`;
         console.log(msg);
       } catch {
-        console.log('[startup] (pre-create) DATABASE_URL present but unparsable');
+        console.log(
+          '[startup] (pre-create) DATABASE_URL present but unparsable',
+        );
       }
     } else {
       console.log('[startup] (pre-create) DATABASE_URL is NOT set');
@@ -38,24 +44,29 @@ async function bootstrap() {
 
     const hasJwt = !!(process.env['JWT_SECRET'] ?? '').trim();
     const hasPepper = !!(process.env['VERIFICATION_CODE_PEPPER'] ?? '').trim();
-    console.log(`[startup] Env check - JWT_SECRET set=${hasJwt}, VERIFICATION_CODE_PEPPER set=${hasPepper}`);
+    console.log(
+      `[startup] Env check - JWT_SECRET set=${hasJwt}, VERIFICATION_CODE_PEPPER set=${hasPepper}`,
+    );
 
     console.log('[bootstrap] About to call NestFactory.create');
     const app = await NestFactory.create(AppModule, {
       bodyParser: true,
       rawBody: true,
     });
-    console.log('[bootstrap] NestFactory.create completed - app object exists:', !!app);
+    console.log(
+      '[bootstrap] NestFactory.create completed - app object exists:',
+      !!app,
+    );
     console.log('[bootstrap] App type:', typeof app);
 
     app.enableCors({ origin: true, credentials: true });
     console.log('[bootstrap] CORS enabled');
-    
+
     // Increase body size limit for file uploads
-    app.use(require('express').json({ limit: '50mb' }));
-    app.use(require('express').urlencoded({ limit: '50mb', extended: true }));
+    app.use(express.json({ limit: '50mb' }));
+    app.use(express.urlencoded({ limit: '50mb', extended: true }));
     console.log('[bootstrap] Body parsers configured');
-    
+
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
