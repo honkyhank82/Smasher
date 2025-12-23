@@ -1,6 +1,6 @@
 {
   "name": "smasher-api",
-  "version": "4.2.13",
+  "version": "4.2.14",
   "private": true,
   "engines": {
     "node": "18.x"
