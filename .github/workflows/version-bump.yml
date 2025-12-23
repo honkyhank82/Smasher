@@ -1,0 +1,114 @@
+name: Version Bump and Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  version-bump:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      new_tag: ${{ steps.bump.outputs.new_tag }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Get current version
+        id: current_version
+        run: |
+          CURRENT_VERSION=$(node -p "require('./app-rn/package.json').version")
+          echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Bump version
+        id: bump
+        run: |
+          CURRENT="${{ steps.current_version.outputs.current_version }}"
+          VERSION_TYPE="${{ github.event.inputs.version_type || 'patch' }}"
+          
+          # Parse current version
+          IFS='.' read -ra VERSION_PARTS <<< "$CURRENT"
+          MAJOR=${VERSION_PARTS[0]}
+          MINOR=${VERSION_PARTS[1]}
+          PATCH=${VERSION_PARTS[2]}
+          
+          case $VERSION_TYPE in
+            "major")
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            "minor")
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            "patch")
+              PATCH=$((PATCH + 1))
+              ;;
+          esac
+          
+          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+          NEW_TAG="v$NEW_VERSION"
+          
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+          echo "Bumped from $CURRENT to $NEW_VERSION"
+
+      - name: Update package.json files
+        run: |
+          NEW_VERSION="${{ steps.bump.outputs.new_version }}"
+          node ./scripts/set-version-to-tag.js "$NEW_VERSION"
+
+      - name: Commit version bump
+        run: |
+          NEW_VERSION="${{ steps.bump.outputs.new_version }}"
+          git add package.json app-rn/package.json server/package.json app-web/package.json || true
+          git commit -m "chore: bump version to $NEW_VERSION [skip ci]" || echo "No changes to commit"
+
+      - name: Create and push tag
+        run: |
+          NEW_TAG="${{ steps.bump.outputs.new_tag }}"
+          git tag "$NEW_TAG"
+          git push origin main --tags
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.bump.outputs.new_tag }}
+          name: Release ${{ steps.bump.outputs.new_tag }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
