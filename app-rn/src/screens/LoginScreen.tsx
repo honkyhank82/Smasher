@@ -134,11 +134,6 @@ export const LoginScreen = ({ onLoginSuccess, onBack }: LoginScreenProps) => {
               </TouchableOpacity>
             </View>
             <View style={styles.content}>
-              <Image 
-                source={require('../../assets/logo.png')} 
-                style={styles.logoImage} 
-                resizeMode="contain" 
-              />
               <Text style={styles.subtitle}>Welcome back!</Text>
             </View>
             <View style={styles.form}>
