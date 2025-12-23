@@ -1,3 +1,10 @@
+## [4.2.7](https://github.com/honkyhank82/Smasher/compare/v4.2.6...v4.2.7) (2025-12-23)
+
+
+### Bug Fixes
+
+* replace welcome-image.png with proper base64 content ([b5ab20c](https://github.com/honkyhank82/Smasher/commit/b5ab20c202023ef1ca331d800fc98f3321feda2f))
+
 ## [4.2.6](https://github.com/honkyhank82/Smasher/compare/v4.2.5...v4.2.6) (2025-12-22)
 
 
