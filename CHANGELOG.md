@@ -1,3 +1,10 @@
+## [4.2.11](https://github.com/honkyhank82/Smasher/compare/v4.2.10...v4.2.11) (2025-12-23)
+
+
+### Bug Fixes
+
+* remove missing logo.png dependency from LogoHeader ([f5d697d](https://github.com/honkyhank82/Smasher/commit/f5d697d6c9bc26125e51078a3ffb93dc3ce2c790))
+
 ## [4.2.10](https://github.com/honkyhank82/Smasher/compare/v4.2.9...v4.2.10) (2025-12-23)
 
 
