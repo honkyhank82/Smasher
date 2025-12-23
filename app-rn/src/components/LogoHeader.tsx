@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, StyleSheet, View, Dimensions } from 'react-native';
+import { StyleSheet, View, Dimensions } from 'react-native';
 
 export const LogoHeader = () => {
   return (

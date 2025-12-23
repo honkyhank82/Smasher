@@ -103,11 +103,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: theme.spacing.xl,
   },
-  logoImage: {
-    width: 250,
-    height: 100,
-    marginBottom: theme.spacing.sm,
-  },
   logo: {
     fontSize: theme.fontSize.xxl,
     fontWeight: 'bold',
