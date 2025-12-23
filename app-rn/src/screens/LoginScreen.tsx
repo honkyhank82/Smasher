@@ -118,11 +118,7 @@ export const LoginScreen = ({ onLoginSuccess, onBack }: LoginScreenProps) => {
 
   return (
     <View style={styles.container}>
-      <Image 
-        source={require('../../assets/welcome-image.png')} 
-        style={styles.backgroundImage}
-        resizeMode="cover"
-      />
+      <View style={styles.backgroundPlaceholder} />
       <View style={styles.overlay}>
         <KeyboardAvoidingView 
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -196,14 +192,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  backgroundImage: {
+  backgroundPlaceholder: {
     position: 'absolute',
     left: 0,
     right: 0,
     top: 0,
     bottom: 0,
-    width: '100%',
-    height: '100%',
+    backgroundColor: '#4A90E2',
   },
   overlay: {
     flex: 1,
