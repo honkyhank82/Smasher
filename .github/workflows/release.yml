@@ -36,10 +36,12 @@ jobs:
           # Run EAS build in non-interactive mode and output JSON
           BUILD_JSON="$(eas build --platform android --profile production --non-interactive --json)"
           echo "$BUILD_JSON" > build-output.json
-          # Extract the first artifact URL from the artifacts array
-          echo "Build JSON output:"
-          echo "$BUILD_JSON" | jq .
-          APK_URL="$(echo "$BUILD_JSON" | jq -r 'if type == "array" then .[0].applicationArchiveUrl else .applicationArchiveUrl end // empty')"
+          # Extract artifact URL from build array structure
+          echo "Build JSON structure:"
+          echo "$BUILD_JSON" | jq 'type'
+          echo "First few elements:"
+          echo "$BUILD_JSON" | jq '.[0:3]'
+          APK_URL="$(echo "$BUILD_JSON" | jq -r '.[0].artifacts[0].applicationArchiveUrl // empty')"
           mkdir -p ../build
           if [ -z "$APK_URL" ] || [ "$APK_URL" = "null" ]; then
             echo "Failed to find APK URL in build output" >&2
