@@ -39,7 +39,7 @@ jobs:
           # Extract the first artifact URL from the artifacts array
           echo "Build JSON output:"
           echo "$BUILD_JSON" | jq .
-          APK_URL="$(echo "$BUILD_JSON" | jq -r '.artifacts[0].applicationArchiveUrl // .build.artifacts[0].applicationArchiveUrl // empty')"
+          APK_URL="$(echo "$BUILD_JSON" | jq -r 'if type == "array" then .[0].applicationArchiveUrl else .applicationArchiveUrl end // empty')"
           mkdir -p ../build
           if [ -z "$APK_URL" ] || [ "$APK_URL" = "null" ]; then
             echo "Failed to find APK URL in build output" >&2
