@@ -32,11 +32,7 @@ export const WelcomeScreen = () => {
 
   return (
     <View style={styles.container}>
-      <ImageBackground 
-        source={require('../../assets/welcome-image.png')} 
-        style={styles.backgroundImage}
-        resizeMode="cover"
-      />
+      <View style={styles.backgroundPlaceholder} />
       <View style={styles.overlay}>
         <View style={styles.content}>
           <Text style={styles.tagline}>Connect with people nearby</Text>
@@ -67,12 +63,13 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: '#000',
   },
-  backgroundImage: {
+  backgroundPlaceholder: {
     position: 'absolute',
     left: 0,
     right: 0,
     top: 0,
     bottom: 0,
+    backgroundColor: '#4A90E2',
   },
   overlay: {
     flex: 1,
