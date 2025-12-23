@@ -1,3 +1,10 @@
+## [4.2.8](https://github.com/honkyhank82/Smasher/compare/v4.2.7...v4.2.8) (2025-12-23)
+
+
+### Bug Fixes
+
+* remove welcome-image.png dependency and use solid background ([f65b516](https://github.com/honkyhank82/Smasher/commit/f65b5161b8245ba46cf05174831d239eb604ea59))
+
 ## [4.2.7](https://github.com/honkyhank82/Smasher/compare/v4.2.6...v4.2.7) (2025-12-23)
 
 
