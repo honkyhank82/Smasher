@@ -11,13 +11,13 @@ npm install
 
 echo "Building APK..."
 # Run EAS build
-BUILD_JSON="$(eas build --platform android --profile production --non-interactive --json)"
+BUILD_JSON="$(eas build --platform android --profile production-apk --non-interactive --json --wait)"
 
 # Save for debugging
 echo "$BUILD_JSON" > build-output.json
 
-# Extract URL
-APK_URL="$(echo "$BUILD_JSON" | jq -r '.[0].artifacts[0].applicationArchiveUrl // .[0].applicationArchiveUrl // .artifacts[0].applicationArchiveUrl // .applicationArchiveUrl // empty')"
+# Extract URL - handle both array and object formats
+APK_URL="$(echo "$BUILD_JSON" | jq -r 'if type == "array" then .[0].artifacts[0].applicationArchiveUrl // .[0].applicationArchiveUrl // empty else .artifacts[0].applicationArchiveUrl // .applicationArchiveUrl // empty end')"
 
 if [ -z "$APK_URL" ] || [ "$APK_URL" = "null" ]; then
   echo "Failed to find APK URL in build output" >&2
