@@ -4,11 +4,7 @@ import { Image, StyleSheet, View, Dimensions } from 'react-native';
 export const LogoHeader = () => {
   return (
     <View style={styles.container}>
-      <Image
-        source={require('../../assets/logo.png')}
-        style={styles.logo}
-        resizeMode="contain"
-      />
+      <View style={styles.logoPlaceholder} />
     </View>
   );
 };
@@ -20,8 +16,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     height: 40, // Standard header height content
   },
-  logo: {
-    width: 150, // Adjust based on logo aspect ratio
+  logoPlaceholder: {
+    width: 150,
     height: 40,
+    backgroundColor: '#4A90E2',
+    borderRadius: 4,
   },
 });
