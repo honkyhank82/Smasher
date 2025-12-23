@@ -1,3 +1,10 @@
+## [4.2.12](https://github.com/honkyhank82/Smasher/compare/v4.2.11...v4.2.12) (2025-12-23)
+
+
+### Bug Fixes
+
+* remove unused logoImage styles and clean up imports ([519b44c](https://github.com/honkyhank82/Smasher/commit/519b44cc476719485c0f5bf40b8a1f68f27b97f3))
+
 ## [4.2.11](https://github.com/honkyhank82/Smasher/compare/v4.2.10...v4.2.11) (2025-12-23)
 
 

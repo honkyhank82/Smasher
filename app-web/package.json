@@ -1,6 +1,6 @@
 {
   "name": "smasher-web",
-  "version": "4.2.11",
+  "version": "4.2.12",
   "type": "module",
   "scripts": {
     "dev": "vite",
