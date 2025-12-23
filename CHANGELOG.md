@@ -1,3 +1,10 @@
+## [4.2.9](https://github.com/honkyhank82/Smasher/compare/v4.2.8...v4.2.9) (2025-12-23)
+
+
+### Bug Fixes
+
+* remove welcome-image.png dependency from LoginScreen ([0fbbb4b](https://github.com/honkyhank82/Smasher/commit/0fbbb4b9a4ee677a64c4714f9d7657074156f3f7))
+
 ## [4.2.8](https://github.com/honkyhank82/Smasher/compare/v4.2.7...v4.2.8) (2025-12-23)
 
 
