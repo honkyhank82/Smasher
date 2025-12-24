@@ -16,6 +16,9 @@ const files = [
   'app-web/package.json'
 ];
 
+// Also handle app.json specially
+const appJsonPath = 'app-rn/app.json';
+
 let changed = [];
 for (const rel of files) {
   const p = path.resolve(__dirname, '..', rel);
@@ -53,6 +56,26 @@ for (const rel of files) {
   }
   console.log(`Updated ${rel} -> ${version}`);
   changed.push(rel);
+}
+
+// Handle app.json
+const pApp = path.resolve(__dirname, '..', appJsonPath);
+if (fs.existsSync(pApp)) {
+  try {
+    const raw = fs.readFileSync(pApp, 'utf8');
+    const pkg = JSON.parse(raw);
+    if (pkg.expo && pkg.expo.version !== version) {
+      pkg.expo.version = version;
+      fs.writeFileSync(pApp, JSON.stringify(pkg, null, 2) + '\n', 'utf8');
+      console.log(`Updated ${appJsonPath} -> ${version}`);
+      changed.push(appJsonPath);
+    } else {
+       console.log(`${appJsonPath} already at ${version} or invalid structure`);
+    }
+  } catch (err) {
+    console.error(`Failed to update ${appJsonPath}: ${err.message}`);
+    // Don't fail the build for this, but warn
+  }
 }
 
 if (changed.length === 0) {
