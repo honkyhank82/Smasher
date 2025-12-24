@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import * as SplashScreen from 'expo-splash-screen';
 import { useAuth } from '../context/AuthContext';
 import { WelcomeScreen } from '../screens/WelcomeScreen';
 import { AgeGateScreen } from '../screens/AgeGateScreen';
