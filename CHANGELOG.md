@@ -1,3 +1,10 @@
+## [4.2.22](https://github.com/honkyhank82/Smasher/compare/v4.2.21...v4.2.22) (2025-12-24)
+
+
+### Bug Fixes
+
+* resolve startup crash and missing assets, bump version to 4.2.21 ([5ef9b85](https://github.com/honkyhank82/Smasher/commit/5ef9b858b950104fe5b29ff3de609e939ffb573c))
+
 ## [4.2.21](https://github.com/honkyhank82/Smasher/compare/v4.2.20...v4.2.21) (2025-12-24)
 
 
