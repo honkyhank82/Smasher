@@ -1,3 +1,10 @@
+## [4.2.23](https://github.com/honkyhank82/Smasher/compare/v4.2.22...v4.2.23) (2025-12-24)
+
+
+### Bug Fixes
+
+* ensure release script updates app.json version and triggers apk build ([1a3285e](https://github.com/honkyhank82/Smasher/commit/1a3285e2dff4ff8aa92bd951e1efb77ab3f97d12))
+
 ## [4.2.22](https://github.com/honkyhank82/Smasher/compare/v4.2.21...v4.2.22) (2025-12-24)
 
 
