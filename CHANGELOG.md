@@ -1,3 +1,12 @@
+## [4.2.21](https://github.com/honkyhank82/Smasher/compare/v4.2.20...v4.2.21) (2025-12-24)
+
+
+### Bug Fixes
+
+* separate eas build and list commands to fix parsing ([672bfeb](https://github.com/honkyhank82/Smasher/commit/672bfebdb550a9c6f3655c935f344c5e55134cdb))
+* trigger release to build APK ([9c0484d](https://github.com/honkyhank82/Smasher/commit/9c0484d9ab1a13cf1f89e5975082c730613b7c74))
+* use production-apk profile and wait for build completion ([25ac57e](https://github.com/honkyhank82/Smasher/commit/25ac57eda33d314dbde190fe0cab3d46edae9fa0))
+
 ## [4.2.12](https://github.com/honkyhank82/Smasher/compare/v4.2.11...v4.2.12) (2025-12-23)
 
 
