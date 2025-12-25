@@ -50,36 +50,44 @@ export default function Auth({ setIsAuthenticated }: AuthProps) {
 
   return (
     <div className="auth-container">
+      <div className="auth-background" aria-hidden="true" />
       <div className="auth-card">
         <img src="/logo.png" alt="SMASHER" className="auth-logo" />
+        <h1 className="visually-hidden">Sign In</h1>
         <p className="subtitle">Connect with people near you</p>
 
-        {error && <div className="error-message">{error}</div>}
+        {error && <div className="error-message" role="alert">{error}</div>}
 
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleLogin} noValidate>
           <div className="form-group">
-            <label>Email Address</label>
+            <label htmlFor="email">Email Address</label>
             <input
+              id="email"
               type="email"
               placeholder="you@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              aria-required="true"
+              autoComplete="email"
             />
           </div>
 
           <div className="form-group">
-            <label>Password</label>
+            <label htmlFor="password">Password</label>
             <input
+              id="password"
               type="password"
               placeholder="Your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              aria-required="true"
+              autoComplete="current-password"
             />
           </div>
 
-          <button type="submit" disabled={loading}>
+          <button type="submit" disabled={loading} className="submit-btn">
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>

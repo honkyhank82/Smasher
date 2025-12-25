@@ -2,7 +2,7 @@
   "expo": {
     "name": "smasher-app",
     "slug": "smasher-app",
-    "version": "4.2.21",
+    "version": "4.2.24",
     "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splash.png",
