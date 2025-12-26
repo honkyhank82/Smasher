@@ -31,40 +31,51 @@ body {
   overflow-x: hidden;
   padding: 20px;
   box-sizing: border-box;
+  background-color: #000; /* Requirement: Set background-color: #000 on container */
 }
 
 /* 1. Background Image Implementation */
 .auth-background {
-  position: fixed; /* Ensures background remains fixed during scrolling */
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: -1;
-  background-color: var(--bg-dark); /* Fallback/Base color */
-  background-image: url('/background.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  /* background-attachment: fixed; - Note: 'fixed' can cause issues on some mobile browsers, but requested by spec */
+  z-index: 0; /* Requirement: Background layer z-index 0 */
+  
+  /* Color Correction */
+  background-color: #000; /* Requirement: background-color: #000 */
+  background-clip: border-box; /* Requirement: background-clip: border-box */
+  border: 1px solid #000; /* Requirement: 1px black border */
+  
+  /* CSS Property Adjustments */
+  background-size: cover; /* Requirement: background-size: cover */
+  background-position: center center; /* Requirement: background-position: center center */
+  background-repeat: no-repeat; /* Requirement: background-repeat: no-repeat */
   background-attachment: fixed;
+  
+  /* Image with WebP fallback using image-set */
+  background-image: url('/background.jpg'); /* Fallback for older browsers */
+  background-image: -webkit-image-set(url('/background.webp') 1x, url('/background.jpg') 1x);
+  background-image: image-set(url('/background.webp') 1x, url('/background.jpg') 1x);
 }
 
-/* Overlay for better text readability if image is bright */
-.auth-background::after {
+/* Overlay using ::before as requested */
+.auth-background::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7); /* Dark overlay */
+  background: rgba(0, 0, 0, 0.5); /* Requirement: semi-transparent black overlay (rgba(0,0,0,0.5)) */
+  z-index: 1; /* Requirement: Overlay layer z-index 1 */
 }
 
 /* 2. Form Element Styling */
 .auth-card {
   position: relative;
-  z-index: 1;
+  z-index: 2; /* Requirement: Form elements minimum z-index 2 */
   background: var(--bg-card);
   border: 1px solid #333;
   border-radius: 12px;
@@ -98,44 +109,44 @@ body {
   margin-bottom: 8px;
   color: var(--text-light);
   font-weight: 500;
-  font-size: 0.95rem;
 }
 
 .form-group input {
   width: 100%;
-  padding: var(--spacing-md); /* 16px padding */
-  background-color: var(--input-bg);
-  color: var(--input-text);
-  border: 2px solid transparent;
+  padding: 16px; /* Increased padding */
   border-radius: 8px;
-  font-size: 1rem;
-  box-sizing: border-box; /* Ensure padding doesn't affect width */
-  transition: border-color 0.2s;
+  border: 1px solid #ddd;
+  background: var(--input-bg);
+  color: var(--input-text);
+  font-size: 16px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
 }
 
 .form-group input:focus {
   outline: none;
   border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(139, 0, 0, 0.2);
 }
 
 .submit-btn {
   width: 100%;
-  padding: var(--spacing-md); /* 16px padding */
+  padding: 16px;
   background-color: var(--primary-color);
-  color: var(--text-light);
+  color: white;
   border: none;
   border-radius: 8px;
-  font-size: 1.1rem;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s;
-  min-height: 54px; /* Touch target size optimization */
+  min-height: 54px; /* Requirement: Touch targets maintain minimum 48px */
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.submit-btn:hover {
+.submit-btn:hover:not(:disabled) {
   background-color: var(--primary-hover);
 }
 
@@ -145,68 +156,46 @@ body {
 }
 
 .error-message {
-  background: var(--error-bg);
-  border: 1px solid var(--error-text);
+  background-color: var(--error-bg);
   color: var(--error-text);
-  padding: var(--spacing-md);
+  padding: 12px;
   border-radius: 8px;
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: 20px;
   text-align: center;
+  border: 1px solid rgba(220, 53, 69, 0.2);
 }
 
 .terms {
   text-align: center;
+  margin-top: 24px;
   font-size: 0.85rem;
   color: var(--text-muted);
-  margin-top: 24px;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-/* 3. Cross-Platform Testing Requirements & Responsiveness */
-
-/* Mobile (320px-768px) */
-@media screen and (max-width: 768px) {
-  .auth-container {
-    padding: 16px;
-    align-items: center; /* Center vertically on mobile too */
-  }
-
+/* Responsive Validation */
+@media (max-width: 768px) {
   .auth-card {
     padding: 24px;
-    width: 100%;
     max-width: 100%;
-    border: none; /* Cleaner look on small screens */
-    background: rgba(26, 26, 26, 0.95); /* Slightly transparent on mobile */
+    margin: 10px;
+    /* Slightly transparent background on mobile for better visibility of bg image */
+    background: rgba(26, 26, 26, 0.95);
   }
-
-  .auth-logo {
-    max-width: 150px;
+  
+  .auth-container {
+    padding: 10px;
   }
 }
 
-/* Tablet (769px-1024px) */
-@media screen and (min-width: 769px) and (max-width: 1024px) {
+@media (min-width: 769px) and (max-width: 1024px) {
   .auth-card {
     max-width: 400px;
-    padding: 32px;
   }
 }
 
-/* Desktop (1025px+) */
-@media screen and (min-width: 1025px) {
+@media (min-width: 1025px) {
   .auth-card {
-    max-width: 440px;
+    max-width: 420px;
   }
 }

@@ -118,7 +118,7 @@ export const LoginScreen = ({ onLoginSuccess, onBack }: LoginScreenProps) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.backgroundPlaceholder} />
+      <Image source={require('../assets/smasherbanner.png')} style={styles.backgroundImage} />
       <View style={styles.overlay}>
         <KeyboardAvoidingView 
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -187,13 +187,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  backgroundPlaceholder: {
+  backgroundImage: {
     position: 'absolute',
     left: 0,
     right: 0,
     top: 0,
     bottom: 0,
-    backgroundColor: '#4A90E2',
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
   overlay: {
     flex: 1,
