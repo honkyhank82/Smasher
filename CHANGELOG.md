@@ -1,3 +1,10 @@
+# [4.3.0](https://github.com/honkyhank82/Smasher/compare/v4.2.23...v4.3.0) (2025-12-25)
+
+
+### Features
+
+* redesign web login page and update assets, bump version to 4.2.24 ([0300072](https://github.com/honkyhank82/Smasher/commit/0300072c1bcf94777eb2ede2c7a1e39749659d0b))
+
 ## [4.2.23](https://github.com/honkyhank82/Smasher/compare/v4.2.22...v4.2.23) (2025-12-24)
 
 
