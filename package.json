@@ -3,7 +3,7 @@
 "version": "4.3.1",
   "private": true,
   "engines": {
-    "node": "18.x"
+    "node": ">=20.x"
   },
   "scripts": {
     "build": "cd server && npm install && npm run build",
