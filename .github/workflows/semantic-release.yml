@@ -43,77 +43,8 @@ jobs:
         id: get_version
         run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
 
-      - name: Build Android APK
-        run: |
-          cd app-rn
-          eas build --platform android --profile production-apk --non-interactive --wait
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-
-      - name: Download APK
-        run: |
-          cd app-rn
-          # Get the latest build ID
-          BUILD_ID=$(eas build:list --platform=android --limit=1 --non-interactive --json | jq -r '.[0].id')
-          
-          # Download the APK
-          eas build:view $BUILD_ID --non-interactive --json > build-info.json
-          APK_URL=$(jq -r '.artifacts[] | select(.type=="apk") | .url' build-info.json)
-          
-          if [ ! -z "$APK_URL" ] && [ "$APK_URL" != "null" ]; then
-            curl -L "$APK_URL" -o smasher-v${{ steps.get_version.outputs.version }}.apk
-            echo "APK downloaded: smasher-v${{ steps.get_version.outputs.version }}.apk"
-            ls -la *.apk
-          else
-            echo "No APK URL found in build artifacts"
-            echo "Build info content:"
-            cat build-info.json
-            exit 1
-          fi
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-
       - name: Run semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: npx semantic-release
-
-      - name: Upload APK to Release
-        if: success()
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            const path = './app-rn/smasher-v${{ steps.get_version.outputs.version }}.apk';
-            
-            if (fs.existsSync(path)) {
-              const content = fs.readFileSync(path);
-              const version = '${{ steps.get_version.outputs.version }}';
-              
-              // Get the latest release
-              const releases = await github.rest.repos.listReleases({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-              });
-              
-              const release = releases.data.find(r => r.tag_name === `v${version}`);
-              
-              if (release) {
-                await github.rest.repos.uploadReleaseAsset({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  release_id: release.id,
-                  name: `smasher-v${version}.apk`,
-                  data: content,
-                  headers: {
-                    'Content-Type': 'application/vnd.android.package-archive'
-                  }
-                });
-                console.log(`APK uploaded to release v${version}`);
-              } else {
-                console.log(`Release v${version} not found`);
-              }
-            } else {
-              console.log('APK file not found');
-            }
