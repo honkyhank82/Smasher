@@ -26,6 +26,12 @@ fi
 # Run EAS build locally using npx to ensure CLI availability
 # Using --yes to suppress installation prompts
 echo "Running EAS build..."
+
+# Ensure gradlew is executable if it exists
+if [ -f "android/gradlew" ]; then
+    chmod +x android/gradlew
+fi
+
 mkdir -p ../build
 npx --yes eas-cli build --local --platform android --profile production-apk --non-interactive --output ../build/app.apk
 
