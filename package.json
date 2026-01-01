@@ -21,6 +21,7 @@
     }
   },
   "devDependencies": {
+    "eas-cli": "^14.8.1",
     "semantic-release": "^21.0.0",
     "@semantic-release/changelog": "^6.0.0",
     "@semantic-release/commit-analyzer": "^9.0.0",
