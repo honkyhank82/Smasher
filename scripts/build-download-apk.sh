@@ -15,6 +15,12 @@ npm -v
 echo "JAVA_HOME: $JAVA_HOME"
 echo "ANDROID_HOME: $ANDROID_HOME"
 
+# Create local.properties for Android build
+if [ -n "$ANDROID_HOME" ]; then
+    echo "Creating local.properties with sdk.dir=$ANDROID_HOME"
+    echo "sdk.dir=$ANDROID_HOME" > android/local.properties
+fi
+
 echo "Building APK locally to bypass cloud limits..."
 # Check if running on Windows
 if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
