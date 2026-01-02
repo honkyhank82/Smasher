@@ -26,7 +26,7 @@ if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; t
 fi
 
 echo "EAS CLI version:"
-npx eas-cli --version
+npx eas --version
 
 # Run EAS build locally using npx to ensure CLI availability
 # Using --yes to suppress installation prompts
@@ -58,7 +58,7 @@ if [ -f "android/gradlew" ]; then
 fi
 
 echo "Building APK with EAS..."
-npx --yes eas-cli build --local --platform android --profile production-apk --non-interactive --output ../build/app.apk --clear-cache
+npx --yes eas build --local --platform android --profile production-apk --non-interactive --output ../build/app.apk --clear-cache
 
 echo "Build command finished."
 if [ -f "../build/app.apk" ]; then
