@@ -38,6 +38,9 @@ mkdir -p ../build
 echo "Syncing native files..."
 npx expo prebuild --platform android --no-install --clean
 
+echo "app.json after prebuild (should match):"
+cat app.json
+
 # Create local.properties for Android build
 # We do this AFTER prebuild because --clean deletes the android directory
 if [ -n "$ANDROID_HOME" ]; then
