@@ -1,6 +1,6 @@
 {
   "name": "smasher-api",
-"version": "4.3.5",
+  "version": "4.3.6",
   "private": true,
   "engines": {
     "node": ">=20.x"
@@ -21,7 +21,7 @@
     }
   },
   "devDependencies": {
-    "eas-cli": "^14.8.1",
+    "eas-cli": "^16.28.0",
     "semantic-release": "^21.0.0",
     "@semantic-release/changelog": "^6.0.0",
     "@semantic-release/commit-analyzer": "^9.0.0",

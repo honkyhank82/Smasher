@@ -25,6 +25,9 @@ if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; t
     # The warning below was too aggressive.
 fi
 
+echo "EAS CLI version:"
+npx eas-cli --version
+
 # Run EAS build locally using npx to ensure CLI availability
 # Using --yes to suppress installation prompts
 echo "Running EAS build..."
@@ -36,6 +39,7 @@ mkdir -p ../build
 # Sync native files with app.json (version, versionCode, etc.)
 # This ensures build.gradle gets the updated version
 echo "Syncing native files..."
+# We must use the same eas-cli version or expo-cli
 npx expo prebuild --platform android --no-install --clean
 
 echo "app.json after prebuild (should match):"
@@ -53,9 +57,10 @@ if [ -f "android/gradlew" ]; then
     chmod +x android/gradlew
 fi
 
+echo "Building APK with EAS..."
 npx --yes eas-cli build --local --platform android --profile production-apk --non-interactive --output ../build/app.apk --clear-cache
 
-echo "Build completed."
+echo "Build command finished."
 if [ -f "../build/app.apk" ]; then
     echo "APK generated successfully."
     ls -l ../build/app.apk
