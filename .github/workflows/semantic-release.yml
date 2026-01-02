@@ -27,6 +27,15 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 

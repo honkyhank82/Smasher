@@ -12,6 +12,8 @@ npm install
 echo "Environment check:"
 node -v
 npm -v
+echo "JAVA_HOME: $JAVA_HOME"
+echo "ANDROID_HOME: $ANDROID_HOME"
 
 echo "Building APK locally to bypass cloud limits..."
 # Check if running on Windows
