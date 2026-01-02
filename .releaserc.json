@@ -22,6 +22,7 @@
           "package.json",
           "server/package.json",
           "app-rn/package.json",
+          "app-rn/app.json",
           "app-web/package.json",
           "CHANGELOG.md"
         ],
