@@ -36,6 +36,11 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Install Android NDK & Tools
+        run: |
+          yes | sdkmanager --licenses
+          sdkmanager "ndk;25.1.8937393" "cmake;3.22.1" "build-tools;34.0.0" "platforms;android-34"
+
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
