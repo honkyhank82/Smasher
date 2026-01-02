@@ -2,7 +2,7 @@
   "expo": {
     "name": "smasher-app",
     "slug": "smasher-app",
-    "version": "4.3.4",
+    "version": "4.3.5",
     "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splash.png",
@@ -14,6 +14,7 @@
     },
     "android": {
       "package": "com.smashermain.app",
+      "versionCode": 40305,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"

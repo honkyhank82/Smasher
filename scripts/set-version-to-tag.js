@@ -66,6 +66,25 @@ if (fs.existsSync(pApp)) {
     const pkg = JSON.parse(raw);
     if (pkg.expo && pkg.expo.version !== version) {
       pkg.expo.version = version;
+
+      // Update versionCode for Android
+      // Scheme: major * 10000 + minor * 100 + patch
+      // e.g. 4.3.5 -> 40305
+      const parts = version.split('.');
+      if (parts.length === 3) {
+        const major = parseInt(parts[0], 10);
+        const minor = parseInt(parts[1], 10);
+        const patch = parseInt(parts[2], 10);
+        if (!isNaN(major) && !isNaN(minor) && !isNaN(patch)) {
+          const versionCode = major * 10000 + minor * 100 + patch;
+          if (!pkg.expo.android) {
+            pkg.expo.android = {};
+          }
+          pkg.expo.android.versionCode = versionCode;
+          console.log(`Updated android.versionCode -> ${versionCode}`);
+        }
+      }
+
       fs.writeFileSync(pApp, JSON.stringify(pkg, null, 2) + '\n', 'utf8');
       console.log(`Updated ${appJsonPath} -> ${version}`);
       changed.push(appJsonPath);
