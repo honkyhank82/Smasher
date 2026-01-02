@@ -12,7 +12,7 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "node ./scripts/set-version-to-tag.js ${nextRelease.version} && powershell -ExecutionPolicy Bypass -File ./scripts/build-download-apk.ps1"
+        "prepareCmd": "node ./scripts/set-version-to-tag.js ${nextRelease.version} && chmod +x scripts/build-download-apk.sh && bash ./scripts/build-download-apk.sh"
       }
     ],
     [
