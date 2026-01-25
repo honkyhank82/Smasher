@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -9,96 +9,97 @@ import {
   Alert,
   ActivityIndicator,
   Linking,
-} from 'react-native';
-import { theme } from '../config/theme';
-import api from '../services/api';
+} from "react-native";
+import { theme } from "../config/theme";
+import api from "../services/api";
 
 export const HelpSupportScreen = ({ navigation }: any) => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [message, setMessage] = useState('');
-  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState("");
+  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
 
   const categories = [
-    { id: 'account', label: 'Account Issues', icon: '👤' },
-    { id: 'technical', label: 'Technical Problems', icon: '🔧' },
-    { id: 'safety', label: 'Safety & Privacy', icon: '🛡️' },
-    { id: 'billing', label: 'Billing & Payments', icon: '💳' },
-    { id: 'report', label: 'Report User', icon: '⚠️' },
-    { id: 'other', label: 'Other', icon: '💬' },
+    { id: "account", label: "Account Issues", icon: "👤" },
+    { id: "technical", label: "Technical Problems", icon: "🔧" },
+    { id: "safety", label: "Safety & Privacy", icon: "🛡️" },
+    { id: "billing", label: "Billing & Payments", icon: "💳" },
+    { id: "report", label: "Report User", icon: "⚠️" },
+    { id: "other", label: "Other", icon: "💬" },
   ];
 
   const faqItems = [
     {
-      question: 'How do I reset my password?',
+      question: "How do I reset my password?",
       answer:
         'Go to Settings > Change Email, or use the "Forgot Password" link on the login screen.',
     },
     {
-      question: 'How do I delete my account?',
+      question: "How do I delete my account?",
       answer:
-        'Go to Settings > Danger Zone > Delete Account. Your account will be scheduled for deletion after 30 days.',
+        "Go to Settings > Danger Zone > Delete Account. Your account will be scheduled for deletion after 30 days.",
     },
     {
-      question: 'How do I block someone?',
+      question: "How do I block someone?",
       answer:
         "Visit their profile and tap the block button. You can manage blocked users in Settings > Blocked Users.",
     },
     {
-      question: 'Why can\'t I see my matches?',
+      question: "Why can't I see my matches?",
       answer:
-        'Make sure you have location services enabled and your profile is complete. Check your privacy settings.',
+        "Make sure you have location services enabled and your profile is complete. Check your privacy settings.",
     },
     {
-      question: 'How do I report inappropriate content?',
+      question: "How do I report inappropriate content?",
       answer:
-        'Tap the report button on any profile or message. Our team will review it within 24 hours.',
+        "Tap the report button on any profile or message. Our team will review it within 24 hours.",
     },
   ];
 
   const handleSubmit = async () => {
     if (!selectedCategory) {
-      Alert.alert('Error', 'Please select a category');
+      Alert.alert("Error", "Please select a category");
       return;
     }
 
     if (!message.trim()) {
-      Alert.alert('Error', 'Please describe your issue');
+      Alert.alert("Error", "Please describe your issue");
       return;
     }
 
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      Alert.alert('Error', 'Please enter a valid email address');
+      Alert.alert("Error", "Please enter a valid email address");
       return;
     }
 
     setLoading(true);
     try {
-      await api.post('/support/ticket', {
+      await api.post("/support/ticket", {
         category: selectedCategory,
         message: message.trim(),
         contactEmail: email.trim() || undefined,
       });
 
       Alert.alert(
-        'Support Request Sent',
-        'Thank you for contacting us. Our team will respond within 24-48 hours.',
+        "Support Request Sent",
+        "Thank you for contacting us. Our team will respond within 24-48 hours.",
         [
           {
-            text: 'OK',
+            text: "OK",
             onPress: () => {
               setSelectedCategory(null);
-              setMessage('');
-              setEmail('');
+              setMessage("");
+              setEmail("");
             },
           },
-        ]
+        ],
       );
     } catch (error: any) {
-      console.error('Failed to submit support request:', error);
+      console.error("Failed to submit support request:", error);
       Alert.alert(
-        'Error',
-        error.response?.data?.message || 'Failed to send support request. Please try again.'
+        "Error",
+        error.response?.data?.message ||
+          "Failed to send support request. Please try again.",
       );
     } finally {
       setLoading(false);
@@ -128,8 +129,8 @@ export const HelpSupportScreen = ({ navigation }: any) => {
           Contact Support
         </Text>
         <Text style={styles.description}>
-          Can't find what you're looking for? Send us a message and we'll get back to
-          you.
+          Can't find what you're looking for? Send us a message and we'll get
+          back to you.
         </Text>
 
         <Text style={styles.label}>Category *</Text>
@@ -139,7 +140,8 @@ export const HelpSupportScreen = ({ navigation }: any) => {
               key={category.id}
               style={[
                 styles.categoryButton,
-                selectedCategory === category.id && styles.categoryButtonSelected,
+                selectedCategory === category.id &&
+                  styles.categoryButtonSelected,
               ]}
               onPress={() => setSelectedCategory(category.id)}
             >
@@ -147,7 +149,8 @@ export const HelpSupportScreen = ({ navigation }: any) => {
               <Text
                 style={[
                   styles.categoryLabel,
-                  selectedCategory === category.id && styles.categoryLabelSelected,
+                  selectedCategory === category.id &&
+                    styles.categoryLabelSelected,
                 ]}
               >
                 {category.label}
@@ -194,7 +197,7 @@ export const HelpSupportScreen = ({ navigation }: any) => {
         <View style={styles.contactInfo}>
           <Text style={styles.contactTitle}>Other Ways to Reach Us</Text>
           <TouchableOpacity
-            onPress={() => Linking.openURL('mailto:support@smasher.app')}
+            onPress={() => Linking.openURL("mailto:support@smasher.app")}
           >
             <Text style={styles.contactLink}>📧 support@smasher.app</Text>
           </TouchableOpacity>
@@ -212,9 +215,9 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: theme.spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
@@ -225,7 +228,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: theme.fontSize.lg,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
   },
   content: {
@@ -234,7 +237,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: theme.fontSize.md,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
     marginBottom: theme.spacing.md,
   },
@@ -254,7 +257,7 @@ const styles = StyleSheet.create({
   },
   faqQuestion: {
     fontSize: theme.fontSize.md,
-    fontWeight: '600',
+    fontWeight: "600",
     color: theme.colors.text,
     marginBottom: theme.spacing.xs,
   },
@@ -265,30 +268,30 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: theme.fontSize.sm,
-    fontWeight: '600',
+    fontWeight: "600",
     color: theme.colors.text,
     marginBottom: theme.spacing.sm,
     marginTop: theme.spacing.md,
   },
   categoryGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     marginHorizontal: -theme.spacing.xs,
     marginBottom: theme.spacing.md,
   },
   categoryButton: {
-    width: '48%',
-    margin: '1%',
+    width: "48%",
+    margin: "1%",
     backgroundColor: theme.colors.surface,
     padding: theme.spacing.md,
     borderRadius: theme.borderRadius.md,
-    alignItems: 'center',
+    alignItems: "center",
     borderWidth: 1,
     borderColor: theme.colors.border,
   },
   categoryButtonSelected: {
     borderColor: theme.colors.primary,
-    backgroundColor: theme.colors.primary + '20',
+    backgroundColor: theme.colors.primary + "20",
   },
   categoryIcon: {
     fontSize: 24,
@@ -297,11 +300,11 @@ const styles = StyleSheet.create({
   categoryLabel: {
     fontSize: theme.fontSize.xs,
     color: theme.colors.text,
-    textAlign: 'center',
+    textAlign: "center",
   },
   categoryLabelSelected: {
     color: theme.colors.primary,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   input: {
     backgroundColor: theme.colors.surface,
@@ -314,13 +317,13 @@ const styles = StyleSheet.create({
   },
   textArea: {
     minHeight: 120,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
   },
   submitButton: {
     backgroundColor: theme.colors.primary,
     borderRadius: theme.borderRadius.md,
     padding: theme.spacing.md,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: theme.spacing.xl,
   },
   submitButtonDisabled: {
@@ -329,7 +332,7 @@ const styles = StyleSheet.create({
   submitButtonText: {
     color: theme.colors.text,
     fontSize: theme.fontSize.md,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   contactInfo: {
     marginTop: theme.spacing.xl,
@@ -341,7 +344,7 @@ const styles = StyleSheet.create({
   },
   contactTitle: {
     fontSize: theme.fontSize.sm,
-    fontWeight: '600',
+    fontWeight: "600",
     color: theme.colors.text,
     marginBottom: theme.spacing.sm,
   },

@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
-import { AppNavigator } from './src/navigation/AppNavigator';
-import { AuthProvider } from './src/context/AuthContext';
-import { PremiumProvider } from './src/contexts/PremiumContext';
-import * as SplashScreen from 'expo-splash-screen';
+import React from "react";
+import { AppNavigator } from "./src/navigation/AppNavigator";
+import { AuthProvider } from "./src/context/AuthContext";
+import { PremiumProvider } from "./src/contexts/PremiumContext";
+import * as SplashScreen from "expo-splash-screen";
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync().catch(() => {

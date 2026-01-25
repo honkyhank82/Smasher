@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -6,18 +6,20 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
-} from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import * as Location from 'expo-location';
-import { theme } from '../config/theme';
-import LocationShareService from '../services/LocationShareService';
-import { LocationShare } from '../types/locationShare';
+} from "react-native";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import * as Location from "expo-location";
+import { theme } from "../config/theme";
+import LocationShareService from "../services/LocationShareService";
+import { LocationShare } from "../types/locationShare";
 
 export const SharedLocationMapScreen = ({ route, navigation }: any) => {
   const { shareId, userName } = route.params;
   const [loading, setLoading] = useState(true);
   const [share, setShare] = useState<LocationShare | null>(null);
-  const [myLocation, setMyLocation] = useState<Location.LocationObject | null>(null);
+  const [myLocation, setMyLocation] = useState<Location.LocationObject | null>(
+    null,
+  );
   const mapRef = useRef<MapView>(null);
   const updateInterval = useRef<NodeJS.Timeout | null>(null);
 
@@ -44,14 +46,14 @@ export const SharedLocationMapScreen = ({ route, navigation }: any) => {
 
       if (!shareData.isActive) {
         Alert.alert(
-          'Location Sharing Ended',
+          "Location Sharing Ended",
           `${userName} has stopped sharing their location.`,
-          [{ text: 'OK', onPress: () => navigation.goBack() }]
+          [{ text: "OK", onPress: () => navigation.goBack() }],
         );
       }
     } catch (error) {
-      console.error('Failed to load share:', error);
-      Alert.alert('Error', 'Failed to load shared location');
+      console.error("Failed to load share:", error);
+      Alert.alert("Error", "Failed to load shared location");
     } finally {
       setLoading(false);
     }
@@ -60,14 +62,14 @@ export const SharedLocationMapScreen = ({ route, navigation }: any) => {
   const getMyLocation = async () => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status === 'granted') {
+      if (status === "granted") {
         const location = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.High,
         });
         setMyLocation(location);
       }
     } catch (error) {
-      console.error('Failed to get my location:', error);
+      console.error("Failed to get my location:", error);
     }
   };
 
@@ -94,13 +96,17 @@ export const SharedLocationMapScreen = ({ route, navigation }: any) => {
   };
 
   const getDistance = (): string => {
-    if (!share || !myLocation) return '';
+    if (!share || !myLocation) {
+      return "";
+    }
 
     const R = 3959; // Earth's radius in miles
     const lat1 = myLocation.coords.latitude * (Math.PI / 180);
     const lat2 = share.latitude * (Math.PI / 180);
-    const dLat = (share.latitude - myLocation.coords.latitude) * (Math.PI / 180);
-    const dLon = (share.longitude - myLocation.coords.longitude) * (Math.PI / 180);
+    const dLat =
+      (share.latitude - myLocation.coords.latitude) * (Math.PI / 180);
+    const dLon =
+      (share.longitude - myLocation.coords.longitude) * (Math.PI / 180);
 
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
@@ -115,13 +121,17 @@ export const SharedLocationMapScreen = ({ route, navigation }: any) => {
   };
 
   const getTimeRemaining = (): string => {
-    if (!share) return '';
+    if (!share) {
+      return "";
+    }
 
     const now = new Date();
     const expires = new Date(share.expiresAt);
     const diff = expires.getTime() - now.getTime();
 
-    if (diff <= 0) return 'Expired';
+    if (diff <= 0) {
+      return "Expired";
+    }
 
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
@@ -192,9 +202,7 @@ export const SharedLocationMapScreen = ({ route, navigation }: any) => {
           <Text style={styles.infoLabel}>📍 {userName}'s Location</Text>
           <Text style={styles.infoTime}>{getTimeRemaining()}</Text>
         </View>
-        {myLocation && (
-          <Text style={styles.infoDistance}>{getDistance()}</Text>
-        )}
+        {myLocation && <Text style={styles.infoDistance}>{getDistance()}</Text>}
       </View>
 
       {/* Control Buttons */}
@@ -227,14 +235,14 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: theme.colors.background,
   },
   errorContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: theme.colors.background,
   },
   errorText: {
@@ -242,7 +250,7 @@ const styles = StyleSheet.create({
     color: theme.colors.textSecondary,
   },
   header: {
-    position: 'absolute',
+    position: "absolute",
     top: 50,
     left: theme.spacing.md,
     right: theme.spacing.md,
@@ -252,8 +260,8 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.md,
     padding: theme.spacing.sm,
     paddingHorizontal: theme.spacing.md,
-    alignSelf: 'flex-start',
-    shadowColor: '#000',
+    alignSelf: "flex-start",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
@@ -262,48 +270,48 @@ const styles = StyleSheet.create({
   backButtonText: {
     color: theme.colors.primary,
     fontSize: theme.fontSize.md,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   infoCard: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 120,
     left: theme.spacing.md,
     right: theme.spacing.md,
     backgroundColor: theme.colors.surface,
     borderRadius: theme.borderRadius.md,
     padding: theme.spacing.md,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
   },
   infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: theme.spacing.xs,
   },
   infoLabel: {
     fontSize: theme.fontSize.md,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
   },
   infoTime: {
     fontSize: theme.fontSize.sm,
     color: theme.colors.primary,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   infoDistance: {
     fontSize: theme.fontSize.sm,
     color: theme.colors.textSecondary,
   },
   controls: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 20,
     left: theme.spacing.md,
     right: theme.spacing.md,
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: theme.spacing.sm,
   },
   controlButton: {
@@ -311,8 +319,8 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
     borderRadius: theme.borderRadius.md,
     padding: theme.spacing.md,
-    alignItems: 'center',
-    shadowColor: '#000',
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
@@ -322,8 +330,8 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
   },
   controlButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: theme.fontSize.sm,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });

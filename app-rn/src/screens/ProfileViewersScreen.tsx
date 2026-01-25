@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -9,10 +9,10 @@ import {
   Alert,
   Image,
   RefreshControl,
-} from 'react-native';
-import { theme } from '../config/theme';
-import api from '../services/api';
-import { usePremium } from '../contexts/PremiumContext';
+} from "react-native";
+import { theme } from "../config/theme";
+import api from "../services/api";
+import { usePremium } from "../contexts/PremiumContext";
 
 interface ProfileViewersScreenProps {
   navigation: any;
@@ -33,7 +33,9 @@ interface ViewersData {
   isPremium: boolean;
 }
 
-export const ProfileViewersScreen = ({ navigation }: ProfileViewersScreenProps) => {
+export const ProfileViewersScreen = ({
+  navigation,
+}: ProfileViewersScreenProps) => {
   const { checkPremiumFeature } = usePremium();
   const [data, setData] = useState<ViewersData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -41,7 +43,7 @@ export const ProfileViewersScreen = ({ navigation }: ProfileViewersScreenProps) 
 
   useEffect(() => {
     // Check if user has premium access
-    const hasPremium = checkPremiumFeature('See Who Viewed Your Profile', true);
+    const hasPremium = checkPremiumFeature("See Who Viewed Your Profile", true);
     if (hasPremium) {
       loadViewers();
     } else {
@@ -52,12 +54,12 @@ export const ProfileViewersScreen = ({ navigation }: ProfileViewersScreenProps) 
 
   const loadViewers = async () => {
     try {
-      const response = await api.get('/profile-views/viewers');
+      const response = await api.get("/profile-views/viewers");
       setData(response.data);
     } catch (error) {
       // Don't show alert on refresh, only on initial load
       if (!refreshing) {
-        Alert.alert('Error', 'Failed to load profile viewers');
+        Alert.alert("Error", "Failed to load profile viewers");
       }
     } finally {
       setLoading(false);
@@ -73,16 +75,16 @@ export const ProfileViewersScreen = ({ navigation }: ProfileViewersScreenProps) 
   const handleViewerPress = (viewer: Viewer) => {
     if (viewer.isBlurred) {
       Alert.alert(
-        'Premium Feature',
-        'Upgrade to premium to see all profile viewers!',
+        "Premium Feature",
+        "Upgrade to premium to see all profile viewers!",
         [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Upgrade', onPress: () => navigation.navigate('Settings') },
-        ]
+          { text: "Cancel", style: "cancel" },
+          { text: "Upgrade", onPress: () => navigation.navigate("Settings") },
+        ],
       );
       return;
     }
-    navigation.navigate('ProfileView', { userId: viewer.id });
+    navigation.navigate("ProfileView", { userId: viewer.id });
   };
 
   const formatTimeAgo = (dateString: string) => {
@@ -117,7 +119,9 @@ export const ProfileViewersScreen = ({ navigation }: ProfileViewersScreenProps) 
             </View>
           ) : (
             <Image
-              source={{ uri: item.profilePicture || 'https://via.placeholder.com/80' }}
+              source={{
+                uri: item.profilePicture || "https://via.placeholder.com/80",
+              }}
               style={styles.profileImage}
             />
           )}
@@ -126,7 +130,9 @@ export const ProfileViewersScreen = ({ navigation }: ProfileViewersScreenProps) 
               {item.displayName}
               {item.age !== null && `, ${item.age}`}
             </Text>
-            <Text style={styles.viewedTime}>{formatTimeAgo(item.viewedAt)}</Text>
+            <Text style={styles.viewedTime}>
+              {formatTimeAgo(item.viewedAt)}
+            </Text>
           </View>
           {item.isBlurred && (
             <View style={styles.lockBadge}>
@@ -163,12 +169,14 @@ export const ProfileViewersScreen = ({ navigation }: ProfileViewersScreenProps) 
         <>
           <View style={styles.statsContainer}>
             <Text style={styles.statsText}>
-              {data.totalCount} {data.totalCount === 1 ? 'person has' : 'people have'} viewed your profile
+              {data.totalCount}{" "}
+              {data.totalCount === 1 ? "person has" : "people have"} viewed your
+              profile
             </Text>
             {!data.isPremium && data.totalCount > 3 && (
               <TouchableOpacity
                 style={styles.upgradeButton}
-                onPress={() => navigation.navigate('Settings')}
+                onPress={() => navigation.navigate("Settings")}
               >
                 <Text style={styles.upgradeButtonText}>
                   🔓 Upgrade to see all viewers
@@ -213,13 +221,13 @@ const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
     backgroundColor: theme.colors.background,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: theme.spacing.md,
     paddingTop: 50,
     paddingBottom: theme.spacing.md,
@@ -231,8 +239,8 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     backgroundColor: theme.colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   backButtonText: {
     fontSize: 24,
@@ -240,7 +248,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: theme.fontSize.lg,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
   },
   placeholder: {
@@ -256,7 +264,7 @@ const styles = StyleSheet.create({
   statsText: {
     fontSize: theme.fontSize.md,
     color: theme.colors.text,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: theme.spacing.sm,
   },
   upgradeButton: {
@@ -268,8 +276,8 @@ const styles = StyleSheet.create({
   upgradeButtonText: {
     color: theme.colors.text,
     fontSize: theme.fontSize.sm,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
   },
   listContent: {
     padding: theme.spacing.md,
@@ -278,11 +286,11 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
     borderRadius: theme.borderRadius.md,
     marginBottom: theme.spacing.md,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   viewerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: theme.spacing.md,
   },
   profileImage: {
@@ -296,8 +304,8 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 30,
     backgroundColor: theme.colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   blurredIcon: {
     fontSize: 30,
@@ -309,7 +317,7 @@ const styles = StyleSheet.create({
   },
   viewerName: {
     fontSize: theme.fontSize.md,
-    fontWeight: '600',
+    fontWeight: "600",
     color: theme.colors.text,
     marginBottom: 4,
   },
@@ -322,16 +330,16 @@ const styles = StyleSheet.create({
     height: 32,
     borderRadius: 16,
     backgroundColor: theme.colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   lockIcon: {
     fontSize: 16,
   },
   emptyContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: theme.spacing.xl,
   },
   emptyIcon: {
@@ -340,13 +348,13 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: theme.fontSize.lg,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
     marginBottom: theme.spacing.sm,
   },
   emptyText: {
     fontSize: theme.fontSize.md,
     color: theme.colors.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
   },
 });

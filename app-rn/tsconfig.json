@@ -15,21 +15,8 @@
       "@config/*": ["src/config/*"],
       "@env": ["src/types/env"]
     },
-    "typeRoots": [
-      "./node_modules/@types",
-      "./src/types"
-    ]
+    "typeRoots": ["./node_modules/@types", "./src/types"]
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    ".env"
-  ],
-  "exclude": [
-    "**/node_modules",
-    "**/Pods",
-    "**/android",
-    "**/ios",
-    "**/.expo"
-  ]
+  "include": ["**/*.ts", "**/*.tsx", ".env"],
+  "exclude": ["**/node_modules", "**/Pods", "**/android", "**/ios", "**/.expo"]
 }

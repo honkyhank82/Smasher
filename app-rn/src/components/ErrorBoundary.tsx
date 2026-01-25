@@ -1,8 +1,8 @@
-import React, { Component, ReactNode } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import React, { Component, ReactNode } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 // @ts-ignore - We'll handle Sentry types separately
-import * as Sentry from '@sentry/react-native';
-import { theme } from '../config/theme';
+import * as Sentry from "@sentry/react-native";
+import { theme } from "../config/theme";
 
 interface ErrorFallbackProps {
   error: Error;
@@ -11,7 +11,10 @@ interface ErrorFallbackProps {
 
 interface Props {
   children: ReactNode;
-  fallback?: React.ComponentType<ErrorFallbackProps> | ReactNode | ((props: ErrorFallbackProps) => ReactNode);
+  fallback?:
+    | React.ComponentType<ErrorFallbackProps>
+    | ReactNode
+    | ((props: ErrorFallbackProps) => ReactNode);
   onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
 }
 
@@ -33,11 +36,11 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     // Log error to Sentry if available
-    if (Sentry && typeof Sentry.withScope === 'function') {
+    if (Sentry && typeof Sentry.withScope === "function") {
       try {
         // @ts-ignore - We know this is safe at runtime
         Sentry.withScope((scope) => {
-          if (scope && typeof scope.setExtras === 'function') {
+          if (scope && typeof scope.setExtras === "function") {
             scope.setExtras({
               componentStack: errorInfo?.componentStack,
             });
@@ -47,12 +50,12 @@ export class ErrorBoundary extends Component<Props, State> {
           }
         });
       } catch (sentryError) {
-        console.error('Failed to capture exception in Sentry:', sentryError);
+        console.error("Failed to capture exception in Sentry:", sentryError);
       }
     }
 
     this.setState({ error, errorInfo });
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    console.error("ErrorBoundary caught an error:", error, errorInfo);
 
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
@@ -66,28 +69,31 @@ export class ErrorBoundary extends Component<Props, State> {
   // Show error report dialog in development
   showErrorReport = () => {
     const { error, errorInfo } = this.state;
-    if (!error) return;
-    
-    const report = `Error: ${error.toString()}\n\n` +
-      `Component Stack: ${errorInfo?.componentStack || 'No stack trace available'}`;
-    
+    if (!error) {
+      return;
+    }
+
+    const report =
+      `Error: ${error.toString()}\n\n` +
+      `Component Stack: ${errorInfo?.componentStack || "No stack trace available"}`;
+
     Alert.alert(
-      'Error Report',
-      'Would you like to report this error?',
+      "Error Report",
+      "Would you like to report this error?",
       [
         {
-          text: 'Cancel',
-          style: 'cancel',
+          text: "Cancel",
+          style: "cancel",
         },
         {
-          text: 'Report',
+          text: "Report",
           onPress: () => {
             // You can implement your error reporting logic here
-            Alert.alert('Thank you!', 'The error has been reported.');
+            Alert.alert("Thank you!", "The error has been reported.");
           },
         },
       ],
-      { cancelable: true }
+      { cancelable: true },
     );
   };
 
@@ -97,9 +103,12 @@ export class ErrorBoundary extends Component<Props, State> {
 
     if (hasError && error) {
       if (fallback) {
-        if (typeof fallback === 'function') {
-          const FallbackComponent = fallback as React.ComponentType<ErrorFallbackProps>;
-          return <FallbackComponent error={error} resetError={this.handleReset} />;
+        if (typeof fallback === "function") {
+          const FallbackComponent =
+            fallback as React.ComponentType<ErrorFallbackProps>;
+          return (
+            <FallbackComponent error={error} resetError={this.handleReset} />
+          );
         }
         return fallback as ReactNode;
       }
@@ -108,20 +117,20 @@ export class ErrorBoundary extends Component<Props, State> {
         <View style={styles.container} testID="error-boundary">
           <Text style={styles.title}>😢 Oops! Something went wrong</Text>
           <Text style={styles.message}>
-            {error.message || 'An unexpected error occurred'}
+            {error.message || "An unexpected error occurred"}
           </Text>
-          
+
           {__DEV__ && (
-            <TouchableOpacity 
-              style={[styles.button, styles.reportButton]} 
+            <TouchableOpacity
+              style={[styles.button, styles.reportButton]}
               onPress={this.showErrorReport}
             >
               <Text style={styles.buttonText}>Report Error</Text>
             </TouchableOpacity>
           )}
-          
-          <TouchableOpacity 
-            style={[styles.button, styles.retryButton]} 
+
+          <TouchableOpacity
+            style={[styles.button, styles.retryButton]}
             onPress={this.handleReset}
           >
             <Text style={styles.buttonText}>Try Again</Text>
@@ -137,20 +146,20 @@ export class ErrorBoundary extends Component<Props, State> {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 24,
     backgroundColor: theme.colors.background,
   },
   title: {
     fontSize: 22,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 16,
     color: theme.colors.error,
-    textAlign: 'center',
+    textAlign: "center",
   },
   message: {
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 24,
     color: theme.colors.text,
     fontSize: 16,
@@ -160,7 +169,7 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 8,
     minWidth: 200,
-    alignItems: 'center',
+    alignItems: "center",
     marginVertical: 8,
   },
   retryButton: {
@@ -170,8 +179,8 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.secondary,
   },
   buttonText: {
-    color: '#FFFFFF',
-    fontWeight: '600',
+    color: "#FFFFFF",
+    fontWeight: "600",
     fontSize: 16,
   },
 });

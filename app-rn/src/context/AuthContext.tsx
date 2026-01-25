@@ -1,7 +1,13 @@
-import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import api from '../services/api';
-import NotificationService from '../services/NotificationService';
+import React, {
+  createContext,
+  useState,
+  useContext,
+  useEffect,
+  ReactNode,
+} from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import api from "../services/api";
+import NotificationService from "../services/NotificationService";
 
 interface User {
   id: string;
@@ -20,7 +26,11 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, birthdate: string, password: string) => Promise<void>;
+  register: (
+    email: string,
+    birthdate: string,
+    password: string,
+  ) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   isAuthenticated: boolean;
@@ -31,11 +41,15 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [logoutTimer, setLogoutTimer] = useState<ReturnType<typeof setTimeout> | null>(null); // Fixed type
+  const [logoutTimer, setLogoutTimer] = useState<ReturnType<
+    typeof setTimeout
+  > | null>(null); // Fixed type
 
   // Auth state debugger (like a security camera behind the bar)
   useEffect(() => {
-    console.log(`🔐 Auth State: ${user ? '🍸 ' + user.email : '🚪 No patrons'}`);
+    console.log(
+      `🔐 Auth State: ${user ? "🍸 " + user.email : "🚪 No patrons"}`,
+    );
     if (user?.profile?.displayName) {
       console.log(`   🎩 Active profile: ${user.profile.displayName}`);
     }
@@ -45,14 +59,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     checkAuth();
     return () => {
       // Cleanup timer when component unmounts (like closing time)
-      if (logoutTimer) clearTimeout(logoutTimer);
+      if (logoutTimer) {
+        clearTimeout(logoutTimer);
+      }
     };
   }, []);
 
   const initializeLocationForUser = async () => {
     try {
-      const PermissionsService = (await import('../services/PermissionsService')).default;
-      const LocationService = (await import('../services/LocationService')).default;
+      const PermissionsService = (
+        await import("../services/PermissionsService")
+      ).default;
+      const LocationService = (await import("../services/LocationService"))
+        .default;
 
       const hasPermission = await PermissionsService.checkLocationPermission();
       let granted = hasPermission;
@@ -71,13 +90,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await LocationService.updateLocationOnServer(location);
       LocationService.startLocationTracking();
     } catch (error) {
-      console.error('Failed to initialize location for authenticated user:', error);
+      console.error(
+        "Failed to initialize location for authenticated user:",
+        error,
+      );
     }
   };
 
   const checkAuth = async () => {
     try {
-      const token = await AsyncStorage.getItem('authToken');
+      const token = await AsyncStorage.getItem("authToken");
       if (!token) {
         // No token, user is not logged in - this is normal
         setLoading(false);
@@ -85,17 +107,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       // Token exists, verify it with the server
-      const response = await api.get('/profiles/me');
+      const response = await api.get("/profiles/me");
       const userData = response.data;
       setUser({
         ...userData,
-        hasProfile: !!(userData.profile?.displayName),
+        hasProfile: !!userData.profile?.displayName,
       });
       await initializeLocationForUser();
     } catch (error: any) {
       // Silently handle auth errors - they're expected when not logged in
       if (error?.response?.status === 401) {
-        await AsyncStorage.removeItem('authToken');
+        await AsyncStorage.removeItem("authToken");
       }
       // Don't log errors - network issues on startup are normal
       setUser(null);
@@ -104,41 +126,52 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const register = async (email: string, birthdate: string, password: string) => {
+  const register = async (
+    email: string,
+    birthdate: string,
+    password: string,
+  ) => {
     try {
-      const response = await api.post('/auth/register', { email, birthdate, password });
-      console.log(`✅ Registration response:`, response.data);
+      const response = await api.post("/auth/register", {
+        email,
+        birthdate,
+        password,
+      });
+      console.log("✅ Registration response:", response.data);
     } catch (error: any) {
-      console.error('💥 Registration explosion:', error);
+      console.error("💥 Registration explosion:", error);
       throw error;
     }
   };
 
   const login = async (email: string, password: string) => {
     try {
-      console.log('📡 Sending login request with:', { email, passwordLength: password.length });
-      const response = await api.post('/auth/login', { email, password });
-      console.log('📡 Login response received:', response.data);
+      console.log("📡 Sending login request with:", {
+        email,
+        passwordLength: password.length,
+      });
+      const response = await api.post("/auth/login", { email, password });
+      console.log("📡 Login response received:", response.data);
       const { access_token, user: userData } = response.data;
-      console.log('💾 Saving token to AsyncStorage...');
-      await AsyncStorage.setItem('authToken', access_token);
-      console.log('👤 Setting user state:', userData);
+      console.log("💾 Saving token to AsyncStorage...");
+      await AsyncStorage.setItem("authToken", access_token);
+      console.log("👤 Setting user state:", userData);
       const userWithProfile = {
         ...userData,
-        hasProfile: !!(userData.profile?.displayName),
+        hasProfile: !!userData.profile?.displayName,
       };
-      console.log('👤 User with hasProfile:', userWithProfile);
+      console.log("👤 User with hasProfile:", userWithProfile);
       setUser(userWithProfile);
-      console.log('✅ Login complete, user state updated');
-      
+      console.log("✅ Login complete, user state updated");
+
       // Register for push notifications
       await NotificationService.registerForPushNotifications();
       await initializeLocationForUser();
     } catch (error: any) {
-      console.error('🚫 Login failed:', error);
-      console.error('🚫 Error response:', error.response?.data);
-      console.error('🚫 Error status:', error.response?.status);
-      console.error('🚫 Error message:', error.message);
+      console.error("🚫 Login failed:", error);
+      console.error("🚫 Error response:", error.response?.data);
+      console.error("🚫 Error status:", error.response?.status);
+      console.error("🚫 Error message:", error.message);
       throw error;
     }
   };
@@ -146,24 +179,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = async () => {
     // Remove push token from backend
     await NotificationService.removePushToken();
-    
-    await AsyncStorage.removeItem('authToken');
+
+    await AsyncStorage.removeItem("authToken");
     setUser(null);
-    console.log(`🚪➡️ ${user?.email || 'User'} bounced`);
-    if (logoutTimer) clearTimeout(logoutTimer);
+    console.log(`🚪➡️ ${user?.email || "User"} bounced`);
+    if (logoutTimer) {
+      clearTimeout(logoutTimer);
+    }
   };
 
   const refreshUser = async () => {
     try {
-      const response = await api.get('/profiles/me');
+      const response = await api.get("/profiles/me");
       const userData = response.data;
       setUser({
         ...userData,
-        hasProfile: !!(userData.profile?.displayName),
+        hasProfile: !!userData.profile?.displayName,
       });
-      console.log('🔄 User data refreshed');
+      console.log("🔄 User data refreshed");
     } catch (error) {
-      console.error('Failed to refresh user data:', error);
+      console.error("Failed to refresh user data:", error);
     }
   };
 
@@ -188,11 +223,11 @@ export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) {
     if (__DEV__) {
-      throw new Error('🚷 useAuth must be used within AuthProvider');
+      throw new Error("🚷 useAuth must be used within AuthProvider");
     }
     const stack = new Error().stack;
     console.error(
-      '🚷 useAuth was called outside AuthProvider. Returning safe defaults in production.',
+      "🚷 useAuth was called outside AuthProvider. Returning safe defaults in production.",
       stack,
     );
     return {

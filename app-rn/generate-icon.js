@@ -1,18 +1,18 @@
 /**
  * Icon Generator Script
- * 
+ *
  * This script generates app icons from the SVG design.
- * 
+ *
  * Requirements:
  * npm install sharp
- * 
+ *
  * Usage:
  * node generate-icon.js
  */
 
-const sharp = require('sharp');
-const fs = require('fs');
-const path = require('path');
+const sharp = require("sharp");
+const fs = require("fs");
+const path = require("path");
 
 // SVG content with the icon design
 const svgContent = `
@@ -106,51 +106,50 @@ const svgContent = `
 `;
 
 async function generateIcons() {
-  console.log('🎨 Generating app icons...\n');
+  console.log("🎨 Generating app icons...\n");
 
   try {
     // Create assets directory if it doesn't exist
-    const assetsDir = path.join(__dirname, 'assets');
+    const assetsDir = path.join(__dirname, "assets");
     if (!fs.existsSync(assetsDir)) {
       fs.mkdirSync(assetsDir, { recursive: true });
     }
 
     // Generate main icon (1024x1024)
-    console.log('📱 Generating icon.png (1024x1024)...');
+    console.log("📱 Generating icon.png (1024x1024)...");
     await sharp(Buffer.from(svgContent))
       .resize(1024, 1024)
       .png()
-      .toFile(path.join(assetsDir, 'icon.png'));
-    console.log('✅ icon.png created');
+      .toFile(path.join(assetsDir, "icon.png"));
+    console.log("✅ icon.png created");
 
     // Generate adaptive icon (1024x1024) - same as main icon for this design
-    console.log('📱 Generating adaptive-icon.png (1024x1024)...');
+    console.log("📱 Generating adaptive-icon.png (1024x1024)...");
     await sharp(Buffer.from(svgContent))
       .resize(1024, 1024)
       .png()
-      .toFile(path.join(assetsDir, 'adaptive-icon.png'));
-    console.log('✅ adaptive-icon.png created');
+      .toFile(path.join(assetsDir, "adaptive-icon.png"));
+    console.log("✅ adaptive-icon.png created");
 
     // Generate favicon (48x48)
-    console.log('🌐 Generating favicon.png (48x48)...');
+    console.log("🌐 Generating favicon.png (48x48)...");
     await sharp(Buffer.from(svgContent))
       .resize(48, 48)
       .png()
-      .toFile(path.join(assetsDir, 'favicon.png'));
-    console.log('✅ favicon.png created');
+      .toFile(path.join(assetsDir, "favicon.png"));
+    console.log("✅ favicon.png created");
 
-    console.log('\n✨ All icons generated successfully!');
-    console.log('\n📋 Next steps:');
-    console.log('1. Review the generated icons in the assets folder');
-    console.log('2. Run: npx expo prebuild --clean');
-    console.log('3. Rebuild your app to see the new icon');
-    console.log('\nNote: For iOS, you may need to run: npx expo run:ios');
-    console.log('For Android: npx expo run:android');
-
+    console.log("\n✨ All icons generated successfully!");
+    console.log("\n📋 Next steps:");
+    console.log("1. Review the generated icons in the assets folder");
+    console.log("2. Run: npx expo prebuild --clean");
+    console.log("3. Rebuild your app to see the new icon");
+    console.log("\nNote: For iOS, you may need to run: npx expo run:ios");
+    console.log("For Android: npx expo run:android");
   } catch (error) {
-    console.error('❌ Error generating icons:', error);
-    console.error('\nMake sure you have sharp installed:');
-    console.error('npm install sharp');
+    console.error("❌ Error generating icons:", error);
+    console.error("\nMake sure you have sharp installed:");
+    console.error("npm install sharp");
   }
 }
 

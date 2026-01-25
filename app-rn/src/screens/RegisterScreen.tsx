@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,41 +7,47 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
-} from 'react-native';
-import { theme } from '../config/theme';
-import { useAuth } from '../context/AuthContext';
+} from "react-native";
+import { theme } from "../config/theme";
+import { useAuth } from "../context/AuthContext";
 
 interface RegisterScreenProps {
   birthdate: string;
   onRegistered: () => void;
 }
-export const RegisterScreen = ({ birthdate, onRegistered }: RegisterScreenProps) => {
-// ...existing code...
+export const RegisterScreen = ({
+  birthdate,
+  onRegistered,
+}: RegisterScreenProps) => {
+  // ...existing code...
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
 
   const handleRegister = async () => {
-    if (!email || !email.includes('@')) {
-      Alert.alert('Error', 'Please enter a valid email address');
+    if (!email || !email.includes("@")) {
+      Alert.alert("Error", "Please enter a valid email address");
       return;
     }
     if (!password || password.length < 8) {
-      Alert.alert('Error', 'Password must be at least 8 characters');
+      Alert.alert("Error", "Password must be at least 8 characters");
       return;
     }
     setLoading(true);
     try {
       await register(email, birthdate, password);
       Alert.alert(
-        'Registration Successful',
-        'You can now log in with your email and password.',
-        [{ text: 'OK', onPress: () => onRegistered() }]
+        "Registration Successful",
+        "You can now log in with your email and password.",
+        [{ text: "OK", onPress: () => onRegistered() }],
       );
     } catch (error: any) {
-      Alert.alert('Error', error.response?.data?.message || 'Registration failed');
+      Alert.alert(
+        "Error",
+        error.response?.data?.message || "Registration failed",
+      );
     } finally {
       setLoading(false);
     }
@@ -86,7 +92,8 @@ export const RegisterScreen = ({ birthdate, onRegistered }: RegisterScreenProps)
         </TouchableOpacity>
       </View>
       <Text style={styles.disclaimer}>
-        Your password must be at least 8 characters. After registering, you can log in with your email and password.
+        Your password must be at least 8 characters. After registering, you can
+        log in with your email and password.
       </Text>
     </View>
   );
@@ -97,15 +104,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
     padding: theme.spacing.lg,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: theme.spacing.xl,
   },
   logo: {
     fontSize: theme.fontSize.xxl,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.primary,
     letterSpacing: 2,
   },
@@ -131,7 +138,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
     borderRadius: theme.borderRadius.md,
     padding: theme.spacing.md,
-    alignItems: 'center',
+    alignItems: "center",
   },
   buttonDisabled: {
     opacity: 0.6,
@@ -139,12 +146,12 @@ const styles = StyleSheet.create({
   buttonText: {
     color: theme.colors.text,
     fontSize: theme.fontSize.md,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   disclaimer: {
     color: theme.colors.textSecondary,
     fontSize: theme.fontSize.xs,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 18,
   },
 });

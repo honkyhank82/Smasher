@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,9 +7,9 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
-} from 'react-native';
-import * as Updates from 'expo-updates';
-import { theme } from '../config/theme';
+} from "react-native";
+import * as Updates from "expo-updates";
+import { theme } from "../config/theme";
 
 export const UpdateDebugScreen = ({ navigation }: any) => {
   const [loading, setLoading] = useState(false);
@@ -32,63 +32,59 @@ export const UpdateDebugScreen = ({ navigation }: any) => {
       };
       setUpdateInfo(info);
     } catch (error) {
-      console.error('Error loading update info:', error);
+      console.error("Error loading update info:", error);
     }
   };
 
   const handleCheckForUpdates = async () => {
     setLoading(true);
     try {
-      console.log('🔍 Checking for updates...');
+      console.log("🔍 Checking for updates...");
       const update = await Updates.checkForUpdateAsync();
-      
-      console.log('Update check result:', {
+
+      console.log("Update check result:", {
         isAvailable: update.isAvailable,
         manifest: update.manifest,
       });
 
       if (update.isAvailable) {
         Alert.alert(
-          'Update Available!',
-          `Update ID: ${update.manifest?.id || 'unknown'}\n\nDownload now?`,
+          "Update Available!",
+          `Update ID: ${update.manifest?.id || "unknown"}\n\nDownload now?`,
           [
-            { text: 'Cancel', style: 'cancel' },
+            { text: "Cancel", style: "cancel" },
             {
-              text: 'Download',
+              text: "Download",
               onPress: async () => {
                 try {
-                  console.log('📥 Downloading update...');
+                  console.log("📥 Downloading update...");
                   const result = await Updates.fetchUpdateAsync();
-                  console.log('Download result:', result);
-                  
-                  Alert.alert(
-                    'Update Downloaded',
-                    'Reload app now to apply?',
-                    [
-                      { text: 'Later', style: 'cancel' },
-                      {
-                        text: 'Reload Now',
-                        onPress: async () => {
-                          console.log('🔄 Reloading app...');
-                          await Updates.reloadAsync();
-                        },
+                  console.log("Download result:", result);
+
+                  Alert.alert("Update Downloaded", "Reload app now to apply?", [
+                    { text: "Later", style: "cancel" },
+                    {
+                      text: "Reload Now",
+                      onPress: async () => {
+                        console.log("🔄 Reloading app...");
+                        await Updates.reloadAsync();
                       },
-                    ]
-                  );
+                    },
+                  ]);
                 } catch (error: any) {
-                  console.error('Download error:', error);
-                  Alert.alert('Download Failed', error.message);
+                  console.error("Download error:", error);
+                  Alert.alert("Download Failed", error.message);
                 }
               },
             },
-          ]
+          ],
         );
       } else {
-        Alert.alert('No Updates', 'You are running the latest version!');
+        Alert.alert("No Updates", "You are running the latest version!");
       }
     } catch (error: any) {
-      console.error('Check error:', error);
-      Alert.alert('Check Failed', `Error: ${error.message}`);
+      console.error("Check error:", error);
+      Alert.alert("Check Failed", `Error: ${error.message}`);
     } finally {
       setLoading(false);
       loadUpdateInfo();
@@ -99,7 +95,7 @@ export const UpdateDebugScreen = ({ navigation }: any) => {
     try {
       await Updates.reloadAsync();
     } catch (error: any) {
-      Alert.alert('Reload Failed', error.message);
+      Alert.alert("Reload Failed", error.message);
     }
   };
 
@@ -115,38 +111,48 @@ export const UpdateDebugScreen = ({ navigation }: any) => {
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Current Update Info</Text>
-        
+
         {updateInfo ? (
           <>
             <View style={styles.infoRow}>
               <Text style={styles.label}>Updates Enabled:</Text>
-              <Text style={styles.value}>{updateInfo.isEnabled ? '✅ Yes' : '❌ No'}</Text>
+              <Text style={styles.value}>
+                {updateInfo.isEnabled ? "✅ Yes" : "❌ No"}
+              </Text>
             </View>
 
             <View style={styles.infoRow}>
               <Text style={styles.label}>Embedded Launch:</Text>
-              <Text style={styles.value}>{updateInfo.isEmbeddedLaunch ? '✅ Yes' : '❌ No'}</Text>
+              <Text style={styles.value}>
+                {updateInfo.isEmbeddedLaunch ? "✅ Yes" : "❌ No"}
+              </Text>
             </View>
 
             <View style={styles.infoRow}>
               <Text style={styles.label}>Update ID:</Text>
-              <Text style={styles.valueSmall}>{updateInfo.updateId || 'None'}</Text>
+              <Text style={styles.valueSmall}>
+                {updateInfo.updateId || "None"}
+              </Text>
             </View>
 
             <View style={styles.infoRow}>
               <Text style={styles.label}>Runtime Version:</Text>
-              <Text style={styles.value}>{updateInfo.runtimeVersion || 'Unknown'}</Text>
+              <Text style={styles.value}>
+                {updateInfo.runtimeVersion || "Unknown"}
+              </Text>
             </View>
 
             <View style={styles.infoRow}>
               <Text style={styles.label}>Channel:</Text>
-              <Text style={styles.value}>{updateInfo.channel || 'None'}</Text>
+              <Text style={styles.value}>{updateInfo.channel || "None"}</Text>
             </View>
 
             <View style={styles.infoRow}>
               <Text style={styles.label}>Created At:</Text>
               <Text style={styles.valueSmall}>
-                {updateInfo.createdAt ? new Date(updateInfo.createdAt).toLocaleString() : 'Unknown'}
+                {updateInfo.createdAt
+                  ? new Date(updateInfo.createdAt).toLocaleString()
+                  : "Unknown"}
               </Text>
             </View>
           </>
@@ -188,11 +194,11 @@ export const UpdateDebugScreen = ({ navigation }: any) => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Expected Values</Text>
         <Text style={styles.infoText}>
-          Runtime Version: 1.0.3{'\n'}
-          Channel: production{'\n'}
-          Updates Enabled: Yes{'\n'}
-          {'\n'}
-          If "Embedded Launch" is Yes, you're running the original build.{'\n'}
+          Runtime Version: 1.0.3{"\n"}
+          Channel: production{"\n"}
+          Updates Enabled: Yes{"\n"}
+          {"\n"}
+          If "Embedded Launch" is Yes, you're running the original build.{"\n"}
           If it's No, you're running an OTA update.
         </Text>
       </View>
@@ -206,9 +212,9 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: theme.spacing.md,
     paddingTop: 50,
     paddingBottom: theme.spacing.md,
@@ -221,7 +227,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: theme.fontSize.xl,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
   },
   section: {
@@ -231,7 +237,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: theme.fontSize.lg,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
     marginBottom: theme.spacing.md,
   },
@@ -246,12 +252,12 @@ const styles = StyleSheet.create({
   value: {
     fontSize: theme.fontSize.md,
     color: theme.colors.text,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   valueSmall: {
     fontSize: theme.fontSize.sm,
     color: theme.colors.text,
-    fontFamily: 'monospace',
+    fontFamily: "monospace",
   },
   infoText: {
     fontSize: theme.fontSize.sm,
@@ -262,7 +268,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
     padding: theme.spacing.md,
     borderRadius: theme.borderRadius.md,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: theme.spacing.sm,
   },
   buttonSecondary: {
@@ -274,6 +280,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: theme.colors.text,
     fontSize: theme.fontSize.md,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

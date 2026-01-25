@@ -8,4 +8,4 @@ declare const process: {
   };
 };
 
-declare module 'expo-localization';
+declare module "expo-localization";

@@ -1,5 +1,5 @@
-declare module '@env' {
+declare module "@env" {
   export const SENTRY_DSN: string;
   export const API_URL: string;
-  export const ENV: 'development' | 'production' | 'test';
+  export const ENV: "development" | "production" | "test";
 }

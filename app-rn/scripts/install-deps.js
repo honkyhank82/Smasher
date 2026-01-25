@@ -1,107 +1,107 @@
-const { execSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+const { execSync } = require("child_process");
+const fs = require("fs");
+const path = require("path");
 
-console.log('Installing dependencies...');
+console.log("Installing dependencies...");
 
 // Define the dependencies to install
 const dependencies = [
   // Core React Native
-  'react@18.2.0',
-  'react-native@0.73.4',
-  'react-dom@18.2.0',
-  'react-native-web@~0.19.6',
-  
+  "react@18.2.0",
+  "react-native@0.73.4",
+  "react-dom@18.2.0",
+  "react-native-web@~0.19.6",
+
   // Navigation
-  '@react-navigation/native@6.1.9',
-  '@react-navigation/stack@6.3.20',
-  '@react-navigation/bottom-tabs@6.5.11',
-  'react-native-gesture-handler@~2.14.0',
-  'react-native-reanimated@~3.6.0',
-  'react-native-screens@~3.29.0',
-  'react-native-safe-area-context@4.8.2',
-  
+  "@react-navigation/native@6.1.9",
+  "@react-navigation/stack@6.3.20",
+  "@react-navigation/bottom-tabs@6.5.11",
+  "react-native-gesture-handler@~2.14.0",
+  "react-native-reanimated@~3.6.0",
+  "react-native-screens@~3.29.0",
+  "react-native-safe-area-context@4.8.2",
+
   // UI Components
-  'react-native-svg@14.1.0',
-  '@shopify/flash-list@1.6.4',
-  'react-hook-form@7.49.3',
-  'zod@3.22.4',
-  
+  "react-native-svg@14.1.0",
+  "@shopify/flash-list@1.6.4",
+  "react-hook-form@7.49.3",
+  "zod@3.22.4",
+
   // Expo
-  'expo@~50.0.0',
-  'expo-application@~5.9.0',
-  'expo-av@~13.10.0',
-  'expo-constants@~15.0.0',
-  'expo-device@~5.9.0',
-  'expo-image-picker@~14.7.0',
-  'expo-linking@~6.2.2',
-  'expo-location@~16.1.0',
-  'expo-notifications@~0.26.0',
-  'expo-splash-screen@~0.26.0',
-  'expo-status-bar@~1.11.0',
-  'expo-system-ui@~2.9.0',
-  'expo-updates@~0.24.0',
-  
+  "expo@~50.0.0",
+  "expo-application@~5.9.0",
+  "expo-av@~13.10.0",
+  "expo-constants@~15.0.0",
+  "expo-device@~5.9.0",
+  "expo-image-picker@~14.7.0",
+  "expo-linking@~6.2.2",
+  "expo-location@~16.1.0",
+  "expo-notifications@~0.26.0",
+  "expo-splash-screen@~0.26.0",
+  "expo-status-bar@~1.11.0",
+  "expo-system-ui@~2.9.0",
+  "expo-updates@~0.24.0",
+
   // Networking
-  'axios@1.6.2',
-  'socket.io-client@4.7.2',
-  '@react-native-async-storage/async-storage@1.23.0',
-  '@react-native-community/netinfo@11.1.0',
-  
+  "axios@1.6.2",
+  "socket.io-client@4.7.2",
+  "@react-native-async-storage/async-storage@1.23.0",
+  "@react-native-community/netinfo@11.1.0",
+
   // Internationalization
-  'i18next@23.7.10',
-  'react-i18next@14.0.0',
-  
+  "i18next@23.7.10",
+  "react-i18next@14.0.0",
+
   // Maps
-  'react-native-maps@1.33.0',
-  
+  "react-native-maps@1.33.0",
+
   // Testing
-  '@testing-library/jest-native@^5.4.3',
-  '@testing-library/react-native@12.4.3',
-  'jest@^29.7.0',
-  'jest-expo@~50.0.1',
-  'react-test-renderer@18.2.0',
-  'ts-jest@^29.1.1',
-  
+  "@testing-library/jest-native@^5.4.3",
+  "@testing-library/react-native@12.4.3",
+  "jest@^29.7.0",
+  "jest-expo@~50.0.1",
+  "react-test-renderer@18.2.0",
+  "ts-jest@^29.1.1",
+
   // Development
-  'react-native-dotenv@^3.4.9',
-  'patch-package@^8.0.0',
-  'prettier@^3.1.0',
-  'typescript@5.3.2',
-  
+  "react-native-dotenv@^3.4.9",
+  "patch-package@^8.0.0",
+  "prettier@^3.1.0",
+  "typescript@5.3.2",
+
   // TypeScript types
-  '@types/jest@^29.5.8',
-  '@types/node@^20.10.5',
-  '@types/react@18.2.45',
-  '@types/react-native@0.72.8',
-  '@types/react-test-renderer@^18.0.0',
-  
+  "@types/jest@^29.5.8",
+  "@types/node@^20.10.5",
+  "@types/react@18.2.45",
+  "@types/react-native@0.72.8",
+  "@types/react-test-renderer@^18.0.0",
+
   // ESLint
-  '@typescript-eslint/eslint-plugin@^6.13.1',
-  '@typescript-eslint/parser@^6.13.1',
-  'eslint@^8.54.0',
-  'eslint-config-prettier@^9.0.0',
-  'eslint-import-resolver-typescript@^3.6.1',
-  'eslint-plugin-import@^2.29.0',
-  'eslint-plugin-jsx-a11y@^6.7.1',
-  'eslint-plugin-prettier@^5.0.1',
-  'eslint-plugin-react@^7.33.2',
-  'eslint-plugin-react-hooks@^4.6.0',
-  'eslint-plugin-react-native@^4.1.0',
-  'eslint-plugin-unused-imports@^3.0.0',
-  
+  "@typescript-eslint/eslint-plugin@^6.13.1",
+  "@typescript-eslint/parser@^6.13.1",
+  "eslint@^8.54.0",
+  "eslint-config-prettier@^9.0.0",
+  "eslint-import-resolver-typescript@^3.6.1",
+  "eslint-plugin-import@^2.29.0",
+  "eslint-plugin-jsx-a11y@^6.7.1",
+  "eslint-plugin-prettier@^5.0.1",
+  "eslint-plugin-react@^7.33.2",
+  "eslint-plugin-react-hooks@^4.6.0",
+  "eslint-plugin-react-native@^4.1.0",
+  "eslint-plugin-unused-imports@^3.0.0",
+
   // Babel
-  '@babel/core@^7.23.7',
-  '@babel/plugin-proposal-export-namespace-from@^7.18.9',
-  '@babel/plugin-transform-runtime@^7.23.4',
-  '@babel/preset-env@^7.23.7',
-  '@babel/preset-typescript@^7.23.3',
-  '@babel/runtime@^7.23.8',
-  '@react-native/babel-preset@^0.73.19',
-  'babel-jest@^29.7.0',
-  'babel-plugin-module-resolver@^5.0.0',
-  'babel-preset-expo@^10.0.0',
-  
+  "@babel/core@^7.23.7",
+  "@babel/plugin-proposal-export-namespace-from@^7.18.9",
+  "@babel/plugin-transform-runtime@^7.23.4",
+  "@babel/preset-env@^7.23.7",
+  "@babel/preset-typescript@^7.23.3",
+  "@babel/runtime@^7.23.8",
+  "@react-native/babel-preset@^0.73.19",
+  "babel-jest@^29.7.0",
+  "babel-plugin-module-resolver@^5.0.0",
+  "babel-preset-expo@^10.0.0",
+
   // Sentry (commented out as it's causing issues)
   // '@sentry/react-native@5.15.0',
   // 'sentry-expo@~7.0.0',
@@ -110,30 +110,30 @@ const dependencies = [
 // Install dependencies
 function installDependencies() {
   try {
-    console.log('Installing dependencies with npm...');
-    execSync(`npm install --legacy-peer-deps ${dependencies.join(' ')}`, {
-      stdio: 'inherit',
+    console.log("Installing dependencies with npm...");
+    execSync(`npm install --legacy-peer-deps ${dependencies.join(" ")}`, {
+      stdio: "inherit",
       cwd: process.cwd(),
     });
-    
-    console.log('Dependencies installed successfully!');
-    
+
+    console.log("Dependencies installed successfully!");
+
     // Create or update .gitignore
     updateGitIgnore();
-    
+
     // Create or update .npmrc
     updateNpmRc();
-    
-    console.log('Setup completed successfully!');
+
+    console.log("Setup completed successfully!");
   } catch (error) {
-    console.error('Failed to install dependencies:', error);
+    console.error("Failed to install dependencies:", error);
     process.exit(1);
   }
 }
 
 // Update .gitignore file
 function updateGitIgnore() {
-  const gitignorePath = path.join(process.cwd(), '.gitignore');
+  const gitignorePath = path.join(process.cwd(), ".gitignore");
   const gitignoreContent = `# OSX
 .DS_Store
 
@@ -304,12 +304,12 @@ next-env.d.ts
 `;
 
   fs.writeFileSync(gitignorePath, gitignoreContent);
-  console.log('Updated .gitignore file');
+  console.log("Updated .gitignore file");
 }
 
 // Update .npmrc file
 function updateNpmRc() {
-  const npmrcPath = path.join(process.cwd(), '.npmrc');
+  const npmrcPath = path.join(process.cwd(), ".npmrc");
   const npmrcContent = `# Enable legacy peer deps to handle dependency conflicts
 legacy-peer-deps=true
 
@@ -324,7 +324,7 @@ engine-strict=true
 `;
 
   fs.writeFileSync(npmrcPath, npmrcContent);
-  console.log('Updated .npmrc file');
+  console.log("Updated .npmrc file");
 }
 
 // Run the installation

@@ -1,16 +1,16 @@
 // Smasher app branding: black, silver, deep dark red
 export const theme = {
   colors: {
-    primary: '#8B0000', // Deep dark red
-    secondary: '#C0C0C0', // Silver
-    background: '#000000', // Black
-    surface: '#1A1A1A', // Dark gray
-    text: '#FFFFFF',
-    textSecondary: '#C0C0C0',
-    border: '#333333',
-    error: '#FF3B30',
-    success: '#34C759',
-    warning: '#FF9500',
+    primary: "#8B0000", // Deep dark red
+    secondary: "#C0C0C0", // Silver
+    background: "#000000", // Black
+    surface: "#1A1A1A", // Dark gray
+    text: "#FFFFFF",
+    textSecondary: "#C0C0C0",
+    border: "#333333",
+    error: "#FF3B30",
+    success: "#34C759",
+    warning: "#FF9500",
   },
   spacing: {
     xs: 4,

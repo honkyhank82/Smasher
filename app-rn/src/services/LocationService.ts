@@ -1,6 +1,6 @@
-import * as ExpoLocation from 'expo-location';
-import { Alert, Platform } from 'react-native';
-import api from './api';
+import * as ExpoLocation from "expo-location";
+import { Alert } from "react-native";
+import api from "./api";
 
 // Default location for development (Johnson City, TN - where seeded users are)
 const DEV_LOCATION = {
@@ -22,9 +22,9 @@ class LocationService {
   async requestPermission(): Promise<boolean> {
     try {
       const { status } = await ExpoLocation.requestForegroundPermissionsAsync();
-      return status === 'granted';
+      return status === "granted";
     } catch (error) {
-      console.error('Location permission error:', error);
+      console.error("Location permission error:", error);
       return false;
     }
   }
@@ -32,19 +32,20 @@ class LocationService {
   async getCurrentLocation(): Promise<Location | null> {
     // In development, prioritize the seeded user location so the user sees data immediately
     if (FORCE_DEV_LOCATION) {
-      console.log('📍 DEV MODE: Using default location (Johnson City, TN)');
+      console.log("📍 DEV MODE: Using default location (Johnson City, TN)");
       return DEV_LOCATION;
     }
 
     try {
       const { status } = await ExpoLocation.getForegroundPermissionsAsync();
-      
-      if (status !== 'granted') {
-        const { status: newStatus } = await ExpoLocation.requestForegroundPermissionsAsync();
-        if (newStatus !== 'granted') {
+
+      if (status !== "granted") {
+        const { status: newStatus } =
+          await ExpoLocation.requestForegroundPermissionsAsync();
+        if (newStatus !== "granted") {
           Alert.alert(
-            'Permission Required',
-            'Location permission is required to find nearby users.'
+            "Permission Required",
+            "Location permission is required to find nearby users.",
           );
           return null;
         }
@@ -59,27 +60,29 @@ class LocationService {
         longitude: position.coords.longitude,
       };
     } catch (error) {
-      console.error('Location error:', error);
-      Alert.alert('Error', 'Failed to get your location');
+      console.error("Location error:", error);
+      Alert.alert("Error", "Failed to get your location");
       return null;
     }
   }
 
   async updateLocationOnServer(location: Location): Promise<void> {
     try {
-      await api.post('/geo/update-location', {
+      await api.post("/geo/update-location", {
         latitude: location.latitude,
         longitude: location.longitude,
       });
     } catch (error) {
-      console.error('Failed to update location on server:', error);
+      console.error("Failed to update location on server:", error);
     }
   }
 
   async startLocationTracking(): Promise<void> {
     try {
       const hasPermission = await this.requestPermission();
-      if (!hasPermission) return;
+      if (!hasPermission) {
+        return;
+      }
 
       // Update location every 5 minutes or 100 meters
       this.watchSubscription = await ExpoLocation.watchPositionAsync(
@@ -94,10 +97,10 @@ class LocationService {
             longitude: position.coords.longitude,
           };
           await this.updateLocationOnServer(location);
-        }
+        },
       );
     } catch (error) {
-      console.error('Location watch error:', error);
+      console.error("Location watch error:", error);
     }
   }
 

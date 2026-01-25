@@ -1,10 +1,10 @@
 // Development API Configuration
 // This file should be used during local development
 
-export const API_BASE_URL = 'http://localhost:3001'; // Local development server
+export const API_BASE_URL = "http://localhost:3001"; // Local development server
 
 // WebSocket URL (for Socket.IO)
-export const WS_URL = 'http://localhost:3001'; // Same as API_BASE_URL for Socket.IO
+export const WS_URL = "http://localhost:3001"; // Same as API_BASE_URL for Socket.IO
 
 // API Timeouts
 export const API_TIMEOUT = 30000; // 30 seconds

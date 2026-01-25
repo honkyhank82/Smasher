@@ -1,4 +1,4 @@
-import api from './api';
+import api from "./api";
 
 export interface SubscriptionStatus {
   isPremium: boolean;
@@ -18,7 +18,7 @@ export const subscriptionService = {
    * Create a checkout session for subscribing to premium
    */
   async createCheckoutSession(successUrl: string, cancelUrl: string) {
-    const response = await api.post('/subscriptions/checkout', {
+    const response = await api.post("/subscriptions/checkout", {
       successUrl,
       cancelUrl,
     });
@@ -29,7 +29,7 @@ export const subscriptionService = {
    * Create a portal session for managing subscription
    */
   async createPortalSession(returnUrl: string) {
-    const response = await api.post('/subscriptions/portal', {
+    const response = await api.post("/subscriptions/portal", {
       returnUrl,
     });
     return response.data;
@@ -39,7 +39,7 @@ export const subscriptionService = {
    * Get current subscription status
    */
   async getSubscriptionStatus(): Promise<SubscriptionStatus> {
-    const response = await api.get('/subscriptions/status');
+    const response = await api.get("/subscriptions/status");
     return response.data;
   },
 
@@ -47,7 +47,7 @@ export const subscriptionService = {
    * Cancel subscription (at period end)
    */
   async cancelSubscription() {
-    const response = await api.delete('/subscriptions/cancel');
+    const response = await api.delete("/subscriptions/cancel");
     return response.data;
   },
 
@@ -55,7 +55,7 @@ export const subscriptionService = {
    * Reactivate a canceled subscription
    */
   async reactivateSubscription() {
-    const response = await api.post('/subscriptions/reactivate');
+    const response = await api.post("/subscriptions/reactivate");
     return response.data;
   },
 };

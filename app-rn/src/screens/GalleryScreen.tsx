@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,20 +9,20 @@ import {
   Alert,
   ActivityIndicator,
   Dimensions,
-} from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import axios from 'axios';
-import { theme } from '../config/theme';
-import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
+} from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import axios from "axios";
+import { theme } from "../config/theme";
+import { useAuth } from "../context/AuthContext";
+import api from "../services/api";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 const imageSize = (width - theme.spacing.md * 4) / 3;
 
 interface MediaItem {
   id: string;
   uri: string;
-  type: 'photo' | 'video';
+  type: "photo" | "video";
   isProfilePicture?: boolean;
 }
 
@@ -38,91 +38,103 @@ export const GalleryScreen = ({ navigation }: any) => {
 
   const loadMedia = async () => {
     try {
-      const response = await api.get('/media/my-media');
+      const response = await api.get("/media/my-media");
       const data = response?.data;
       if (!Array.isArray(data)) {
-        console.warn('Unexpected media response shape', data);
+        console.warn("Unexpected media response shape", data);
         setMedia([]);
         return;
       }
       const mapped = data
-        .filter((item: any) => item && typeof item === 'object')
+        .filter((item: any) => item && typeof item === "object")
         .map((item: any) => ({
           id: String(item.id),
-          uri: String(item.url || ''),
-          type: item.type === 'video' ? 'video' : 'photo',
+          uri: String(item.url || ""),
+          type: item.type === "video" ? "video" : "photo",
           isProfilePicture: Boolean(item.isProfilePicture),
         }))
-        .filter((m: MediaItem) => m.id && m.uri && (m.type === 'photo' || m.type === 'video'));
+        .filter(
+          (m: MediaItem) =>
+            m.id && m.uri && (m.type === "photo" || m.type === "video"),
+        );
       setMedia(mapped);
     } catch (error) {
-      console.error('Failed to load media:', error);
+      console.error("Failed to load media:", error);
     } finally {
       setInitialLoading(false);
     }
   };
 
-  const uploadToR2 = async (url: string, filePath: string, contentType: string) => {
+  const uploadToR2 = async (
+    url: string,
+    filePath: string,
+    contentType: string,
+  ) => {
     try {
-      console.log('📤 Uploading file with axios...');
-      console.log('File path:', filePath);
-      
+      console.log("📤 Uploading file with axios...");
+      console.log("File path:", filePath);
+
       // Fetch the file from local URI
       const fileResponse = await fetch(filePath);
       const blob = await fileResponse.blob();
-      console.log('File loaded as blob, size:', blob.size);
-      
+      console.log("File loaded as blob, size:", blob.size);
+
       // Upload to R2 using axios
-      console.log('Uploading to R2...');
+      console.log("Uploading to R2...");
       const response = await axios.put(url, blob, {
         headers: {
-          'Content-Type': contentType,
+          "Content-Type": contentType,
         },
         timeout: 60000,
         maxContentLength: Infinity,
         maxBodyLength: Infinity,
       });
-      
-      console.log('Upload response status:', response.status);
-      console.log('✅ Upload successful');
+
+      console.log("Upload response status:", response.status);
+      console.log("✅ Upload successful");
       return { ok: true, status: response.status };
     } catch (error: any) {
-      console.error('Upload error:', error);
+      console.error("Upload error:", error);
       if (error.response) {
-        console.error('Response status:', error.response.status);
-        console.error('Response data:', error.response.data);
+        console.error("Response status:", error.response.status);
+        console.error("Response data:", error.response.data);
       }
       throw error;
     }
   };
 
-  const uploadPhoto = async (uri: string, fileName: string, fileType: string, mediaType: 'photo' | 'video') => {
+  const uploadPhoto = async (
+    uri: string,
+    fileName: string,
+    fileType: string,
+    mediaType: "photo" | "video",
+  ) => {
     setLoading(true);
     try {
-      console.log('=== UPLOAD START ===');
-      console.log('File:', fileName);
-      console.log('Type:', fileType);
-      console.log('URI:', uri);
-      
+      console.log("=== UPLOAD START ===");
+      console.log("File:", fileName);
+      console.log("Type:", fileType);
+      console.log("URI:", uri);
+
       // Read file as base64
       const fileResponse = await fetch(uri);
       const blob = await fileResponse.blob();
       const reader = new FileReader();
-      
+
       const base64Data = await new Promise<string>((resolve, reject) => {
         reader.onloadend = () => {
           const result = reader.result as string;
-          const base64 = result.split(',')[1];
+          const base64 = result.split(",")[1];
           resolve(base64);
         };
         reader.onerror = reject;
         reader.readAsDataURL(blob);
       });
-      
-      console.log('File converted to base64, uploading...');
-      
+
+      console.log("File converted to base64, uploading...");
+
       // Upload through backend
-      const uploadResponse = await api.post('/media/upload', {
+      const uploadResponse = await api.post("/media/upload", {
         fileName,
         fileType,
         mediaType,
@@ -130,43 +142,58 @@ export const GalleryScreen = ({ navigation }: any) => {
       });
 
       if (!uploadResponse?.data?.id || !uploadResponse?.data?.url) {
-        throw new Error('Invalid upload response: missing id or url');
+        throw new Error("Invalid upload response: missing id or url");
       }
-      console.log('✓ Upload successful');
-      console.log('Media ID:', uploadResponse.data.id);
-      console.log('=== UPLOAD COMPLETE ===');
+      console.log("✓ Upload successful");
+      console.log("Media ID:", uploadResponse.data.id);
+      console.log("=== UPLOAD COMPLETE ===");
 
       // Add to local state
-      setMedia([...media, { 
-        id: uploadResponse.data.id,
-        uri: uploadResponse.data.url, 
-        type: mediaType 
-      }]);
-      Alert.alert('Success', `${mediaType === 'photo' ? 'Photo' : 'Video'} added to gallery`);
+      setMedia([
+        ...media,
+        {
+          id: uploadResponse.data.id,
+          uri: uploadResponse.data.url,
+          type: mediaType,
+        },
+      ]);
+      Alert.alert(
+        "Success",
+        `${mediaType === "photo" ? "Photo" : "Video"} added to gallery`,
+      );
     } catch (error: any) {
-      console.error('❌ UPLOAD FAILED ❌', error);
-      Alert.alert('Upload Error', error.message || 'Failed to upload media');
+      console.error("❌ UPLOAD FAILED ❌", error);
+      Alert.alert("Upload Error", error.message || "Failed to upload media");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAddMedia = async (type: 'photo' | 'video', retryCount: number = 0) => {
+  const handleAddMedia = async (
+    type: "photo" | "video",
+    retryCount: number = 0,
+  ) => {
     if (media.length >= 6) {
-      Alert.alert('Limit Reached', 'You can upload up to 6 photos/videos');
+      Alert.alert("Limit Reached", "You can upload up to 6 photos/videos");
       return;
     }
 
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission Required', 'Please grant photo library access to upload media.');
+    if (status !== "granted") {
+      Alert.alert(
+        "Permission Required",
+        "Please grant photo library access to upload media.",
+      );
       return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: type === 'photo' ? ImagePicker.MediaTypeOptions.Images : ImagePicker.MediaTypeOptions.Videos,
-      allowsEditing: type === 'photo',
-      aspect: type === 'photo' ? [4, 3] : undefined,
+      mediaTypes:
+        type === "photo"
+          ? ImagePicker.MediaTypeOptions.Images
+          : ImagePicker.MediaTypeOptions.Videos,
+      allowsEditing: type === "photo",
+      aspect: type === "photo" ? [4, 3] : undefined,
       quality: 0.8,
       videoMaxDuration: 60, // Limit video to 60 seconds
       base64: false,
@@ -182,34 +209,36 @@ export const GalleryScreen = ({ navigation }: any) => {
     }
   };
 
-
   const handleDeleteMedia = (id: string | number) => {
-    const item = media.find(m => m.id === id);
+    const item = media.find((m) => m.id === id);
     if (!item) {
-      Alert.alert('Error', 'Media item not found');
+      Alert.alert("Error", "Media item not found");
       return;
     }
     Alert.alert(
-      `Delete ${item.type === 'photo' ? 'Photo' : 'Video'}`,
+      `Delete ${item.type === "photo" ? "Photo" : "Video"}`,
       `Are you sure you want to delete this ${item.type}?`,
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: "Cancel", style: "cancel" },
         {
-          text: 'Delete',
-          style: 'destructive',
+          text: "Delete",
+          style: "destructive",
           onPress: async () => {
             try {
-              await api.post('/media/delete', { mediaId: item.id });
-              const newMedia = media.filter(m => m.id !== id);
+              await api.post("/media/delete", { mediaId: item.id });
+              const newMedia = media.filter((m) => m.id !== id);
               setMedia(newMedia);
-              Alert.alert('Success', `${item.type === 'photo' ? 'Photo' : 'Video'} deleted`);
+              Alert.alert(
+                "Success",
+                `${item.type === "photo" ? "Photo" : "Video"} deleted`,
+              );
             } catch (error) {
-              console.error('Delete error:', error);
-              Alert.alert('Error', 'Failed to delete media');
+              console.error("Delete error:", error);
+              Alert.alert("Error", "Failed to delete media");
             }
           },
         },
-      ]
+      ],
     );
   };
 
@@ -235,14 +264,11 @@ export const GalleryScreen = ({ navigation }: any) => {
               style={styles.photoContainer}
               onLongPress={() => handleDeleteMedia(item.id)}
             >
-              {item.type === 'photo' ? (
+              {item.type === "photo" ? (
                 <Image source={{ uri: item.uri }} style={styles.photo} />
               ) : (
                 <View style={styles.videoContainer}>
-                  <Image 
-                    source={{ uri: item.uri }} 
-                    style={styles.photo}
-                  />
+                  <Image source={{ uri: item.uri }} style={styles.photo} />
                   <View style={styles.playIcon}>
                     <Text style={styles.playIconText}>▶</Text>
                   </View>
@@ -261,7 +287,7 @@ export const GalleryScreen = ({ navigation }: any) => {
             <>
               <TouchableOpacity
                 style={styles.addButton}
-                onPress={() => handleAddMedia('photo')}
+                onPress={() => handleAddMedia("photo")}
                 disabled={loading}
               >
                 {loading ? (
@@ -276,7 +302,7 @@ export const GalleryScreen = ({ navigation }: any) => {
               {media.length < 5 && (
                 <TouchableOpacity
                   style={styles.addButton}
-                  onPress={() => handleAddMedia('video')}
+                  onPress={() => handleAddMedia("video")}
                   disabled={loading}
                 >
                   {loading ? (
@@ -295,11 +321,19 @@ export const GalleryScreen = ({ navigation }: any) => {
 
         <View style={styles.tips}>
           <Text style={styles.tipsTitle}>Tips for great media:</Text>
-          <Text style={styles.tipText}>• Use clear, well-lit photos and videos</Text>
+          <Text style={styles.tipText}>
+            • Use clear, well-lit photos and videos
+          </Text>
           <Text style={styles.tipText}>• Show your face clearly</Text>
-          <Text style={styles.tipText}>• Include variety (close-up, full body, activities)</Text>
-          <Text style={styles.tipText}>• Keep videos short and engaging (under 30 seconds)</Text>
-          <Text style={styles.tipText}>• Avoid group photos/videos where you're hard to identify</Text>
+          <Text style={styles.tipText}>
+            • Include variety (close-up, full body, activities)
+          </Text>
+          <Text style={styles.tipText}>
+            • Keep videos short and engaging (under 30 seconds)
+          </Text>
+          <Text style={styles.tipText}>
+            • Avoid group photos/videos where you're hard to identify
+          </Text>
           <Text style={styles.tipText}>• Long press to delete media</Text>
         </View>
       </View>
@@ -313,9 +347,9 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: theme.spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
@@ -326,7 +360,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: theme.fontSize.lg,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
   },
   content: {
@@ -336,16 +370,16 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.md,
     color: theme.colors.textSecondary,
     marginBottom: theme.spacing.lg,
-    textAlign: 'center',
+    textAlign: "center",
   },
   grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: theme.spacing.sm,
     marginBottom: theme.spacing.xl,
   },
   photoContainer: {
-    position: 'relative',
+    position: "relative",
   },
   photo: {
     width: imageSize,
@@ -354,40 +388,40 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
   },
   videoContainer: {
-    position: 'relative',
+    position: "relative",
   },
   playIcon: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
+    position: "absolute",
+    top: "50%",
+    left: "50%",
     transform: [{ translateX: -20 }, { translateY: -20 }],
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    alignItems: "center",
+    justifyContent: "center",
   },
   playIconText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
     marginLeft: 3,
   },
   deleteButton: {
-    position: 'absolute',
+    position: "absolute",
     top: 4,
     right: 4,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
     width: 24,
     height: 24,
     borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   deleteButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     lineHeight: 20,
   },
   addButton: {
@@ -397,9 +431,9 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
     borderWidth: 2,
     borderColor: theme.colors.border,
-    borderStyle: 'dashed',
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderStyle: "dashed",
+    alignItems: "center",
+    justifyContent: "center",
   },
   addButtonIcon: {
     fontSize: 40,
@@ -419,7 +453,7 @@ const styles = StyleSheet.create({
   },
   tipsTitle: {
     fontSize: theme.fontSize.md,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
     marginBottom: theme.spacing.sm,
   },

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -8,10 +8,10 @@ import {
   TextInput,
   ActivityIndicator,
   Alert,
-} from 'react-native';
-import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
-import { theme } from '../config/theme';
+} from "react-native";
+import { useAuth } from "../context/AuthContext";
+import api from "../services/api";
+import { theme } from "../config/theme";
 
 interface AdminUserSummary {
   id: string;
@@ -24,60 +24,67 @@ interface AdminUserSummary {
 
 export const AdminScreen = ({ navigation }: any) => {
   const { user } = useAuth();
-  const [searchEmail, setSearchEmail] = useState('');
-  const [searchUserId, setSearchUserId] = useState('');
+  const [searchEmail, setSearchEmail] = useState("");
+  const [searchUserId, setSearchUserId] = useState("");
   const [targetUser, setTargetUser] = useState<AdminUserSummary | null>(null);
-  const [profileBio, setProfileBio] = useState('');
-  const [mediaIdToDelete, setMediaIdToDelete] = useState('');
+  const [profileBio, setProfileBio] = useState("");
+  const [mediaIdToDelete, setMediaIdToDelete] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [actionMessage, setActionMessage] = useState('');
+  const [error, setError] = useState("");
+  const [actionMessage, setActionMessage] = useState("");
 
   const isAdmin = !!user?.isAdmin;
 
   const handleLoadByEmail = async () => {
-    setError('');
-    setActionMessage('');
+    setError("");
+    setActionMessage("");
     setTargetUser(null);
-    if (!searchEmail.trim()) return;
+    if (!searchEmail.trim()) {
+      return;
+    }
     try {
       setLoading(true);
-      const response = await api.get<AdminUserSummary | null>('/users/admin/by-email', {
-        params: { email: searchEmail.trim() },
-      });
+      const response = await api.get<AdminUserSummary | null>(
+        "/users/admin/by-email",
+        {
+          params: { email: searchEmail.trim() },
+        },
+      );
       if (!response.data) {
-        setError('No user found for that email');
+        setError("No user found for that email");
         return;
       }
       setTargetUser(response.data);
-      setProfileBio('');
+      setProfileBio("");
     } catch (err: any) {
-      console.error('Admin load by email error:', err);
-      setError(err?.response?.data?.message || 'Failed to load user by email');
+      console.error("Admin load by email error:", err);
+      setError(err?.response?.data?.message || "Failed to load user by email");
     } finally {
       setLoading(false);
     }
   };
 
   const handleLoadById = async () => {
-    setError('');
-    setActionMessage('');
+    setError("");
+    setActionMessage("");
     setTargetUser(null);
-    if (!searchUserId.trim()) return;
+    if (!searchUserId.trim()) {
+      return;
+    }
     try {
       setLoading(true);
       const response = await api.get<AdminUserSummary | null>(
         `/users/admin/by-id/${encodeURIComponent(searchUserId.trim())}`,
       );
       if (!response.data) {
-        setError('No user found for that ID');
+        setError("No user found for that ID");
         return;
       }
       setTargetUser(response.data);
-      setProfileBio('');
+      setProfileBio("");
     } catch (err: any) {
-      console.error('Admin load by id error:', err);
-      setError(err?.response?.data?.message || 'Failed to load user by id');
+      console.error("Admin load by id error:", err);
+      setError(err?.response?.data?.message || "Failed to load user by id");
     } finally {
       setLoading(false);
     }
@@ -85,78 +92,102 @@ export const AdminScreen = ({ navigation }: any) => {
 
   const ensureTarget = () => {
     if (!targetUser) {
-      setError('Load a user first');
+      setError("Load a user first");
       return false;
     }
     return true;
   };
 
   const callUserAction = async (path: string, body?: any) => {
-    if (!ensureTarget()) return;
-    setError('');
-    setActionMessage('');
+    if (!ensureTarget()) {
+      return;
+    }
+    setError("");
+    setActionMessage("");
     try {
       setLoading(true);
       const response = await api.post(path, body || {});
-      const msg = response?.data?.message || 'Action completed';
+      const msg = response?.data?.message || "Action completed";
       setActionMessage(msg);
     } catch (err: any) {
-      console.error('Admin action error:', err);
-      setError(err?.response?.data?.message || 'Action failed');
+      console.error("Admin action error:", err);
+      setError(err?.response?.data?.message || "Action failed");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeactivate = () => {
-    if (!targetUser) return;
+    if (!targetUser) {
+      return;
+    }
     callUserAction(`/users/admin/deactivate/${targetUser.id}`);
   };
 
   const handleReactivate = () => {
-    if (!targetUser) return;
+    if (!targetUser) {
+      return;
+    }
     callUserAction(`/users/admin/reactivate/${targetUser.id}`);
   };
 
   const handleBan = () => {
-    if (!targetUser) return;
+    if (!targetUser) {
+      return;
+    }
     Alert.alert(
-      'Ban User',
-      'This will schedule the user account for deletion after the grace period. Continue?',
+      "Ban User",
+      "This will schedule the user account for deletion after the grace period. Continue?",
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Ban User', style: 'destructive', onPress: () => callUserAction(`/users/admin/ban/${targetUser!.id}`) },
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Ban User",
+          style: "destructive",
+          onPress: () => callUserAction(`/users/admin/ban/${targetUser!.id}`),
+        },
       ],
     );
   };
 
   const handleMakeAdmin = () => {
-    if (!targetUser) return;
-    callUserAction(`/users/admin/privileges/${targetUser.id}`, { isAdmin: true });
+    if (!targetUser) {
+      return;
+    }
+    callUserAction(`/users/admin/privileges/${targetUser.id}`, {
+      isAdmin: true,
+    });
   };
 
   const handleRemoveAdmin = () => {
-    if (!targetUser) return;
-    callUserAction(`/users/admin/privileges/${targetUser.id}`, { isAdmin: false });
+    if (!targetUser) {
+      return;
+    }
+    callUserAction(`/users/admin/privileges/${targetUser.id}`, {
+      isAdmin: false,
+    });
   };
 
   const handleUpdateProfile = async () => {
-    if (!ensureTarget()) return;
-    if (!profileBio.trim()) {
-      setError('Enter a replacement bio or text (can be empty string to clear)');
+    if (!ensureTarget()) {
       return;
     }
-    setError('');
-    setActionMessage('');
+    if (!profileBio.trim()) {
+      setError(
+        "Enter a replacement bio or text (can be empty string to clear)",
+      );
+      return;
+    }
+    setError("");
+    setActionMessage("");
     try {
       setLoading(true);
       await api.patch(`/profiles/admin/${targetUser!.id}`, {
         bio: profileBio,
       });
-      setActionMessage('Profile updated');
+      setActionMessage("Profile updated");
     } catch (err: any) {
-      console.error('Admin update profile error:', err);
-      setError(err?.response?.data?.message || 'Failed to update profile');
+      console.error("Admin update profile error:", err);
+      setError(err?.response?.data?.message || "Failed to update profile");
     } finally {
       setLoading(false);
     }
@@ -164,18 +195,20 @@ export const AdminScreen = ({ navigation }: any) => {
 
   const handleDeleteMedia = async () => {
     if (!mediaIdToDelete.trim()) {
-      setError('Enter a mediaId to delete');
+      setError("Enter a mediaId to delete");
       return;
     }
-    setError('');
-    setActionMessage('');
+    setError("");
+    setActionMessage("");
     try {
       setLoading(true);
-      await api.post('/media/admin/delete', { mediaId: mediaIdToDelete.trim() });
-      setActionMessage('Media deleted');
+      await api.post("/media/admin/delete", {
+        mediaId: mediaIdToDelete.trim(),
+      });
+      setActionMessage("Media deleted");
     } catch (err: any) {
-      console.error('Admin delete media error:', err);
-      setError(err?.response?.data?.message || 'Failed to delete media');
+      console.error("Admin delete media error:", err);
+      setError(err?.response?.data?.message || "Failed to delete media");
     } finally {
       setLoading(false);
     }
@@ -193,7 +226,9 @@ export const AdminScreen = ({ navigation }: any) => {
         </View>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Access Denied</Text>
-          <Text style={styles.infoText}>You do not have permission to view this screen.</Text>
+          <Text style={styles.infoText}>
+            You do not have permission to view this screen.
+          </Text>
         </View>
       </View>
     );
@@ -222,8 +257,16 @@ export const AdminScreen = ({ navigation }: any) => {
             autoCapitalize="none"
             placeholder="user@example.com"
           />
-          <TouchableOpacity style={styles.button} onPress={handleLoadByEmail} disabled={loading}>
-            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Load</Text>}
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleLoadByEmail}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>Load</Text>
+            )}
           </TouchableOpacity>
         </View>
 
@@ -236,21 +279,37 @@ export const AdminScreen = ({ navigation }: any) => {
             autoCapitalize="none"
             placeholder="UUID"
           />
-          <TouchableOpacity style={styles.button} onPress={handleLoadById} disabled={loading}>
-            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Load</Text>}
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleLoadById}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>Load</Text>
+            )}
           </TouchableOpacity>
         </View>
 
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
-        {actionMessage ? <Text style={styles.successText}>{actionMessage}</Text> : null}
+        {actionMessage ? (
+          <Text style={styles.successText}>{actionMessage}</Text>
+        ) : null}
 
         {targetUser && (
           <View style={styles.infoCard}>
             <Text style={styles.infoText}>ID: {targetUser.id}</Text>
             <Text style={styles.infoText}>Email: {targetUser.email}</Text>
-            <Text style={styles.infoText}>Admin: {targetUser.isAdmin ? 'Yes' : 'No'}</Text>
-            <Text style={styles.infoText}>Premium: {targetUser.isPremium ? 'Yes' : 'No'}</Text>
-            <Text style={styles.infoText}>Status: {targetUser.accountStatus}</Text>
+            <Text style={styles.infoText}>
+              Admin: {targetUser.isAdmin ? "Yes" : "No"}
+            </Text>
+            <Text style={styles.infoText}>
+              Premium: {targetUser.isPremium ? "Yes" : "No"}
+            </Text>
+            <Text style={styles.infoText}>
+              Status: {targetUser.accountStatus}
+            </Text>
           </View>
         )}
       </View>
@@ -260,23 +319,43 @@ export const AdminScreen = ({ navigation }: any) => {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Account Controls</Text>
             <View style={styles.rowButtons}>
-              <TouchableOpacity style={styles.smallButton} onPress={handleDeactivate} disabled={loading}>
+              <TouchableOpacity
+                style={styles.smallButton}
+                onPress={handleDeactivate}
+                disabled={loading}
+              >
                 <Text style={styles.smallButtonText}>Deactivate</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.smallButton} onPress={handleReactivate} disabled={loading}>
+              <TouchableOpacity
+                style={styles.smallButton}
+                onPress={handleReactivate}
+                disabled={loading}
+              >
                 <Text style={styles.smallButtonText}>Reactivate</Text>
               </TouchableOpacity>
             </View>
             <View style={styles.rowButtons}>
-              <TouchableOpacity style={styles.smallButton} onPress={handleBan} disabled={loading}>
+              <TouchableOpacity
+                style={styles.smallButton}
+                onPress={handleBan}
+                disabled={loading}
+              >
                 <Text style={styles.smallButtonText}>Ban / Delete</Text>
               </TouchableOpacity>
             </View>
             <View style={styles.rowButtons}>
-              <TouchableOpacity style={styles.smallButton} onPress={handleMakeAdmin} disabled={loading}>
+              <TouchableOpacity
+                style={styles.smallButton}
+                onPress={handleMakeAdmin}
+                disabled={loading}
+              >
                 <Text style={styles.smallButtonText}>Make Admin</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.smallButton} onPress={handleRemoveAdmin} disabled={loading}>
+              <TouchableOpacity
+                style={styles.smallButton}
+                onPress={handleRemoveAdmin}
+                disabled={loading}
+              >
                 <Text style={styles.smallButtonText}>Remove Admin</Text>
               </TouchableOpacity>
             </View>
@@ -292,8 +371,16 @@ export const AdminScreen = ({ navigation }: any) => {
               multiline
               numberOfLines={3}
             />
-            <TouchableOpacity style={styles.button} onPress={handleUpdateProfile} disabled={loading}>
-              {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Update Bio</Text>}
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleUpdateProfile}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>Update Bio</Text>
+              )}
             </TouchableOpacity>
           </View>
 
@@ -306,8 +393,16 @@ export const AdminScreen = ({ navigation }: any) => {
               placeholder="Media UUID"
               autoCapitalize="none"
             />
-            <TouchableOpacity style={styles.button} onPress={handleDeleteMedia} disabled={loading}>
-              {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Delete Media</Text>}
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleDeleteMedia}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>Delete Media</Text>
+              )}
             </TouchableOpacity>
           </View>
         </>
@@ -324,9 +419,9 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: theme.spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
@@ -337,7 +432,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: theme.fontSize.lg,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
   },
   section: {
@@ -346,10 +441,10 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: theme.fontSize.sm,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.textSecondary,
     marginBottom: theme.spacing.md,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
     letterSpacing: 1,
   },
   inputGroup: {
@@ -370,22 +465,22 @@ const styles = StyleSheet.create({
   },
   textArea: {
     height: 80,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
   },
   button: {
     marginTop: theme.spacing.sm,
     backgroundColor: theme.colors.primary,
     borderRadius: theme.borderRadius.md,
     paddingVertical: theme.spacing.sm,
-    alignItems: 'center',
+    alignItems: "center",
   },
   buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: "#fff",
+    fontWeight: "bold",
   },
   rowButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginTop: theme.spacing.sm,
   },
   smallButton: {
@@ -394,13 +489,13 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
     borderRadius: theme.borderRadius.md,
     paddingVertical: theme.spacing.sm,
-    alignItems: 'center',
+    alignItems: "center",
     borderWidth: 1,
     borderColor: theme.colors.border,
   },
   smallButtonText: {
     color: theme.colors.text,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   infoCard: {
     marginTop: theme.spacing.md,
@@ -416,11 +511,11 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   errorText: {
-    color: '#ff4444',
+    color: "#ff4444",
     marginTop: theme.spacing.sm,
   },
   successText: {
-    color: '#4caf50',
+    color: "#4caf50",
     marginTop: theme.spacing.sm,
   },
 });

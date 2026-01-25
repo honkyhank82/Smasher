@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   View,
   Text,
@@ -6,9 +6,9 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
-} from 'react-native';
-import { theme } from '../config/theme';
-import { useAuth } from '../context/AuthContext';
+} from "react-native";
+import { theme } from "../config/theme";
+import { useAuth } from "../context/AuthContext";
 
 export const MyProfileScreen = ({ navigation }: any) => {
   const { user } = useAuth();
@@ -25,30 +25,36 @@ export const MyProfileScreen = ({ navigation }: any) => {
           <Text style={styles.backButton}>← Back</Text>
         </TouchableOpacity>
         <Text style={styles.title}>My Profile</Text>
-        <TouchableOpacity onPress={() => navigateToScreen('EditProfile')}>
+        <TouchableOpacity onPress={() => navigateToScreen("EditProfile")}>
           <Text style={styles.editButton}>Edit</Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.profileSection}>
         <Image
-          source={{ uri: user?.profile?.profilePicture || 'https://via.placeholder.com/150' }}
+          source={{
+            uri:
+              user?.profile?.profilePicture ||
+              "https://via.placeholder.com/150",
+          }}
           style={styles.profileImage}
           resizeMode="cover"
         />
-        <Text style={styles.displayName}>{user?.profile?.displayName || 'No name set'}</Text>
+        <Text style={styles.displayName}>
+          {user?.profile?.displayName || "No name set"}
+        </Text>
         <Text style={styles.email}>{user?.email}</Text>
       </View>
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Bio</Text>
-        <Text style={styles.bio}>{user?.profile?.bio || 'No bio yet'}</Text>
+        <Text style={styles.bio}>{user?.profile?.bio || "No bio yet"}</Text>
       </View>
 
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Gallery</Text>
-          <TouchableOpacity onPress={() => navigateToScreen('Gallery')}>
+          <TouchableOpacity onPress={() => navigateToScreen("Gallery")}>
             <Text style={styles.manageButton}>Manage →</Text>
           </TouchableOpacity>
         </View>
@@ -60,7 +66,7 @@ export const MyProfileScreen = ({ navigation }: any) => {
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Profile Viewers</Text>
-          <TouchableOpacity onPress={() => navigateToScreen('ProfileViewers')}>
+          <TouchableOpacity onPress={() => navigateToScreen("ProfileViewers")}>
             <Text style={styles.manageButton}>View →</Text>
           </TouchableOpacity>
         </View>
@@ -69,9 +75,9 @@ export const MyProfileScreen = ({ navigation }: any) => {
         </Text>
       </View>
 
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.button}
-        onPress={() => navigateToScreen('EditProfile')}
+        onPress={() => navigateToScreen("EditProfile")}
       >
         <Text style={styles.buttonText}>Edit Profile</Text>
       </TouchableOpacity>
@@ -85,9 +91,9 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: theme.spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
@@ -98,7 +104,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: theme.fontSize.lg,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
   },
   editButton: {
@@ -106,7 +112,7 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.md,
   },
   profileSection: {
-    alignItems: 'center',
+    alignItems: "center",
     padding: theme.spacing.xl,
   },
   profileImage: {
@@ -118,7 +124,7 @@ const styles = StyleSheet.create({
   },
   displayName: {
     fontSize: theme.fontSize.xl,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
     marginBottom: theme.spacing.xs,
   },
@@ -132,20 +138,20 @@ const styles = StyleSheet.create({
     borderTopColor: theme.colors.border,
   },
   sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: theme.spacing.sm,
   },
   sectionTitle: {
     fontSize: theme.fontSize.md,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
   },
   manageButton: {
     fontSize: theme.fontSize.sm,
     color: theme.colors.primary,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   bio: {
     fontSize: theme.fontSize.md,
@@ -162,11 +168,11 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.md,
     padding: theme.spacing.md,
     margin: theme.spacing.md,
-    alignItems: 'center',
+    alignItems: "center",
   },
   buttonText: {
     color: theme.colors.text,
     fontSize: theme.fontSize.md,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });

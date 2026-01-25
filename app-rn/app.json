@@ -14,7 +14,7 @@
     },
     "android": {
       "package": "com.smashermain.app",
-      "versionCode": 40308,
+      "versionCode": 4003008,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
@@ -23,9 +23,7 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "extra": {
       "eas": {
         "projectId": "edef8952-a01b-408f-abeb-e3922973df75"

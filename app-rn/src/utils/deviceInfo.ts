@@ -1,6 +1,6 @@
-import { Platform } from 'react-native';
-import * as Application from 'expo-application';
-import * as Device from 'expo-device';
+import { Platform } from "react-native";
+import * as Application from "expo-application";
+import * as Device from "expo-device";
 
 export interface DeviceInfo {
   uniqueId: string;
@@ -17,10 +17,10 @@ export interface DeviceInfo {
 
 export const getDeviceInfo = (): DeviceInfo => {
   return {
-    uniqueId: Application.getAndroidId?.() || 'unknown',
-    deviceName: Device.deviceName || 'unknown',
-    osName: Device.osName || 'unknown',
-    osVersion: Device.osVersion || 'unknown',
+    uniqueId: Application.getAndroidId?.() || "unknown",
+    deviceName: Device.deviceName || "unknown",
+    osName: Device.osName || "unknown",
+    osVersion: Device.osVersion || "unknown",
     deviceType: Device.deviceType || null,
     brand: Device.brand || null,
     modelName: Device.modelName || null,

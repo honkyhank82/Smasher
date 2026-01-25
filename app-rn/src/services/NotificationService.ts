@@ -1,7 +1,7 @@
-import * as Notifications from 'expo-notifications';
-import * as Device from 'expo-device';
-import { Platform } from 'react-native';
-import api from './api';
+import * as Notifications from "expo-notifications";
+import * as Device from "expo-device";
+import { Platform } from "react-native";
+import api from "./api";
 
 // Configure notification behavior
 Notifications.setNotificationHandler({
@@ -19,48 +19,49 @@ class NotificationService {
   async registerForPushNotifications(): Promise<string | null> {
     try {
       if (!Device.isDevice) {
-        console.log('Push notifications only work on physical devices');
+        console.log("Push notifications only work on physical devices");
         return null;
       }
 
       // Check existing permissions
-      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
       let finalStatus = existingStatus;
 
       // Request permissions if not granted
-      if (existingStatus !== 'granted') {
+      if (existingStatus !== "granted") {
         const { status } = await Notifications.requestPermissionsAsync();
         finalStatus = status;
       }
 
-      if (finalStatus !== 'granted') {
-        console.log('Push notification permission not granted');
+      if (finalStatus !== "granted") {
+        console.log("Push notification permission not granted");
         return null;
       }
 
       // Get push token
       const token = await Notifications.getExpoPushTokenAsync({
-        projectId: 'edef8952-a01b-408f-abeb-e3922973df75',
+        projectId: "edef8952-a01b-408f-abeb-e3922973df75",
       });
 
-      console.log('Push token:', token.data);
+      console.log("Push token:", token.data);
 
       // Save token to backend
       await this.savePushToken(token.data);
 
       // Configure Android channel
-      if (Platform.OS === 'android') {
-        await Notifications.setNotificationChannelAsync('default', {
-          name: 'default',
+      if (Platform.OS === "android") {
+        await Notifications.setNotificationChannelAsync("default", {
+          name: "default",
           importance: Notifications.AndroidImportance.MAX,
           vibrationPattern: [0, 250, 250, 250],
-          lightColor: '#FF231F7C',
+          lightColor: "#FF231F7C",
         });
       }
 
       return token.data;
     } catch (error) {
-      console.error('Error registering for push notifications:', error);
+      console.error("Error registering for push notifications:", error);
       return null;
     }
   }
@@ -70,10 +71,10 @@ class NotificationService {
    */
   async savePushToken(token: string): Promise<void> {
     try {
-      await api.put('/users/push-token', { pushToken: token });
-      console.log('Push token saved to backend');
+      await api.put("/users/push-token", { pushToken: token });
+      console.log("Push token saved to backend");
     } catch (error) {
-      console.error('Error saving push token:', error);
+      console.error("Error saving push token:", error);
     }
   }
 
@@ -82,10 +83,10 @@ class NotificationService {
    */
   async removePushToken(): Promise<void> {
     try {
-      await api.delete('/users/push-token');
-      console.log('Push token removed from backend');
+      await api.delete("/users/push-token");
+      console.log("Push token removed from backend");
     } catch (error) {
-      console.error('Error removing push token:', error);
+      console.error("Error removing push token:", error);
     }
   }
 

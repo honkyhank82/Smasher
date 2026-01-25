@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -10,11 +10,11 @@ import {
   Alert,
   RefreshControl,
   Dimensions,
-} from 'react-native';
-import { theme } from '../config/theme';
-import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
-import { USE_MOCK_DATA, MOCK_NEARBY_USERS } from '../utils/mockData';
+} from "react-native";
+import { theme } from "../config/theme";
+import { useAuth } from "../context/AuthContext";
+import api from "../services/api";
+import { USE_MOCK_DATA, MOCK_NEARBY_USERS } from "../utils/mockData";
 
 interface NearbyUser {
   id: string;
@@ -34,7 +34,7 @@ export const HomeScreen = ({ navigation }: any) => {
   const { user, logout } = useAuth();
 
   const PAGE_SIZE = 12;
-  const { height: windowHeight } = Dimensions.get('window');
+  const { height: windowHeight } = Dimensions.get("window");
   const PAGE_HEIGHT = windowHeight - 80; // approximate header + padding offset
 
   useEffect(() => {
@@ -48,9 +48,12 @@ export const HomeScreen = ({ navigation }: any) => {
   const initializeLocation = async () => {
     try {
       // Import services dynamically
-      const PermissionsService = (await import('../services/PermissionsService')).default;
-      const LocationService = (await import('../services/LocationService')).default;
-      
+      const PermissionsService = (
+        await import("../services/PermissionsService")
+      ).default;
+      const LocationService = (await import("../services/LocationService"))
+        .default;
+
       // Check/request location permission
       const hasPermission = await PermissionsService.checkLocationPermission();
       if (!hasPermission) {
@@ -58,15 +61,15 @@ export const HomeScreen = ({ navigation }: any) => {
         if (!granted) {
           setLoading(false);
           Alert.alert(
-            'Location Required',
-            'SMASHER needs location access to show you nearby users.',
+            "Location Required",
+            "SMASHER needs location access to show you nearby users.",
             [
-              { text: 'Cancel', style: 'cancel' },
+              { text: "Cancel", style: "cancel" },
               {
-                text: 'Enable',
+                text: "Enable",
                 onPress: () => PermissionsService.requestLocationPermission(),
               },
-            ]
+            ],
           );
           return;
         }
@@ -83,41 +86,45 @@ export const HomeScreen = ({ navigation }: any) => {
         setLoading(false);
       }
     } catch (error: any) {
-      console.error('❌ Failed to initialize location:', {
+      console.error("❌ Failed to initialize location:", {
         message: error.message,
         stack: error.stack,
       });
       setLoading(false);
       Alert.alert(
-        'Location Error',
+        "Location Error",
         `Failed to initialize location services: ${error.message}\n\nPlease ensure location permissions are granted.`,
         [
-          { text: 'Retry', onPress: () => initializeLocation() },
-          { text: 'Cancel', style: 'cancel' },
-        ]
+          { text: "Retry", onPress: () => initializeLocation() },
+          { text: "Cancel", style: "cancel" },
+        ],
       );
     }
   };
 
   const loadNearbyUsers = async () => {
     try {
-      console.log('🔍 Loading nearby users...');
-      
+      console.log("🔍 Loading nearby users...");
+
       // Use mock data if enabled
       if (USE_MOCK_DATA) {
-        console.log('📦 Using mock data for nearby users');
-        await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
+        console.log("📦 Using mock data for nearby users");
+        await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate network delay
         setUsers(MOCK_NEARBY_USERS);
-        console.log('✅ Mock nearby users loaded:', MOCK_NEARBY_USERS.length, 'users');
+        console.log(
+          "✅ Mock nearby users loaded:",
+          MOCK_NEARBY_USERS.length,
+          "users",
+        );
         return;
       }
-      
-      const response = await api.get('/geo/nearby');
-      console.log('✅ Nearby users loaded:', response.data.length, 'users');
-      
+
+      const response = await api.get("/geo/nearby");
+      console.log("✅ Nearby users loaded:", response.data.length, "users");
+
       setUsers(response.data);
     } catch (error: any) {
-      console.error('❌ Failed to load nearby users:', {
+      console.error("❌ Failed to load nearby users:", {
         message: error.message,
         status: error.response?.status,
         data: error.response?.data,
@@ -126,12 +133,12 @@ export const HomeScreen = ({ navigation }: any) => {
       // Don't show alert on refresh, only on initial load
       if (!refreshing) {
         Alert.alert(
-          'Unable to Load Nearby Users',
-          `Error: ${error.response?.data?.message || error.message || 'Network error'}\n\nPlease check your internet connection and try again.`,
+          "Unable to Load Nearby Users",
+          `Error: ${error.response?.data?.message || error.message || "Network error"}\n\nPlease check your internet connection and try again.`,
           [
-            { text: 'Retry', onPress: () => loadNearbyUsers() },
-            { text: 'Cancel', style: 'cancel' },
-          ]
+            { text: "Retry", onPress: () => loadNearbyUsers() },
+            { text: "Cancel", style: "cancel" },
+          ],
         );
       }
     } finally {
@@ -146,13 +153,13 @@ export const HomeScreen = ({ navigation }: any) => {
   };
 
   const handleUserPress = (userId: string) => {
-    navigateToScreen('Profile', { userId });
+    navigateToScreen("Profile", { userId });
   };
 
   const handleLogout = () => {
-    Alert.alert('Logout', 'Are you sure you want to logout?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Logout', onPress: logout, style: 'destructive' },
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Logout", onPress: logout, style: "destructive" },
     ]);
   };
 
@@ -164,20 +171,26 @@ export const HomeScreen = ({ navigation }: any) => {
     >
       <View style={styles.imageContainer}>
         <Image
-          source={{ uri: item.profilePicture || 'https://via.placeholder.com/150' }}
+          source={{
+            uri: item.profilePicture || "https://via.placeholder.com/150",
+          }}
           style={styles.userImage}
         />
-        {item.isOnline && (
-          <View style={styles.onlineIndicator} />
-        )}
+        {item.isOnline && <View style={styles.onlineIndicator} />}
       </View>
       <View style={styles.userInfo}>
-        <Text style={styles.userName} numberOfLines={1}>{item.displayName}, {item.age}</Text>
+        <Text style={styles.userName} numberOfLines={1}>
+          {item.displayName}, {item.age}
+        </Text>
         {item.isOnline && (
-          <Text style={styles.userStatus} numberOfLines={1}>Online now</Text>
+          <Text style={styles.userStatus} numberOfLines={1}>
+            Online now
+          </Text>
         )}
         {item.distance !== null && (
-          <Text style={styles.userDistance} numberOfLines={1}>{item.distance} mi</Text>
+          <Text style={styles.userDistance} numberOfLines={1}>
+            {item.distance} mi
+          </Text>
         )}
       </View>
     </TouchableOpacity>
@@ -204,7 +217,10 @@ export const HomeScreen = ({ navigation }: any) => {
             {row.map((user) => renderUserCard(user))}
             {row.length < 4 &&
               Array.from({ length: 4 - row.length }).map((_, idx) => (
-                <View key={`spacer-${rowIndex}-${idx}`} style={[styles.userCard, styles.userCardSpacer]} />
+                <View
+                  key={`spacer-${rowIndex}-${idx}`}
+                  style={[styles.userCard, styles.userCardSpacer]}
+                />
               ))}
           </View>
         ))}
@@ -261,20 +277,20 @@ const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
     backgroundColor: theme.colors.background,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     padding: theme.spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
   },
   logo: {
     fontSize: theme.fontSize.xl,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.primary,
     letterSpacing: 2,
   },
@@ -282,11 +298,11 @@ const styles = StyleSheet.create({
     padding: theme.spacing.sm,
   },
   page: {
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
   },
   row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: theme.spacing.sm,
   },
   userCard: {
@@ -297,47 +313,47 @@ const styles = StyleSheet.create({
     margin: theme.spacing.xs,
     borderWidth: 1,
     borderColor: theme.colors.border,
-    maxWidth: '24%',
+    maxWidth: "24%",
   },
   userCardSpacer: {
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     borderWidth: 0,
   },
   imageContainer: {
-    position: 'relative',
-    width: '100%',
-    aspectRatio: 3/4,
+    position: "relative",
+    width: "100%",
+    aspectRatio: 3 / 4,
     marginBottom: theme.spacing.xs,
   },
   userImage: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
     borderRadius: theme.borderRadius.md,
     backgroundColor: theme.colors.border,
   },
   onlineIndicator: {
-    position: 'absolute',
+    position: "absolute",
     top: 8,
     right: 8,
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: '#4CAF50',
+    backgroundColor: "#4CAF50",
     borderWidth: 2,
     borderColor: theme.colors.surface,
   },
   userInfo: {
-    width: '100%',
+    width: "100%",
   },
   userName: {
     fontSize: theme.fontSize.xs,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
     marginBottom: 1,
   },
   userStatus: {
     fontSize: 10,
-    color: '#4CAF50',
+    color: "#4CAF50",
     marginBottom: 1,
   },
   userDistance: {
@@ -345,8 +361,8 @@ const styles = StyleSheet.create({
     color: theme.colors.textSecondary,
   },
   emptyContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: theme.spacing.xl * 2,
   },
   emptyText: {
@@ -357,6 +373,6 @@ const styles = StyleSheet.create({
   emptySubtext: {
     fontSize: theme.fontSize.sm,
     color: theme.colors.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
   },
 });

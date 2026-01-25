@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,61 +7,67 @@ import {
   TextInput,
   Alert,
   ScrollView,
-} from 'react-native';
-import { theme } from '../config/theme';
+} from "react-native";
+import { theme } from "../config/theme";
 
 interface AgeGateScreenProps {
   onAgeVerified: (birthdate: string) => void;
 }
 
 export const AgeGateScreen = ({ onAgeVerified }: AgeGateScreenProps) => {
-  const [month, setMonth] = useState('');
-  const [day, setDay] = useState('');
-  const [year, setYear] = useState('');
+  const [month, setMonth] = useState("");
+  const [day, setDay] = useState("");
+  const [year, setYear] = useState("");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const calculateAge = (birthdate: Date): number => {
     const today = new Date();
     let age = today.getFullYear() - birthdate.getFullYear();
     const monthDiff = today.getMonth() - birthdate.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthdate.getDate())) {
+
+
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthdate.getDate())
+    ) {
       age--;
     }
-    
+
     return age;
   };
 
   const handleContinue = () => {
     if (!month || !day || !year) {
-      Alert.alert('Error', 'Please enter your complete birthdate');
+      Alert.alert("Error", "Please enter your complete birthdate");
       return;
     }
 
     if (!agreedToTerms) {
-      Alert.alert('Error', 'You must agree to the Terms and Privacy Policy');
+      Alert.alert("Error", "You must agree to the Terms and Privacy Policy");
       return;
     }
 
-    const birthdate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-    
+    const birthdate = new Date(
+      parseInt(year),
+      parseInt(month) - 1,
+      parseInt(day),
+
     if (isNaN(birthdate.getTime())) {
-      Alert.alert('Error', 'Please enter a valid date');
+      Alert.alert("Error", "Please enter a valid date");
       return;
     }
 
     const age = calculateAge(birthdate);
-    
+
     if (age < 18) {
       Alert.alert(
-        'Age Requirement',
-        'You must be 18 or older to use this app.',
-        [{ text: 'OK' }]
+        "Age Requirement",
+        "You must be 18 or older to use this app.",
+        [{ text: "OK" }],
       );
       return;
     }
 
-    const birthdateString = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    const birthdateString = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
     onAgeVerified(birthdateString);
   };
 
@@ -74,7 +80,7 @@ export const AgeGateScreen = ({ onAgeVerified }: AgeGateScreenProps) => {
 
       <View style={styles.form}>
         <Text style={styles.label}>Enter Your Birthdate</Text>
-        
+
         <View style={styles.dateInputs}>
           <TextInput
             style={[styles.input, styles.dateInput]}
@@ -111,12 +117,13 @@ export const AgeGateScreen = ({ onAgeVerified }: AgeGateScreenProps) => {
           style={styles.checkboxContainer}
           onPress={() => setAgreedToTerms(!agreedToTerms)}
         >
-          <View style={[styles.checkbox, agreedToTerms && styles.checkboxChecked]}>
+          <View
+            style={[styles.checkbox, agreedToTerms && styles.checkboxChecked]}
+          >
             {agreedToTerms && <Text style={styles.checkmark}>✓</Text>}
           </View>
           <Text style={styles.checkboxLabel}>
-            I agree to the{' '}
-            <Text style={styles.link}>Terms of Service</Text> and{' '}
+            I agree to the <Text style={styles.link}>Terms of Service</Text> and{" "}
             <Text style={styles.link}>Privacy Policy</Text>
           </Text>
         </TouchableOpacity>
@@ -127,8 +134,8 @@ export const AgeGateScreen = ({ onAgeVerified }: AgeGateScreenProps) => {
       </View>
 
       <Text style={styles.disclaimer}>
-        By continuing, you confirm that you are 18 years or older and agree to our
-        community guidelines.
+        By continuing, you confirm that you are 18 years or older and agree to
+        our community guidelines.
       </Text>
     </ScrollView>
   );
@@ -141,16 +148,16 @@ const styles = StyleSheet.create({
   },
   content: {
     flexGrow: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     padding: theme.spacing.lg,
   },
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: theme.spacing.xl,
   },
   logo: {
     fontSize: theme.fontSize.xxl,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.primary,
     letterSpacing: 2,
   },
@@ -166,11 +173,11 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.md,
     color: theme.colors.text,
     marginBottom: theme.spacing.md,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   dateInputs: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: theme.spacing.lg,
   },
   input: {
@@ -184,11 +191,11 @@ const styles = StyleSheet.create({
   },
   dateInput: {
     flex: 1,
-    textAlign: 'center',
+    textAlign: "center",
   },
   yearInput: {
     flex: 1.5,
-    textAlign: 'center',
+    textAlign: "center",
   },
   dateSeparator: {
     color: theme.colors.textSecondary,
@@ -196,8 +203,8 @@ const styles = StyleSheet.create({
     marginHorizontal: theme.spacing.sm,
   },
   checkboxContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: theme.spacing.lg,
   },
   checkbox: {
@@ -207,8 +214,8 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: theme.colors.border,
     marginRight: theme.spacing.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   checkboxChecked: {
     backgroundColor: theme.colors.primary,
@@ -217,7 +224,7 @@ const styles = StyleSheet.create({
   checkmark: {
     color: theme.colors.text,
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   checkboxLabel: {
     flex: 1,
@@ -226,23 +233,23 @@ const styles = StyleSheet.create({
   },
   link: {
     color: theme.colors.primary,
-    textDecorationLine: 'underline',
+    textDecorationLine: "underline",
   },
   button: {
     backgroundColor: theme.colors.primary,
     borderRadius: theme.borderRadius.md,
     padding: theme.spacing.md,
-    alignItems: 'center',
+    alignItems: "center",
   },
   buttonText: {
     color: theme.colors.text,
     fontSize: theme.fontSize.md,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   disclaimer: {
     color: theme.colors.textSecondary,
     fontSize: theme.fontSize.xs,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 18,
   },
 });

@@ -1,20 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  Image,
   ActivityIndicator,
   RefreshControl,
   Alert,
-} from 'react-native';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { theme } from '../config/theme';
-import { API_BASE_URL } from '../config/api';
-import { USE_MOCK_DATA, MOCK_BUDDIES } from '../utils/mockData';
+} from "react-native";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { theme } from "../config/theme";
+import { API_BASE_URL } from "../config/api";
+import { USE_MOCK_DATA, MOCK_BUDDIES } from "../utils/mockData";
 
 interface Buddy {
   id: string;
@@ -40,25 +39,25 @@ export const BuddiesScreen = ({ navigation }: any) => {
 
   const loadBuddies = async () => {
     try {
-      console.log('🔍 Loading buddies...');
-      
+      console.log("🔍 Loading buddies...");
+
       // Use mock data if enabled
       if (USE_MOCK_DATA) {
-        console.log('📦 Using mock data for buddies');
-        await new Promise(resolve => setTimeout(resolve, 500));
+        console.log("📦 Using mock data for buddies");
+        await new Promise((resolve) => setTimeout(resolve, 500));
         setBuddies(MOCK_BUDDIES);
-        console.log('✅ Mock buddies loaded:', MOCK_BUDDIES.length, 'buddies');
+        console.log("✅ Mock buddies loaded:", MOCK_BUDDIES.length, "buddies");
         return;
       }
-      
-      const token = await AsyncStorage.getItem('authToken');
+
+      const token = await AsyncStorage.getItem("authToken");
       const response = await axios.get(`${API_BASE_URL}/buddies`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log('✅ Buddies loaded:', response.data.length, 'buddies');
+      console.log("✅ Buddies loaded:", response.data.length, "buddies");
       setBuddies(response.data);
     } catch (error: any) {
-      console.error('❌ Failed to load buddies:', {
+      console.error("❌ Failed to load buddies:", {
         message: error.message,
         status: error.response?.status,
         data: error.response?.data,
@@ -66,9 +65,9 @@ export const BuddiesScreen = ({ navigation }: any) => {
       // Don't show alert on refresh, only on initial load
       if (!refreshing) {
         Alert.alert(
-          'Unable to Load Favorites',
-          `Error: ${error.response?.data?.message || error.message || 'Network error'}`,
-          [{ text: 'OK' }]
+          "Unable to Load Favorites",
+          `Error: ${error.response?.data?.message || error.message || "Network error"}`,
+          [{ text: "OK" }],
         );
       }
     } finally {
@@ -83,7 +82,7 @@ export const BuddiesScreen = ({ navigation }: any) => {
   };
 
   const handleBuddyPress = (buddy: Buddy) => {
-    navigateToScreen('Profile', { userId: buddy.id });
+    navigateToScreen("Profile", { userId: buddy.id });
   };
 
   const renderBuddy = ({ item }: { item: Buddy }) => (
@@ -137,7 +136,7 @@ export const BuddiesScreen = ({ navigation }: any) => {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Favorites</Text>
         <Text style={styles.headerSubtitle}>
-          {buddies.length} {buddies.length === 1 ? 'favorite' : 'favorites'}
+          {buddies.length} {buddies.length === 1 ? "favorite" : "favorites"}
         </Text>
       </View>
 
@@ -168,8 +167,8 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: theme.colors.background,
   },
   header: {
@@ -180,7 +179,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: theme.fontSize.xxl,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
     marginBottom: theme.spacing.xs,
   },
@@ -195,13 +194,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   buddyCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: theme.colors.surface,
     padding: theme.spacing.md,
     borderRadius: theme.borderRadius.lg,
     marginBottom: theme.spacing.md,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -215,20 +214,20 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 30,
     backgroundColor: theme.colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   avatarText: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontWeight: "bold",
+    color: "#fff",
   },
   buddyInfo: {
     flex: 1,
   },
   displayName: {
     fontSize: theme.fontSize.lg,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
     marginBottom: theme.spacing.xs,
   },
@@ -246,8 +245,8 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: theme.spacing.xl,
   },
   emptyIcon: {
@@ -256,14 +255,14 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: theme.fontSize.xl,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
     marginBottom: theme.spacing.sm,
   },
   emptyText: {
     fontSize: theme.fontSize.md,
     color: theme.colors.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 22,
   },
 });

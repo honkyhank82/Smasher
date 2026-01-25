@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -8,12 +8,12 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Platform,
-} from 'react-native';
-import { io, Socket } from 'socket.io-client';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { theme } from '../config/theme';
-import { API_BASE_URL } from '../config/api';
-import { useAuth } from '../context/AuthContext';
+} from "react-native";
+import { io, Socket } from "socket.io-client";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { theme } from "../config/theme";
+import { API_BASE_URL } from "../config/api";
+import { useAuth } from "../context/AuthContext";
 
 interface ChatScreenProps {
   route: any;
@@ -36,7 +36,7 @@ export const ChatScreen = ({ route, navigation }: ChatScreenProps) => {
   const { userId, displayName } = route.params;
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
-  const [inputText, setInputText] = useState('');
+  const [inputText, setInputText] = useState("");
   const [socket, setSocket] = useState<Socket | null>(null);
   const flatListRef = useRef<FlatList>(null);
   const isPremium = (user?.isAdmin || user?.isPremium) ?? false;
@@ -49,46 +49,55 @@ export const ChatScreen = ({ route, navigation }: ChatScreenProps) => {
   }, []);
 
   const initializeSocket = async () => {
-    const token = await AsyncStorage.getItem('authToken');
-    
+    const token = await AsyncStorage.getItem("authToken");
+
     const newSocket = io(API_BASE_URL, {
       auth: { token },
-      transports: ['websocket'],
+      transports: ["websocket"],
     });
 
-    newSocket.on('connect', () => {
-      console.log('Socket connected');
+    newSocket.on("connect", () => {
+      console.log("Socket connected");
       // Join chat room
-      newSocket.emit('joinChat', { userId });
+      newSocket.emit("joinChat", { userId });
     });
 
-    newSocket.on('message', (message: any) => {
+    newSocket.on("message", (message: any) => {
       setMessages((prev) => [...prev, { ...message, isMine: false }]);
       scrollToBottom();
     });
 
-    newSocket.on('messageHistory', (history: any[]) => {
-      setMessages(history.map(msg => ({ ...msg, isMine: msg.senderId !== userId })));
-    });
-
-    newSocket.on('messagesRead', (data: { messageIds: string[]; readAt: string }) => {
-      setMessages((prev) =>
-        prev.map((msg) =>
-          data.messageIds.includes(msg.id)
-            ? { ...msg, isRead: true, readAt: data.readAt }
-            : msg
-        )
+    newSocket.on("messageHistory", (history: any[]) => {
+      setMessages(
+        history.map((msg) => ({ ...msg, isMine: msg.senderId !== userId })),
       );
     });
 
-    newSocket.on('messageSent', (message: any) => {
+    newSocket.on(
+      "messagesRead",
+      (data: { messageIds: string[]; readAt: string }) => {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            data.messageIds.includes(msg.id)
+              ? { ...msg, isRead: true, readAt: data.readAt }
+              : msg,
+          ),
+        );
+      },
+    );
+
+    newSocket.on("messageSent", (message: any) => {
       // Update the temporary message with the server response
       setMessages((prev) =>
         prev.map((msg) =>
-          msg.senderId === 'me' && msg.content === message.content
-            ? { ...message, isMine: true, senderIsPremium: message.senderIsPremium }
-            : msg
-        )
+          msg.senderId === "me" && msg.content === message.content
+            ? {
+                ...message,
+                isMine: true,
+                senderIsPremium: message.senderIsPremium,
+              }
+            : msg,
+        ),
       );
     });
 
@@ -102,21 +111,23 @@ export const ChatScreen = ({ route, navigation }: ChatScreenProps) => {
   };
 
   const handleSend = () => {
-    if (!inputText.trim() || !socket) return;
+    if (!inputText.trim() || !socket) {
+      return;
+    }
 
     const message = {
       receiverId: userId,
       content: inputText.trim(),
     };
 
-    socket.emit('sendMessage', message);
-    
+    socket.emit("sendMessage", message);
+
     // Add to local messages immediately
     setMessages((prev) => [
       ...prev,
       {
         id: Date.now().toString(),
-        senderId: 'me',
+        senderId: "me",
         receiverId: userId,
         content: inputText.trim(),
         createdAt: new Date().toISOString(),
@@ -126,7 +137,7 @@ export const ChatScreen = ({ route, navigation }: ChatScreenProps) => {
       },
     ]);
 
-    setInputText('');
+    setInputText("");
     scrollToBottom();
   };
 
@@ -141,14 +152,12 @@ export const ChatScreen = ({ route, navigation }: ChatScreenProps) => {
       <View style={styles.messageFooter}>
         <Text style={styles.messageTime}>
           {new Date(item.createdAt).toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
+            hour: "2-digit",
+            minute: "2-digit",
           })}
         </Text>
         {item.isMine && item.senderIsPremium && (
-          <Text style={styles.readReceipt}>
-            {item.isRead ? '✓✓' : '✓'}
-          </Text>
+          <Text style={styles.readReceipt}>{item.isRead ? "✓✓" : "✓"}</Text>
         )}
       </View>
     </View>
@@ -157,7 +166,7 @@ export const ChatScreen = ({ route, navigation }: ChatScreenProps) => {
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={90}
     >
       <View style={styles.header}>
@@ -188,7 +197,10 @@ export const ChatScreen = ({ route, navigation }: ChatScreenProps) => {
           maxLength={500}
         />
         <TouchableOpacity
-          style={[styles.sendButton, !inputText.trim() && styles.sendButtonDisabled]}
+          style={[
+            styles.sendButton,
+            !inputText.trim() && styles.sendButtonDisabled,
+          ]}
           onPress={handleSend}
           disabled={!inputText.trim()}
         >
@@ -205,9 +217,9 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     padding: theme.spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
@@ -220,24 +232,24 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: theme.fontSize.lg,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
   },
   messagesList: {
     padding: theme.spacing.md,
   },
   messageContainer: {
-    maxWidth: '75%',
+    maxWidth: "75%",
     padding: theme.spacing.md,
     borderRadius: theme.borderRadius.md,
     marginBottom: theme.spacing.sm,
   },
   myMessage: {
-    alignSelf: 'flex-end',
+    alignSelf: "flex-end",
     backgroundColor: theme.colors.primary,
   },
   theirMessage: {
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
     backgroundColor: theme.colors.surface,
   },
   messageText: {
@@ -246,8 +258,8 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.xs,
   },
   messageFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 4,
   },
   messageTime: {
@@ -260,7 +272,7 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   inputContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     padding: theme.spacing.md,
     borderTopWidth: 1,
     borderTopColor: theme.colors.border,
@@ -281,8 +293,8 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
     borderRadius: theme.borderRadius.md,
     paddingHorizontal: theme.spacing.lg,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   sendButtonDisabled: {
     opacity: 0.5,
@@ -290,6 +302,6 @@ const styles = StyleSheet.create({
   sendButtonText: {
     color: theme.colors.text,
     fontSize: theme.fontSize.md,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });

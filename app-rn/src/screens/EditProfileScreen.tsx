@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -9,16 +9,18 @@ import {
   Image,
   Alert,
   ActivityIndicator,
-} from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import { theme } from '../config/theme';
-import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
+} from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import { theme } from "../config/theme";
+import { useAuth } from "../context/AuthContext";
+import api from "../services/api";
 
 export const EditProfileScreen = ({ navigation }: any) => {
   const { user, refreshUser } = useAuth();
-  const [displayName, setDisplayName] = useState(user?.profile?.displayName || '');
-  const [bio, setBio] = useState(user?.profile?.bio || '');
+  const [displayName, setDisplayName] = useState(
+    user?.profile?.displayName || "",
+  );
+  const [bio, setBio] = useState(user?.profile?.bio || "");
   const [showAge, setShowAge] = useState(
     user?.profile?.showAge !== undefined ? user.profile.showAge : true,
   );
@@ -27,42 +29,47 @@ export const EditProfileScreen = ({ navigation }: any) => {
     user?.profile?.heightIn != null
       ? user.profile.heightIn
       : user?.profile?.heightCm != null
-      ? Math.round(user.profile.heightCm / 2.54)
-      : null;
+        ? Math.round(user.profile.heightCm / 2.54)
+        : null;
 
   const [heightFeet, setHeightFeet] = useState(
-    initialTotalInches != null ? String(Math.floor(initialTotalInches / 12)) : '',
+    initialTotalInches != null
+      ? String(Math.floor(initialTotalInches / 12))
+      : "",
   );
   const [heightInches, setHeightInches] = useState(
-    initialTotalInches != null ? String(initialTotalInches % 12) : '',
+    initialTotalInches != null ? String(initialTotalInches % 12) : "",
   );
   const [weightLbs, setWeightLbs] = useState(
     user?.profile?.weightLbs != null
       ? String(user.profile.weightLbs)
       : user?.profile?.weightKg != null
-      ? String(Math.round(user.profile.weightKg * 2.20462))
-      : '',
+        ? String(Math.round(user.profile.weightKg * 2.20462))
+        : "",
   );
-  const [ethnicity, setEthnicity] = useState(user?.profile?.ethnicity || '');
-  const [bodyType, setBodyType] = useState(user?.profile?.bodyType || '');
+  const [ethnicity, setEthnicity] = useState(user?.profile?.ethnicity || "");
+  const [bodyType, setBodyType] = useState(user?.profile?.bodyType || "");
   const [sexualPosition, setSexualPosition] = useState(
-    user?.profile?.sexualPosition || '',
+    user?.profile?.sexualPosition || "",
   );
   const [relationshipStatus, setRelationshipStatus] = useState(
-    user?.profile?.relationshipStatus || '',
+    user?.profile?.relationshipStatus || "",
   );
-  const [lookingFor, setLookingFor] = useState(user?.profile?.lookingFor || '');
+  const [lookingFor, setLookingFor] = useState(user?.profile?.lookingFor || "");
   const [profilePicture, setProfilePicture] = useState<string | null>(
-    user?.profile?.profilePicture || null
+    user?.profile?.profilePicture || null,
   );
   const [newProfilePicture, setNewProfilePicture] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
   const handlePickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    
-    if (status !== 'granted') {
-      Alert.alert('Permission Required', 'Please grant photo library access to upload images.');
+
+    if (status !== "granted") {
+      Alert.alert(
+        "Permission Required",
+        "Please grant photo library access to upload images.",
+      );
       return;
     }
 
@@ -84,7 +91,7 @@ export const EditProfileScreen = ({ navigation }: any) => {
 
   const handleSave = async () => {
     if (!displayName.trim()) {
-      Alert.alert('Error', 'Please enter a display name');
+      Alert.alert("Error", "Please enter a display name");
       return;
     }
 
@@ -99,7 +106,7 @@ export const EditProfileScreen = ({ navigation }: any) => {
       const weightLbsNum = weightLbs ? parseInt(weightLbs, 10) : null;
 
       // Update profile text fields
-      await api.patch('/profiles/me', {
+      await api.patch("/profiles/me", {
         displayName: displayName.trim(),
         bio: bio.trim(),
         showAge,
@@ -113,13 +120,18 @@ export const EditProfileScreen = ({ navigation }: any) => {
       });
 
       // Handle profile picture upload if changed
-      if (newProfilePicture && newProfilePicture.uri && newProfilePicture.fileName && newProfilePicture.type) {
+      if (
+        newProfilePicture &&
+        newProfilePicture.uri &&
+        newProfilePicture.fileName &&
+        newProfilePicture.type
+      ) {
         try {
           // Step 1: Get signed upload URL
-          const signedUrlResponse = await api.post('/media/signed-upload', {
+          const signedUrlResponse = await api.post("/media/signed-upload", {
             fileName: newProfilePicture.fileName,
             fileType: newProfilePicture.type,
-            mediaType: 'photo',
+            mediaType: "photo",
           });
 
           const { uploadUrl, fileKey } = signedUrlResponse.data;
@@ -127,63 +139,67 @@ export const EditProfileScreen = ({ navigation }: any) => {
           // Step 2: Upload file to R2 with timeout
           const fileData = await fetch(newProfilePicture.uri);
           if (!fileData.ok) {
-            throw new Error('Failed to read file from device');
+            throw new Error("Failed to read file from device");
           }
           const blob = await fileData.blob();
-          
+
           const uploadResponse = await Promise.race([
             fetch(uploadUrl, {
-              method: 'PUT',
+              method: "PUT",
               body: blob,
               headers: {
-                'Content-Type': newProfilePicture.type,
+                "Content-Type": newProfilePicture.type,
               },
             }),
             new Promise<Response>((_, reject) =>
-              setTimeout(() => reject(new Error('Upload timeout')), 60000)
+              setTimeout(() => reject(new Error("Upload timeout")), 60000),
             ),
           ]);
 
           if (!uploadResponse.ok) {
-            throw new Error(`Upload failed with status ${uploadResponse.status}`);
+            throw new Error(
+              `Upload failed with status ${uploadResponse.status}`,
+            );
           }
 
           // Step 3: Confirm upload and create media record
-          const confirmResponse = await api.post('/media/confirm-upload', {
+          const confirmResponse = await api.post("/media/confirm-upload", {
             fileKey,
             fileType: newProfilePicture.type,
-            mediaType: 'photo',
+            mediaType: "photo",
           });
 
           // Step 4: Set as profile picture
-          await api.post('/media/set-profile-picture', {
+          await api.post("/media/set-profile-picture", {
             mediaId: confirmResponse.data.id,
           });
         } catch (uploadError: any) {
-          console.error('Profile picture upload error:', uploadError);
-          const errorMsg = uploadError.message?.includes('Network request failed') 
-            ? 'Network connection failed. Please check your internet connection.'
-            : uploadError.message?.includes('timeout')
-            ? 'Upload timed out. Please try again with a smaller image.'
-            : 'Profile picture upload failed';
-          Alert.alert('Warning', `Profile updated but ${errorMsg}`);
+          console.error("Profile picture upload error:", uploadError);
+          const errorMsg = uploadError.message?.includes(
+            "Network request failed",
+          )
+            ? "Network connection failed. Please check your internet connection."
+            : uploadError.message?.includes("timeout")
+              ? "Upload timed out. Please try again with a smaller image."
+              : "Profile picture upload failed";
+          Alert.alert("Warning", `Profile updated but ${errorMsg}`);
         }
       }
 
       await refreshUser();
-      Alert.alert('Success', 'Profile updated successfully!', [
-        { text: 'OK', onPress: () => navigation.goBack() },
+      Alert.alert("Success", "Profile updated successfully!", [
+        { text: "OK", onPress: () => navigation.goBack() },
       ]);
     } catch (error: any) {
-      let errorMessage = 'Failed to update profile';
+      let errorMessage = "Failed to update profile";
       if (error.response?.data?.message) {
         if (Array.isArray(error.response.data.message)) {
-          errorMessage = error.response.data.message.join('\n');
+          errorMessage = error.response.data.message.join("\n");
         } else {
           errorMessage = error.response.data.message;
         }
       }
-      Alert.alert('Error', errorMessage);
+      Alert.alert("Error", errorMessage);
     } finally {
       setLoading(false);
     }
@@ -197,7 +213,9 @@ export const EditProfileScreen = ({ navigation }: any) => {
         </TouchableOpacity>
         <Text style={styles.title}>Edit Profile</Text>
         <TouchableOpacity onPress={handleSave} disabled={loading}>
-          <Text style={[styles.saveButton, loading && styles.saveButtonDisabled]}>
+          <Text
+            style={[styles.saveButton, loading && styles.saveButtonDisabled]}
+          >
             Save
           </Text>
         </TouchableOpacity>
@@ -205,7 +223,7 @@ export const EditProfileScreen = ({ navigation }: any) => {
 
       <TouchableOpacity style={styles.imageContainer} onPress={handlePickImage}>
         <Image
-          source={{ uri: profilePicture || 'https://via.placeholder.com/150' }}
+          source={{ uri: profilePicture || "https://via.placeholder.com/150" }}
           style={styles.profileImage}
           resizeMode="cover"
         />
@@ -247,7 +265,7 @@ export const EditProfileScreen = ({ navigation }: any) => {
             style={styles.toggleButton}
             onPress={() => setShowAge(!showAge)}
           >
-            <Text style={styles.toggleText}>{showAge ? 'On' : 'Off'}</Text>
+            <Text style={styles.toggleText}>{showAge ? "On" : "Off"}</Text>
           </TouchableOpacity>
         </View>
 
@@ -352,9 +370,9 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: theme.spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
@@ -365,21 +383,21 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: theme.fontSize.lg,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
   },
   saveButton: {
     color: theme.colors.primary,
     fontSize: theme.fontSize.md,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   saveButtonDisabled: {
     opacity: 0.5,
   },
   imageContainer: {
-    alignSelf: 'center',
+    alignSelf: "center",
     marginVertical: theme.spacing.xl,
-    position: 'relative',
+    position: "relative",
   },
   profileImage: {
     width: 120,
@@ -388,20 +406,20 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
   },
   imageOverlay: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
     padding: theme.spacing.xs,
     borderBottomLeftRadius: 60,
     borderBottomRightRadius: 60,
-    alignItems: 'center',
+    alignItems: "center",
   },
   imageOverlayText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: theme.fontSize.xs,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   form: {
     padding: theme.spacing.md,
@@ -410,7 +428,7 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.md,
     color: theme.colors.text,
     marginBottom: theme.spacing.sm,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   input: {
     backgroundColor: theme.colors.surface,
@@ -424,12 +442,12 @@ const styles = StyleSheet.create({
   },
   bioInput: {
     height: 100,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
   },
   charCount: {
     fontSize: theme.fontSize.xs,
     color: theme.colors.textSecondary,
-    textAlign: 'right',
+    textAlign: "right",
     marginBottom: theme.spacing.md,
   },
   sectionHeader: {
@@ -437,11 +455,11 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
     marginTop: theme.spacing.lg,
     marginBottom: theme.spacing.sm,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   heightRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: theme.spacing.md,
   },
   heightInput: {
@@ -454,9 +472,9 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.md,
   },
   row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: theme.spacing.md,
   },
   toggleButton: {
@@ -470,16 +488,16 @@ const styles = StyleSheet.create({
   toggleText: {
     color: theme.colors.text,
     fontSize: theme.fontSize.sm,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   loadingOverlay: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

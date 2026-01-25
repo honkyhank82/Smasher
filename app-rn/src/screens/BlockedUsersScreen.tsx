@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,10 +9,10 @@ import {
   ActivityIndicator,
   Image,
   RefreshControl,
-} from 'react-native';
-import { theme } from '../config/theme';
-import api from '../services/api';
-import { USE_MOCK_DATA, MOCK_BLOCKED_USERS } from '../utils/mockData';
+} from "react-native";
+import { theme } from "../config/theme";
+import api from "../services/api";
+import { USE_MOCK_DATA, MOCK_BLOCKED_USERS } from "../utils/mockData";
 
 interface BlockedUser {
   id: string;
@@ -33,22 +33,26 @@ export const BlockedUsersScreen = ({ navigation }: any) => {
 
   const loadBlockedUsers = async () => {
     try {
-      console.log('🔍 Loading blocked users...');
-      
+      console.log("🔍 Loading blocked users...");
+
       // Use mock data if enabled
       if (USE_MOCK_DATA) {
-        console.log('📦 Using mock data for blocked users');
-        await new Promise(resolve => setTimeout(resolve, 500));
+        console.log("📦 Using mock data for blocked users");
+        await new Promise((resolve) => setTimeout(resolve, 500));
         setBlockedUsers(MOCK_BLOCKED_USERS);
-        console.log('✅ Mock blocked users loaded:', MOCK_BLOCKED_USERS.length, 'users');
+        console.log(
+          "✅ Mock blocked users loaded:",
+          MOCK_BLOCKED_USERS.length,
+          "users",
+        );
         return;
       }
-      
-      const response = await api.get('/users/blocked');
-      console.log('✅ Blocked users loaded:', response.data.length, 'users');
+
+      const response = await api.get("/users/blocked");
+      console.log("✅ Blocked users loaded:", response.data.length, "users");
       setBlockedUsers(response.data);
     } catch (error: any) {
-      console.error('❌ Failed to load blocked users:', {
+      console.error("❌ Failed to load blocked users:", {
         message: error.message,
         status: error.response?.status,
         data: error.response?.data,
@@ -56,9 +60,9 @@ export const BlockedUsersScreen = ({ navigation }: any) => {
       // Don't show alert on refresh, only on initial load
       if (!refreshing) {
         Alert.alert(
-          'Error Loading Blocked Users',
+          "Error Loading Blocked Users",
           `Failed to load blocked users: ${error.response?.data?.message || error.message}`,
-          [{ text: 'OK' }]
+          [{ text: "OK" }],
         );
       }
     } finally {
@@ -74,30 +78,32 @@ export const BlockedUsersScreen = ({ navigation }: any) => {
 
   const handleUnblock = (userId: string, displayName: string) => {
     Alert.alert(
-      'Unblock User',
+      "Unblock User",
       `Are you sure you want to unblock ${displayName}?`,
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: "Cancel", style: "cancel" },
         {
-          text: 'Unblock',
+          text: "Unblock",
           onPress: async () => {
             setUnblocking(userId);
             try {
               await api.post(`/users/unblock/${userId}`);
-              setBlockedUsers(blockedUsers.filter((user) => user.id !== userId));
-              Alert.alert('Success', `${displayName} has been unblocked`);
+              setBlockedUsers(
+                blockedUsers.filter((user) => user.id !== userId),
+              );
+              Alert.alert("Success", `${displayName} has been unblocked`);
             } catch (error: any) {
-              console.error('Failed to unblock user:', error);
+              console.error("Failed to unblock user:", error);
               Alert.alert(
-                'Error',
-                error.response?.data?.message || 'Failed to unblock user'
+                "Error",
+                error.response?.data?.message || "Failed to unblock user",
               );
             } finally {
               setUnblocking(null);
             }
           },
         },
-      ]
+      ],
     );
   };
 
@@ -105,7 +111,7 @@ export const BlockedUsersScreen = ({ navigation }: any) => {
     <View style={styles.userCard}>
       <Image
         source={{
-          uri: item.profilePicture || 'https://via.placeholder.com/50',
+          uri: item.profilePicture || "https://via.placeholder.com/50",
         }}
         style={styles.avatar}
         resizeMode="cover"
@@ -153,8 +159,8 @@ export const BlockedUsersScreen = ({ navigation }: any) => {
           <Text style={styles.emptyIcon}>🚫</Text>
           <Text style={styles.emptyTitle}>No Blocked Users</Text>
           <Text style={styles.emptyDescription}>
-            You haven't blocked anyone yet. Blocked users won't be able to see your
-            profile or send you messages.
+            You haven't blocked anyone yet. Blocked users won't be able to see
+            your profile or send you messages.
           </Text>
         </View>
       ) : (
@@ -184,13 +190,13 @@ const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
     backgroundColor: theme.colors.background,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: theme.spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
@@ -201,15 +207,15 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: theme.fontSize.lg,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
   },
   listContent: {
     padding: theme.spacing.md,
   },
   userCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: theme.colors.surface,
     padding: theme.spacing.md,
     borderRadius: theme.borderRadius.md,
@@ -229,7 +235,7 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontSize: theme.fontSize.md,
-    fontWeight: '600',
+    fontWeight: "600",
     color: theme.colors.text,
     marginBottom: theme.spacing.xs,
   },
@@ -244,17 +250,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.colors.primary,
     minWidth: 80,
-    alignItems: 'center',
+    alignItems: "center",
   },
   unblockButtonText: {
     color: theme.colors.primary,
     fontSize: theme.fontSize.sm,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   emptyContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: theme.spacing.xl,
   },
   emptyIcon: {
@@ -263,14 +269,14 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: theme.fontSize.lg,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
     marginBottom: theme.spacing.sm,
   },
   emptyDescription: {
     fontSize: theme.fontSize.sm,
     color: theme.colors.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 20,
   },
 });

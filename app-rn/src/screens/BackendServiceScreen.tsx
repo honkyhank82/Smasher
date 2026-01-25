@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,18 +7,20 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
-} from 'react-native';
-import { theme } from '../config/theme';
-import backendService from '../services/backendService';
-import { BACKEND_SERVICES } from '../config/api';
+} from "react-native";
+import { theme } from "../config/theme";
+import backendService from "../services/backendService";
+import { BACKEND_SERVICES } from "../config/api";
 
 interface BackendServiceScreenProps {
   navigation: any;
 }
 
-export const BackendServiceScreen = ({ navigation }: BackendServiceScreenProps) => {
+export const BackendServiceScreen = ({
+  navigation,
+}: BackendServiceScreenProps) => {
   const [services, setServices] = useState<any[]>([]);
-  const [selectedService, setSelectedService] = useState<string>('');
+  const [selectedService, setSelectedService] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [checking, setChecking] = useState<string | null>(null);
 
@@ -30,64 +32,67 @@ export const BackendServiceScreen = ({ navigation }: BackendServiceScreenProps) 
     try {
       const currentService = await backendService.getSelectedService();
       setSelectedService(currentService);
-      
+
       const availableServices = backendService.getAvailableServices();
       setServices(availableServices);
     } catch (error) {
-      console.error('Error loading services:', error);
-      Alert.alert('Error', 'Failed to load backend services');
+      console.error("Error loading services:", error);
+      Alert.alert("Error", "Failed to load backend services");
     } finally {
       setLoading(false);
     }
   };
 
   const handleServiceSelect = async (serviceKey: string) => {
-    if (serviceKey === selectedService) return;
-    
+    if (serviceKey === selectedService) {
+      return;
+    }
+
     setChecking(serviceKey);
     try {
       // Check if the service is available
-      const isAvailable = await backendService.checkServiceAvailability(serviceKey);
-      
+      const isAvailable =
+        await backendService.checkServiceAvailability(serviceKey);
+
       if (isAvailable) {
         const success = await backendService.setActiveService(serviceKey);
         if (success) {
           setSelectedService(serviceKey);
           Alert.alert(
-            'Service Changed',
+            "Service Changed",
             `Backend service changed to ${BACKEND_SERVICES[serviceKey].name}. The app will reload to apply changes.`,
             [
               {
-                text: 'OK',
+                text: "OK",
                 onPress: () => {
                   // In a real app, you might want to reload the app here
                   navigation.goBack();
                 },
               },
-            ]
+            ],
           );
         } else {
-          Alert.alert('Error', 'Failed to change backend service');
+          Alert.alert("Error", "Failed to change backend service");
         }
       } else {
         Alert.alert(
-          'Service Unavailable',
+          "Service Unavailable",
           `${BACKEND_SERVICES[serviceKey].name} is currently unavailable. Would you like to try another service?`,
           [
             {
-              text: 'Try Another',
+              text: "Try Another",
               onPress: handleTryNextService,
             },
             {
-              text: 'Cancel',
-              style: 'cancel',
+              text: "Cancel",
+              style: "cancel",
             },
-          ]
+          ],
         );
       }
     } catch (error) {
-      console.error('Error selecting service:', error);
-      Alert.alert('Error', 'Failed to select backend service');
+      console.error("Error selecting service:", error);
+      Alert.alert("Error", "Failed to select backend service");
     } finally {
       setChecking(null);
     }
@@ -100,24 +105,27 @@ export const BackendServiceScreen = ({ navigation }: BackendServiceScreenProps) 
       if (result.success) {
         setSelectedService(await backendService.getSelectedService());
         Alert.alert(
-          'Service Changed',
+          "Service Changed",
           `Backend service changed to ${result.service.name}. The app will reload to apply changes.`,
           [
             {
-              text: 'OK',
+              text: "OK",
               onPress: () => {
                 // In a real app, you might want to reload the app here
                 navigation.goBack();
               },
             },
-          ]
+          ],
         );
       } else {
-        Alert.alert('Error', result.message || 'Failed to find available backend service');
+        Alert.alert(
+          "Error",
+          result.message || "Failed to find available backend service",
+        );
       }
     } catch (error) {
-      console.error('Error trying next service:', error);
-      Alert.alert('Error', 'Failed to switch backend service');
+      console.error("Error trying next service:", error);
+      Alert.alert("Error", "Failed to switch backend service");
     } finally {
       setLoading(false);
     }
@@ -143,7 +151,8 @@ export const BackendServiceScreen = ({ navigation }: BackendServiceScreenProps) 
       </View>
 
       <Text style={styles.description}>
-        Select a backend service to use for the app. If one service is unavailable, you can try another.
+        Select a backend service to use for the app. If one service is
+        unavailable, you can try another.
       </Text>
 
       <View style={styles.serviceList}>
@@ -177,9 +186,7 @@ export const BackendServiceScreen = ({ navigation }: BackendServiceScreenProps) 
         onPress={handleTryNextService}
         disabled={checking !== null || loading}
       >
-        <Text style={styles.buttonText}>
-          Try Next Available Service
-        </Text>
+        <Text style={styles.buttonText}>Try Next Available Service</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -192,8 +199,8 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: theme.colors.background,
   },
   loadingText: {
@@ -202,9 +209,9 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
@@ -215,7 +222,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
   },
   description: {
@@ -228,9 +235,9 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   serviceItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     padding: 16,
     borderWidth: 1,
     borderColor: theme.colors.border,
@@ -247,7 +254,7 @@ const styles = StyleSheet.create({
   },
   serviceName: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
     marginBottom: 4,
   },
@@ -258,19 +265,19 @@ const styles = StyleSheet.create({
   selectedText: {
     fontSize: 20,
     color: theme.colors.primary,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   button: {
     backgroundColor: theme.colors.primary,
     padding: 16,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
     margin: 16,
   },
   buttonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });
 

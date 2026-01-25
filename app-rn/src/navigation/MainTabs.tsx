@@ -1,19 +1,19 @@
-import React from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Text } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { theme } from '../config/theme';
-import { HomeScreen } from '../screens/HomeScreen';
-import { BuddiesScreen } from '../screens/BuddiesScreen';
-import { ChatsListScreen } from '../screens/ChatsListScreen';
-import { MyProfileScreen } from '../screens/MyProfileScreen';
-import { SettingsScreen } from '../screens/SettingsScreen';
+import React from "react";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { Text } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { theme } from "../config/theme";
+import { HomeScreen } from "../screens/HomeScreen";
+import { BuddiesScreen } from "../screens/BuddiesScreen";
+import { ChatsListScreen } from "../screens/ChatsListScreen";
+import { MyProfileScreen } from "../screens/MyProfileScreen";
+import { SettingsScreen } from "../screens/SettingsScreen";
 
 const Tab = createBottomTabNavigator();
 
 export const MainTabs = () => {
   const insets = useSafeAreaInsets();
-  
+
   return (
     <Tab.Navigator
       screenOptions={{
@@ -30,7 +30,7 @@ export const MainTabs = () => {
         tabBarInactiveTintColor: theme.colors.textSecondary,
         tabBarLabelStyle: {
           fontSize: 12,
-          fontWeight: '600',
+          fontWeight: "600",
         },
       }}
     >
@@ -41,7 +41,7 @@ export const MainTabs = () => {
           tabBarIcon: ({ color, size }) => (
             <Text style={{ fontSize: 24 }}>🏠</Text>
           ),
-          tabBarLabel: 'Home',
+          tabBarLabel: "Home",
         }}
       />
       <Tab.Screen
@@ -51,7 +51,7 @@ export const MainTabs = () => {
           tabBarIcon: ({ color, size }) => (
             <Text style={{ fontSize: 24 }}>⭐</Text>
           ),
-          tabBarLabel: 'Favorites',
+          tabBarLabel: "Favorites",
         }}
       />
       <Tab.Screen
@@ -61,7 +61,7 @@ export const MainTabs = () => {
           tabBarIcon: ({ color, size }) => (
             <Text style={{ fontSize: 24 }}>💬</Text>
           ),
-          tabBarLabel: 'Chats',
+          tabBarLabel: "Chats",
         }}
       />
       <Tab.Screen
@@ -71,7 +71,7 @@ export const MainTabs = () => {
           tabBarIcon: ({ color, size }) => (
             <Text style={{ fontSize: 24 }}>👤</Text>
           ),
-          tabBarLabel: 'Profile',
+          tabBarLabel: "Profile",
         }}
       />
       <Tab.Screen
@@ -81,7 +81,7 @@ export const MainTabs = () => {
           tabBarIcon: ({ color, size }) => (
             <Text style={{ fontSize: 24 }}>⚙️</Text>
           ),
-          tabBarLabel: 'Settings',
+          tabBarLabel: "Settings",
         }}
       />
     </Tab.Navigator>

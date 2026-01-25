@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,10 +8,10 @@ import {
   Alert,
   ActivityIndicator,
   Modal,
-} from 'react-native';
-import { theme } from '../config/theme';
-import LocationShareService from '../services/LocationShareService';
-import { LocationShare, SHARE_DURATIONS } from '../types/locationShare';
+} from "react-native";
+import { theme } from "../config/theme";
+import LocationShareService from "../services/LocationShareService";
+import { LocationShare, SHARE_DURATIONS } from "../types/locationShare";
 
 export const LocationShareScreen = ({ route, navigation }: any) => {
   const { userId, userName } = route.params;
@@ -28,7 +28,7 @@ export const LocationShareScreen = ({ route, navigation }: any) => {
       const shares = await LocationShareService.getMyShares();
       setMyShares(shares);
     } catch (error) {
-      console.error('Failed to load shares:', error);
+      console.error("Failed to load shares:", error);
     }
   };
 
@@ -43,15 +43,15 @@ export const LocationShareScreen = ({ route, navigation }: any) => {
       });
 
       Alert.alert(
-        'Location Sharing Started',
-        `You're now sharing your location with ${userName} for ${getDurationLabel(durationMinutes)}.`
+        "Location Sharing Started",
+        `You're now sharing your location with ${userName} for ${getDurationLabel(durationMinutes)}.`,
       );
 
       await loadMyShares();
     } catch (error: any) {
       Alert.alert(
-        'Failed to Share Location',
-        error.response?.data?.message || error.message || 'Please try again.'
+        "Failed to Share Location",
+        error.response?.data?.message || error.message || "Please try again.",
       );
     } finally {
       setLoading(false);
@@ -60,24 +60,24 @@ export const LocationShareScreen = ({ route, navigation }: any) => {
 
   const handleStopSharing = async (shareId: string) => {
     Alert.alert(
-      'Stop Sharing Location?',
-      'The other user will no longer see your location.',
+      "Stop Sharing Location?",
+      "The other user will no longer see your location.",
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: "Cancel", style: "cancel" },
         {
-          text: 'Stop Sharing',
-          style: 'destructive',
+          text: "Stop Sharing",
+          style: "destructive",
           onPress: async () => {
             try {
               await LocationShareService.stopSharing(shareId);
-              Alert.alert('Location Sharing Stopped');
+              Alert.alert("Location Sharing Stopped");
               await loadMyShares();
             } catch (error: any) {
-              Alert.alert('Error', 'Failed to stop sharing location');
+              Alert.alert("Error", "Failed to stop sharing location");
             }
           },
         },
-      ]
+      ],
     );
   };
 
@@ -91,7 +91,9 @@ export const LocationShareScreen = ({ route, navigation }: any) => {
     const expires = new Date(expiresAt);
     const diff = expires.getTime() - now.getTime();
 
-    if (diff <= 0) return 'Expired';
+    if (diff <= 0) {
+      return "Expired";
+    }
 
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
@@ -108,7 +110,7 @@ export const LocationShareScreen = ({ route, navigation }: any) => {
         <Text style={styles.shareTitle}>Sharing with {userName}</Text>
         <Text style={styles.shareTime}>{getTimeRemaining(item.expiresAt)}</Text>
         <Text style={styles.shareStatus}>
-          {item.isActive ? '🟢 Active' : '🔴 Inactive'}
+          {item.isActive ? "🟢 Active" : "🔴 Inactive"}
         </Text>
       </View>
       <TouchableOpacity
@@ -121,7 +123,7 @@ export const LocationShareScreen = ({ route, navigation }: any) => {
   );
 
   const activeShare = myShares.find(
-    (share) => share.sharedWithUserId === userId && share.isActive
+    (share) => share.sharedWithUserId === userId && share.isActive,
   );
 
   return (
@@ -141,8 +143,8 @@ export const LocationShareScreen = ({ route, navigation }: any) => {
           <Text style={styles.infoIcon}>📍</Text>
           <Text style={styles.infoTitle}>Share Your Live Location</Text>
           <Text style={styles.infoText}>
-            {userName} will see your real-time location for the duration you choose.
-            You can stop sharing at any time.
+            {userName} will see your real-time location for the duration you
+            choose. You can stop sharing at any time.
           </Text>
         </View>
 
@@ -166,7 +168,9 @@ export const LocationShareScreen = ({ route, navigation }: any) => {
             ) : (
               <>
                 <Text style={styles.startButtonIcon}>📍</Text>
-                <Text style={styles.startButtonText}>Start Sharing Location</Text>
+                <Text style={styles.startButtonText}>
+                  Start Sharing Location
+                </Text>
               </>
             )}
           </TouchableOpacity>
@@ -176,10 +180,9 @@ export const LocationShareScreen = ({ route, navigation }: any) => {
         <View style={styles.safetyCard}>
           <Text style={styles.safetyTitle}>🔒 Privacy & Safety</Text>
           <Text style={styles.safetyText}>
-            • Your location is only shared with {userName}{'\n'}
-            • Sharing automatically stops after the time limit{'\n'}
-            • You can stop sharing anytime{'\n'}
-            • Location data is encrypted
+            • Your location is only shared with {userName}
+            {"\n"}• Sharing automatically stops after the time limit{"\n"}• You
+            can stop sharing anytime{"\n"}• Location data is encrypted
           </Text>
         </View>
       </View>
@@ -231,9 +234,9 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: theme.spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
@@ -244,7 +247,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: theme.fontSize.lg,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
   },
   content: {
@@ -255,7 +258,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
     borderRadius: theme.borderRadius.md,
     padding: theme.spacing.lg,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: theme.spacing.lg,
   },
   infoIcon: {
@@ -264,23 +267,23 @@ const styles = StyleSheet.create({
   },
   infoTitle: {
     fontSize: theme.fontSize.lg,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
     marginBottom: theme.spacing.sm,
   },
   infoText: {
     fontSize: theme.fontSize.sm,
     color: theme.colors.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 20,
   },
   startButton: {
     backgroundColor: theme.colors.primary,
     borderRadius: theme.borderRadius.md,
     padding: theme.spacing.lg,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: theme.spacing.lg,
   },
   startButtonIcon: {
@@ -288,16 +291,16 @@ const styles = StyleSheet.create({
     marginRight: theme.spacing.sm,
   },
   startButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: theme.fontSize.md,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   activeShareSection: {
     marginBottom: theme.spacing.lg,
   },
   sectionTitle: {
     fontSize: theme.fontSize.md,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
     marginBottom: theme.spacing.sm,
   },
@@ -305,16 +308,16 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
     borderRadius: theme.borderRadius.md,
     padding: theme.spacing.md,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   shareInfo: {
     flex: 1,
   },
   shareTitle: {
     fontSize: theme.fontSize.md,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
     marginBottom: 4,
   },
@@ -334,9 +337,9 @@ const styles = StyleSheet.create({
     paddingVertical: theme.spacing.sm,
   },
   stopButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: theme.fontSize.sm,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   safetyCard: {
     backgroundColor: theme.colors.surface,
@@ -347,7 +350,7 @@ const styles = StyleSheet.create({
   },
   safetyTitle: {
     fontSize: theme.fontSize.md,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
     marginBottom: theme.spacing.sm,
   },
@@ -358,19 +361,19 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
   },
   modalContent: {
     backgroundColor: theme.colors.surface,
     borderTopLeftRadius: theme.borderRadius.lg,
     borderTopRightRadius: theme.borderRadius.lg,
     padding: theme.spacing.lg,
-    maxHeight: '70%',
+    maxHeight: "70%",
   },
   modalTitle: {
     fontSize: theme.fontSize.xl,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
     marginBottom: theme.spacing.xs,
   },
@@ -380,9 +383,9 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.lg,
   },
   durationOption: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: theme.spacing.md,
     backgroundColor: theme.colors.background,
     borderRadius: theme.borderRadius.md,
@@ -398,7 +401,7 @@ const styles = StyleSheet.create({
   },
   modalCancelButton: {
     padding: theme.spacing.md,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: theme.spacing.md,
   },
   modalCancelText: {

@@ -14,47 +14,52 @@ export interface BackendServiceConfig {
 // Automatic failover system with multiple redundant servers
 export const BACKEND_SERVICES: Record<string, BackendServiceConfig> = {
   FLY_IO: {
-    name: 'Fly.io Primary',
-    apiUrl: 'https://smasher-api.fly.dev',
-    wsUrl: 'wss://smasher-api.fly.dev',
+    name: "Fly.io Primary",
+    apiUrl: "https://smasher-api.fly.dev",
+    wsUrl: "wss://smasher-api.fly.dev",
     priority: 1,
-    healthCheck: '/health',
+    healthCheck: "/health",
     isActive: true,
   },
   FLY_IO_SECONDARY: {
-    name: 'Fly.io Secondary Region',
-    apiUrl: 'https://smasher-api-backup.fly.dev',
-    wsUrl: 'wss://smasher-api-backup.fly.dev',
+    name: "Fly.io Secondary Region",
+    apiUrl: "https://smasher-api-backup.fly.dev",
+    wsUrl: "wss://smasher-api-backup.fly.dev",
     priority: 2,
-    healthCheck: '/health',
+    healthCheck: "/health",
     isActive: false,
   },
   RENDER: {
-    name: 'Render Backup',
-    apiUrl: 'https://smasher.onrender.com',
-    wsUrl: 'wss://smasher.onrender.com',
+    name: "Render Backup",
+    apiUrl: "https://smasher.onrender.com",
+    wsUrl: "wss://smasher.onrender.com",
     priority: 3,
-    healthCheck: '/health',
+    healthCheck: "/health",
     isActive: false,
   },
 };
 
-export const BACKEND_SERVICES_LIST: BackendServiceConfig[] = Object.values(BACKEND_SERVICES);
+export const BACKEND_SERVICES_LIST: BackendServiceConfig[] =
+  Object.values(BACKEND_SERVICES);
 
 // Health check timeout
 const HEALTH_CHECK_TIMEOUT = 5000; // 5 seconds
 
 // Check if a service is healthy
-export const checkServiceHealth = async (service: BackendServiceConfig): Promise<boolean> => {
+export const checkServiceHealth = async (
+  service: BackendServiceConfig,
+): Promise<boolean> => {
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), HEALTH_CHECK_TIMEOUT);
-    
+    const timeoutId = setTimeout(
+      () => controller.abort(),
+      HEALTH_CHECK_TIMEOUT,
+
     const response = await fetch(`${service.apiUrl}${service.healthCheck}`, {
       signal: controller.signal,
-      method: 'GET',
+      method: "GET",
     });
-    
+
     clearTimeout(timeoutId);
     return response.ok;
   } catch (error) {
@@ -66,8 +71,9 @@ export const checkServiceHealth = async (service: BackendServiceConfig): Promise
 // Get the first healthy backend service
 export const getHealthyService = async () => {
   // Sort by priority
-  const sortedServices = [...BACKEND_SERVICES_LIST].sort((a, b) => a.priority - b.priority);
-  
+  const sortedServices = [...BACKEND_SERVICES_LIST].sort(
+    (a, b) => a.priority - b.priority,
+
   // Try each service in order
   for (const service of sortedServices) {
     const isHealthy = await checkServiceHealth(service);
@@ -76,9 +82,9 @@ export const getHealthyService = async () => {
       return service;
     }
   }
-  
+
   // If all health checks fail, return the primary service anyway
-  console.warn('All health checks failed, using primary service');
+  console.warn("All health checks failed, using primary service");
   return sortedServices[0];
 };
 

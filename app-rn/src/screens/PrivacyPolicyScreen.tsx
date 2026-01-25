@@ -1,12 +1,12 @@
-import React from 'react';
+import React from "react";
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-} from 'react-native';
-import { theme } from '../config/theme';
+} from "react-native";
+import { theme } from "../config/theme";
 
 export const PrivacyPolicyScreen = ({ navigation }: any) => {
   return (
@@ -64,11 +64,12 @@ export const PrivacyPolicyScreen = ({ navigation }: any) => {
 
         <Text style={styles.sectionTitle}>3. Information Sharing</Text>
         <Text style={styles.paragraph}>
-          We do not sell your personal information. We may share your information:
+          We do not sell your personal information. We may share your
+          information:
         </Text>
         <Text style={styles.bulletPoint}>
-          • With other users as part of the App's functionality (profile viewing,
-          matching)
+          • With other users as part of the App's functionality (profile
+          viewing, matching)
         </Text>
         <Text style={styles.bulletPoint}>
           • With service providers who assist in operating the App
@@ -82,23 +83,22 @@ export const PrivacyPolicyScreen = ({ navigation }: any) => {
 
         <Text style={styles.sectionTitle}>4. Location Information</Text>
         <Text style={styles.paragraph}>
-          We collect and use your location data to show you nearby users and enable
-          location-based features. You can control location permissions through your
-          device settings. Disabling location services may limit certain features.
+          We collect and use your location data to show you nearby users and
+          enable location-based features. You can control location permissions
+          through your device settings. Disabling location services may limit
+          certain features.
         </Text>
 
         <Text style={styles.sectionTitle}>5. Data Retention</Text>
         <Text style={styles.paragraph}>
           We retain your information for as long as your account is active or as
-          needed to provide services. If you delete your account, we will delete your
-          personal information within 30 days, except where we are required to retain
-          it for legal purposes.
+          needed to provide services. If you delete your account, we will delete
+          your personal information within 30 days, except where we are required
+          to retain it for legal purposes.
         </Text>
 
         <Text style={styles.sectionTitle}>6. Your Rights</Text>
-        <Text style={styles.paragraph}>
-          You have the right to:
-        </Text>
+        <Text style={styles.paragraph}>You have the right to:</Text>
         <Text style={styles.bulletPoint}>
           • Access and update your personal information
         </Text>
@@ -111,36 +111,35 @@ export const PrivacyPolicyScreen = ({ navigation }: any) => {
         <Text style={styles.bulletPoint}>
           • Opt out of certain data collection
         </Text>
-        <Text style={styles.bulletPoint}>
-          • Request a copy of your data
-        </Text>
+        <Text style={styles.bulletPoint}>• Request a copy of your data</Text>
 
         <Text style={styles.sectionTitle}>7. Security</Text>
         <Text style={styles.paragraph}>
           We implement reasonable security measures to protect your information.
-          However, no method of transmission over the internet is 100% secure. We
-          cannot guarantee absolute security of your data.
+          However, no method of transmission over the internet is 100% secure.
+          We cannot guarantee absolute security of your data.
         </Text>
 
         <Text style={styles.sectionTitle}>8. Children's Privacy</Text>
         <Text style={styles.paragraph}>
-          Our App is not intended for users under 18 years of age. We do not knowingly
-          collect information from children under 18. If we become aware that a child
-          under 18 has provided us with personal information, we will delete it.
+          Our App is not intended for users under 18 years of age. We do not
+          knowingly collect information from children under 18. If we become
+          aware that a child under 18 has provided us with personal information,
+          we will delete it.
         </Text>
 
         <Text style={styles.sectionTitle}>9. Cookies and Tracking</Text>
         <Text style={styles.paragraph}>
           We use cookies and similar tracking technologies to collect usage
-          information and improve our services. You can control cookies through your
-          device settings.
+          information and improve our services. You can control cookies through
+          your device settings.
         </Text>
 
         <Text style={styles.sectionTitle}>10. Changes to Privacy Policy</Text>
         <Text style={styles.paragraph}>
-          We may update this Privacy Policy from time to time. We will notify you of
-          any material changes by posting the new policy and updating the "Last
-          Updated" date.
+          We may update this Privacy Policy from time to time. We will notify
+          you of any material changes by posting the new policy and updating the
+          "Last Updated" date.
         </Text>
 
         <Text style={styles.sectionTitle}>11. Contact Us</Text>
@@ -161,9 +160,9 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: theme.spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
@@ -174,7 +173,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: theme.fontSize.lg,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
   },
   content: {
@@ -185,11 +184,11 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.xs,
     color: theme.colors.textSecondary,
     marginBottom: theme.spacing.xl,
-    fontStyle: 'italic',
+    fontStyle: "italic",
   },
   sectionTitle: {
     fontSize: theme.fontSize.md,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
     marginTop: theme.spacing.lg,
     marginBottom: theme.spacing.sm,

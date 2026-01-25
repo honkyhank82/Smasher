@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   View,
   Text,
@@ -8,13 +8,13 @@ import {
   Switch,
   Alert,
   ActivityIndicator,
-} from 'react-native';
-import * as Updates from 'expo-updates';
-import * as Application from 'expo-application';
-import { theme } from '../config/theme';
-import { useAuth } from '../context/AuthContext';
-import { usePremium } from '../contexts/PremiumContext';
-import api from '../services/api';
+} from "react-native";
+import * as Updates from "expo-updates";
+import * as Application from "expo-application";
+import { theme } from "../config/theme";
+import { useAuth } from "../context/AuthContext";
+import { usePremium } from "../contexts/PremiumContext";
+import api from "../services/api";
 
 export const SettingsScreen = ({ navigation }: any) => {
   const { logout, user } = useAuth();
@@ -24,7 +24,9 @@ export const SettingsScreen = ({ navigation }: any) => {
   const [loading, setLoading] = React.useState(false);
 
   const appVersion =
-    Application.nativeApplicationVersion || Application.applicationVersion || 'Unknown';
+    Application.nativeApplicationVersion ||
+    Application.applicationVersion ||
+    "Unknown";
 
   // Helper to navigate to parent stack screens
   const navigateToScreen = (screenName: string) => {
@@ -33,123 +35,136 @@ export const SettingsScreen = ({ navigation }: any) => {
   };
 
   const handleLogout = () => {
-    Alert.alert('Logout', 'Are you sure you want to logout?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Logout', onPress: logout, style: 'destructive' },
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Logout", onPress: logout, style: "destructive" },
     ]);
   };
 
   const handleDeactivateAccount = () => {
     Alert.alert(
-      'Deactivate Account',
-      'Your profile will be hidden and you won\'t receive any notifications. You can reactivate anytime by logging in.\n\nAre you sure you want to deactivate your account?',
+      "Deactivate Account",
+      "Your profile will be hidden and you won't receive any notifications. You can reactivate anytime by logging in.\n\nAre you sure you want to deactivate your account?",
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: "Cancel", style: "cancel" },
         {
-          text: 'Deactivate',
-          style: 'destructive',
+          text: "Deactivate",
+          style: "destructive",
           onPress: async () => {
             setLoading(true);
             try {
-              const response = await api.post('/users/deactivate');
-              Alert.alert('Account Deactivated', response.data.message, [
-                { text: 'OK', onPress: logout },
+              const response = await api.post("/users/deactivate");
+              Alert.alert("Account Deactivated", response.data.message, [
+                { text: "OK", onPress: logout },
               ]);
             } catch (error: any) {
-              console.error('Deactivate error:', error);
-              Alert.alert('Error', error.response?.data?.message || 'Failed to deactivate account');
+              console.error("Deactivate error:", error);
+              Alert.alert(
+                "Error",
+                error.response?.data?.message || "Failed to deactivate account",
+              );
             } finally {
               setLoading(false);
             }
           },
         },
-      ]
+      ],
     );
   };
 
   const handleDeleteAccount = () => {
     Alert.alert(
-      'Delete Account',
-      'This will permanently delete your account and all your data after 30 days. You can cancel the deletion within this period.\n\nAre you absolutely sure?',
+      "Delete Account",
+      "This will permanently delete your account and all your data after 30 days. You can cancel the deletion within this period.\n\nAre you absolutely sure?",
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: "Cancel", style: "cancel" },
         {
-          text: 'Delete',
-          style: 'destructive',
+          text: "Delete",
+          style: "destructive",
           onPress: () => {
             // Second confirmation
             Alert.alert(
-              'Final Confirmation',
-              'This action cannot be undone after 30 days. All your messages, matches, and profile data will be permanently deleted.\n\nType DELETE to confirm:',
+              "Final Confirmation",
+              "This action cannot be undone after 30 days. All your messages, matches, and profile data will be permanently deleted.\n\nType DELETE to confirm:",
               [
-                { text: 'Cancel', style: 'cancel' },
+                { text: "Cancel", style: "cancel" },
                 {
-                  text: 'I Understand, Delete My Account',
-                  style: 'destructive',
+                  text: "I Understand, Delete My Account",
+                  style: "destructive",
                   onPress: async () => {
                     setLoading(true);
                     try {
-                      const response = await api.post('/users/delete');
+                      const response = await api.post("/users/delete");
                       Alert.alert(
-                        'Deletion Scheduled',
+                        "Deletion Scheduled",
                         `${response.data.message}\n\nDeletion Date: ${new Date(response.data.deletionDate).toLocaleDateString()}`,
-                        [{ text: 'OK', onPress: logout }]
+                        [{ text: "OK", onPress: logout }],
                       );
                     } catch (error: any) {
-                      console.error('Delete error:', error);
-                      Alert.alert('Error', error.response?.data?.message || 'Failed to delete account');
+                      console.error("Delete error:", error);
+                      Alert.alert(
+                        "Error",
+                        error.response?.data?.message ||
+                          "Failed to delete account",
+                      );
                     } finally {
                       setLoading(false);
                     }
                   },
                 },
-              ]
+              ],
             );
           },
         },
-      ]
+      ],
     );
   };
 
   const handleCheckForUpdates = async () => {
     if (__DEV__) {
-      Alert.alert('Development Mode', 'Updates are disabled in development mode');
+      Alert.alert(
+        "Development Mode",
+        "Updates are disabled in development mode",
+      );
       return;
     }
 
     setLoading(true);
     try {
-      console.log('🔍 Manually checking for updates...');
+      console.log("🔍 Manually checking for updates...");
       const update = await Updates.checkForUpdateAsync();
-      
+
       if (update.isAvailable) {
         Alert.alert(
-          'Update Available',
-          'A new version is available. Download and install now?',
+          "Update Available",
+          "A new version is available. Download and install now?",
           [
-            { text: 'Later', style: 'cancel' },
+            { text: "Later", style: "cancel" },
             {
-              text: 'Update Now',
+              text: "Update Now",
               onPress: async () => {
                 try {
-                  console.log('📥 Downloading update...');
+                  console.log("📥 Downloading update...");
                   await Updates.fetchUpdateAsync();
-                  console.log('✅ Update downloaded, reloading...');
+                  console.log("✅ Update downloaded, reloading...");
                   await Updates.reloadAsync();
                 } catch (error) {
-                  console.error('Update error:', error);
-                  Alert.alert('Update Failed', 'Failed to download update. Please try again.');
+                  console.error("Update error:", error);
+                  Alert.alert(
+                    "Update Failed",
+                    "Failed to download update. Please try again.",
+                  );
                 }
               },
             },
-          ]
+          ],
         );
       } else {
-        Alert.alert('Up to Date', 'You are running the latest version!');
+        Alert.alert("Up to Date", "You are running the latest version!");
       }
     } catch (error: any) {
-      console.error('Check for updates error:', error);
-      Alert.alert('Error', `Failed to check for updates: ${error.message}`);
+      console.error("Check for updates error:", error);
+      Alert.alert("Error", `Failed to check for updates: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -167,66 +182,88 @@ export const SettingsScreen = ({ navigation }: any) => {
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Preferences</Text>
-        
+
         <View style={styles.settingRow}>
           <View style={styles.settingInfo}>
             <Text style={styles.settingLabel}>Notifications</Text>
-            <Text style={styles.settingDescription}>Receive match and message notifications</Text>
+            <Text style={styles.settingDescription}>
+              Receive match and message notifications
+            </Text>
           </View>
           <Switch
             value={notificationsEnabled}
             onValueChange={setNotificationsEnabled}
-            trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+            trackColor={{
+              false: theme.colors.border,
+              true: theme.colors.primary,
+            }}
           />
         </View>
 
         <View style={styles.settingRow}>
           <View style={styles.settingInfo}>
             <Text style={styles.settingLabel}>Location Services</Text>
-            <Text style={styles.settingDescription}>Allow app to access your location</Text>
+            <Text style={styles.settingDescription}>
+              Allow app to access your location
+            </Text>
           </View>
           <Switch
             value={locationEnabled}
             onValueChange={setLocationEnabled}
-            trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+            trackColor={{
+              false: theme.colors.border,
+              true: theme.colors.primary,
+            }}
           />
         </View>
       </View>
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Premium</Text>
-        
+
         {isPremium ? (
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.menuItem, styles.premiumMenuItem]}
-            onPress={() => navigateToScreen('ManageSubscription')}
+            onPress={() => navigateToScreen("ManageSubscription")}
           >
             <View>
-              <Text style={[styles.menuItemText, styles.premiumText]}>✨ Premium Active</Text>
+              <Text style={[styles.menuItemText, styles.premiumText]}>
+                ✨ Premium Active
+              </Text>
               {subscriptionStatus?.isFreeTrial ? (
                 <Text style={styles.premiumSubtext}>
-                  You're on a free 1 month SMASHER Premium trial for early users. After your trial ends, your
-                  account will automatically revert to the free version unless you upgrade.
+                  You're on a free 1 month SMASHER Premium trial for early
+                  users. After your trial ends, your account will automatically
+                  revert to the free version unless you upgrade.
                 </Text>
               ) : subscriptionStatus?.subscription ? (
                 <Text style={styles.premiumSubtext}>
                   {subscriptionStatus.subscription.cancelAtPeriodEnd
-                    ? 'Expires: ' + new Date(subscriptionStatus.subscription.currentPeriodEnd).toLocaleDateString()
-                    : 'Renews: ' + new Date(subscriptionStatus.subscription.currentPeriodEnd).toLocaleDateString()
-                  }
+                    ? "Expires: " +
+                      new Date(
+                        subscriptionStatus.subscription.currentPeriodEnd,
+                      ).toLocaleDateString()
+                    : "Renews: " +
+                      new Date(
+                        subscriptionStatus.subscription.currentPeriodEnd,
+                      ).toLocaleDateString()}
                 </Text>
               ) : null}
             </View>
             <Text style={styles.menuItemArrow}>→</Text>
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.menuItem, styles.upgradeMenuItem]}
-            onPress={() => navigateToScreen('PremiumUpgrade')}
+            onPress={() => navigateToScreen("PremiumUpgrade")}
           >
             <View>
-              <Text style={[styles.menuItemText, styles.upgradeText]}>✨ Upgrade to Premium</Text>
-              <Text style={styles.upgradeSubtext}>Extended range, see all viewers & more - $9.99/month</Text>
+              <Text style={[styles.menuItemText, styles.upgradeText]}>
+                ✨ Upgrade to Premium
+              </Text>
+              <Text style={styles.upgradeSubtext}>
+                Extended range, see all viewers & more - $9.99/month
+              </Text>
             </View>
             <Text style={styles.menuItemArrow}>→</Text>
           </TouchableOpacity>
@@ -235,35 +272,35 @@ export const SettingsScreen = ({ navigation }: any) => {
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Account</Text>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={styles.menuItem}
-          onPress={() => navigateToScreen('ChangeEmail')}
+          onPress={() => navigateToScreen("ChangeEmail")}
         >
           <Text style={styles.menuItemText}>Change Email</Text>
           <Text style={styles.menuItemArrow}>→</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.menuItem}
-          onPress={() => navigateToScreen('PrivacySettings')}
+          onPress={() => navigateToScreen("PrivacySettings")}
         >
           <Text style={styles.menuItemText}>Privacy Settings</Text>
           <Text style={styles.menuItemArrow}>→</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.menuItem}
-          onPress={() => navigateToScreen('BlockedUsers')}
+          onPress={() => navigateToScreen("BlockedUsers")}
         >
           <Text style={styles.menuItemText}>Blocked Users</Text>
           <Text style={styles.menuItemArrow}>→</Text>
         </TouchableOpacity>
 
         {user?.isAdmin && (
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.menuItem}
-            onPress={() => navigateToScreen('Admin')}
+            onPress={() => navigateToScreen("Admin")}
           >
             <Text style={styles.menuItemText}>Admin Dashboard</Text>
             <Text style={styles.menuItemArrow}>→</Text>
@@ -273,8 +310,8 @@ export const SettingsScreen = ({ navigation }: any) => {
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>About</Text>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={styles.menuItem}
           onPress={handleCheckForUpdates}
           disabled={loading}
@@ -287,25 +324,25 @@ export const SettingsScreen = ({ navigation }: any) => {
           )}
         </TouchableOpacity>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.menuItem}
-          onPress={() => navigateToScreen('TermsOfService')}
+          onPress={() => navigateToScreen("TermsOfService")}
         >
           <Text style={styles.menuItemText}>Terms of Service</Text>
           <Text style={styles.menuItemArrow}>→</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.menuItem}
-          onPress={() => navigateToScreen('PrivacyPolicy')}
+          onPress={() => navigateToScreen("PrivacyPolicy")}
         >
           <Text style={styles.menuItemText}>Privacy Policy</Text>
           <Text style={styles.menuItemArrow}>→</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.menuItem}
-          onPress={() => navigateToScreen('HelpSupport')}
+          onPress={() => navigateToScreen("HelpSupport")}
         >
           <Text style={styles.menuItemText}>Help & Support</Text>
           <Text style={styles.menuItemArrow}>→</Text>
@@ -319,9 +356,9 @@ export const SettingsScreen = ({ navigation }: any) => {
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Danger Zone</Text>
-        
-        <TouchableOpacity 
-          style={styles.dangerButton} 
+
+        <TouchableOpacity
+          style={styles.dangerButton}
           onPress={handleDeactivateAccount}
           disabled={loading}
         >
@@ -337,8 +374,8 @@ export const SettingsScreen = ({ navigation }: any) => {
           )}
         </TouchableOpacity>
 
-        <TouchableOpacity 
-          style={[styles.dangerButton, styles.deleteButton]} 
+        <TouchableOpacity
+          style={[styles.dangerButton, styles.deleteButton]}
           onPress={handleDeleteAccount}
           disabled={loading}
         >
@@ -372,9 +409,9 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: theme.spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
@@ -385,7 +422,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: theme.fontSize.lg,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
   },
   section: {
@@ -394,16 +431,16 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: theme.fontSize.sm,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.textSecondary,
     marginBottom: theme.spacing.md,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
     letterSpacing: 1,
   },
   settingRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     backgroundColor: theme.colors.surface,
     padding: theme.spacing.md,
     borderRadius: theme.borderRadius.md,
@@ -418,7 +455,7 @@ const styles = StyleSheet.create({
   settingLabel: {
     fontSize: theme.fontSize.md,
     color: theme.colors.text,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: theme.spacing.xs,
   },
   settingDescription: {
@@ -426,9 +463,9 @@ const styles = StyleSheet.create({
     color: theme.colors.textSecondary,
   },
   menuItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     backgroundColor: theme.colors.surface,
     padding: theme.spacing.md,
     borderRadius: theme.borderRadius.md,
@@ -454,12 +491,12 @@ const styles = StyleSheet.create({
     padding: theme.spacing.md,
     marginBottom: theme.spacing.sm,
     borderWidth: 1,
-    borderColor: '#ff9800',
+    borderColor: "#ff9800",
   },
   dangerButtonText: {
     fontSize: theme.fontSize.md,
-    color: '#ff9800',
-    fontWeight: '600',
+    color: "#ff9800",
+    fontWeight: "600",
     marginBottom: theme.spacing.xs,
   },
   dangerButtonDescription: {
@@ -467,10 +504,10 @@ const styles = StyleSheet.create({
     color: theme.colors.textSecondary,
   },
   deleteButton: {
-    borderColor: '#ff4444',
+    borderColor: "#ff4444",
   },
   deleteButtonText: {
-    color: '#ff4444',
+    color: "#ff4444",
   },
   logoutButton: {
     backgroundColor: theme.colors.surface,
@@ -478,41 +515,41 @@ const styles = StyleSheet.create({
     padding: theme.spacing.md,
     margin: theme.spacing.md,
     marginTop: theme.spacing.xl,
-    alignItems: 'center',
+    alignItems: "center",
     borderWidth: 1,
-    borderColor: '#ff4444',
+    borderColor: "#ff4444",
   },
   logoutButtonText: {
-    color: '#ff4444',
+    color: "#ff4444",
     fontSize: theme.fontSize.md,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   premiumMenuItem: {
-    backgroundColor: '#1a1a1a',
-    borderColor: '#8B0000',
+    backgroundColor: "#1a1a1a",
+    borderColor: "#8B0000",
     borderWidth: 2,
   },
   premiumText: {
-    color: '#8B0000',
-    fontWeight: 'bold',
+    color: "#8B0000",
+    fontWeight: "bold",
   },
   premiumSubtext: {
     fontSize: theme.fontSize.xs,
-    color: '#999',
+    color: "#999",
     marginTop: 4,
   },
   upgradeMenuItem: {
-    backgroundColor: '#2a1a1a',
-    borderColor: '#8B0000',
+    backgroundColor: "#2a1a1a",
+    borderColor: "#8B0000",
     borderWidth: 2,
   },
   upgradeText: {
-    color: '#8B0000',
-    fontWeight: 'bold',
+    color: "#8B0000",
+    fontWeight: "bold",
   },
   upgradeSubtext: {
     fontSize: theme.fontSize.xs,
-    color: '#ccc',
+    color: "#ccc",
     marginTop: 4,
   },
 });

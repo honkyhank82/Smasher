@@ -1,4 +1,4 @@
-const { getDefaultConfig, mergeConfig } = require('expo/metro-config');
+const { getDefaultConfig, mergeConfig } = require("expo/metro-config");
 
 /**
  * Metro configuration for Expo

@@ -1,9 +1,8 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { BACKEND_SERVICES } from '../config/api';
-import { Alert } from 'react-native';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { BACKEND_SERVICES } from "../config/api";
 
 // Storage key for the selected backend service
-const SELECTED_SERVICE_KEY = 'selected_backend_service';
+const SELECTED_SERVICE_KEY = "selected_backend_service";
 
 /**
  * Service for managing backend service selection
@@ -15,23 +14,28 @@ export const backendService = {
   async getSelectedService(): Promise<string> {
     try {
       const serviceKey = await AsyncStorage.getItem(SELECTED_SERVICE_KEY);
-      if (serviceKey && BACKEND_SERVICES[serviceKey as keyof typeof BACKEND_SERVICES]) {
+      if (
+        serviceKey &&
+        BACKEND_SERVICES[serviceKey as keyof typeof BACKEND_SERVICES]
+      ) {
         return serviceKey;
       }
-      return 'FLY_IO'; // Default to Fly.io
+      return "FLY_IO"; // Default to Fly.io
     } catch (error) {
-      console.error('Error getting selected service:', error);
-      return 'FLY_IO';
+      console.error("Error getting selected service:", error);
+      return "FLY_IO";
     }
   },
 
   /**
    * Set the active backend service
    */
-  async setActiveService(serviceKey: keyof typeof BACKEND_SERVICES): Promise<boolean> {
+  async setActiveService(
+    serviceKey: keyof typeof BACKEND_SERVICES,
+  ): Promise<boolean> {
     try {
       // Reset all services to inactive
-      Object.keys(BACKEND_SERVICES).forEach(key => {
+      Object.keys(BACKEND_SERVICES).forEach((key) => {
         BACKEND_SERVICES[key as keyof typeof BACKEND_SERVICES].isActive = false;
       });
 
@@ -43,7 +47,7 @@ export const backendService = {
       }
       return false;
     } catch (error) {
-      console.error('Error setting active service:', error);
+      console.error("Error setting active service:", error);
       return false;
     }
   },
@@ -51,7 +55,10 @@ export const backendService = {
   /**
    * Get all available backend services
    */
-  getAvailableServices(): { key: keyof typeof BACKEND_SERVICES; isActive: boolean }[] {
+  getAvailableServices(): {
+    key: keyof typeof BACKEND_SERVICES;
+    isActive: boolean;
+  }[] {
     return Object.entries(BACKEND_SERVICES).map(([key, service]) => ({
       key: key as keyof typeof BACKEND_SERVICES,
       ...service,
@@ -61,18 +68,22 @@ export const backendService = {
   /**
    * Check if a backend service is available
    */
-  async checkServiceAvailability(serviceKey: keyof typeof BACKEND_SERVICES): Promise<boolean> {
+  async checkServiceAvailability(
+    serviceKey: keyof typeof BACKEND_SERVICES,
+  ): Promise<boolean> {
     try {
       const service = BACKEND_SERVICES[serviceKey];
-      if (!service) return false;
+      if (!service) {
+        return false;
+      }
 
       // Try to fetch the health endpoint
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
       const response = await fetch(`${service.apiUrl}/health`, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         signal: controller.signal,
       });
@@ -88,7 +99,11 @@ export const backendService = {
   /**
    * Switch to the next available backend service
    */
-  async switchToNextAvailableService(): Promise<{ success: boolean; service?: typeof BACKEND_SERVICES[keyof typeof BACKEND_SERVICES]; message?: string }> {
+  async switchToNextAvailableService(): Promise<{
+    success: boolean;
+    service?: (typeof BACKEND_SERVICES)[keyof typeof BACKEND_SERVICES];
+    message?: string;
+  }> {
     const currentService = await this.getSelectedService();
     const services = Object.keys(BACKEND_SERVICES);
 
@@ -99,22 +114,21 @@ export const backendService = {
       const nextIndex = (currentIndex + i) % services.length;
       const nextService = services[nextIndex] as keyof typeof BACKEND_SERVICES;
 
-      
       const isAvailable = await this.checkServiceAvailability(nextService);
       if (isAvailable) {
         await this.setActiveService(nextService);
         return {
           success: true,
-          service: BACKEND_SERVICES[nextService]
+          service: BACKEND_SERVICES[nextService],
         };
       }
     }
-    
+
     return {
       success: false,
-      message: 'No available backend services found'
+      message: "No available backend services found",
     };
-  }
+  },
 };
 
 export default backendService;

@@ -21,10 +21,10 @@ export interface LocationShareUpdate {
 }
 
 export const SHARE_DURATIONS = [
-  { label: '15 minutes', value: 15 },
-  { label: '30 minutes', value: 30 },
-  { label: '1 hour', value: 60 },
-  { label: '2 hours', value: 120 },
-  { label: '4 hours', value: 240 },
-  { label: 'Until I stop', value: 1440 }, // 24 hours max
+  { label: "15 minutes", value: 15 },
+  { label: "30 minutes", value: 30 },
+  { label: "1 hour", value: 60 },
+  { label: "2 hours", value: 120 },
+  { label: "4 hours", value: 240 },
+  { label: "Until I stop", value: 1440 }, // 24 hours max
 ];

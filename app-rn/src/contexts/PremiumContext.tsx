@@ -1,7 +1,16 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Alert } from 'react-native';
-import { subscriptionService, SubscriptionStatus } from '../services/subscriptionService';
-import { useAuth } from '../context/AuthContext';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import { Alert } from "react-native";
+import {
+  subscriptionService,
+  SubscriptionStatus,
+} from "../services/subscriptionService";
+import { useAuth } from "../context/AuthContext";
 
 interface PremiumContextType {
   isPremium: boolean;
@@ -15,10 +24,13 @@ interface PremiumContextType {
 
 const PremiumContext = createContext<PremiumContextType | undefined>(undefined);
 
-export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const PremiumProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const { user } = useAuth();
   const [isPremium, setIsPremium] = useState(false);
-  const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null);
+  const [subscriptionStatus, setSubscriptionStatus] =
+    useState<SubscriptionStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [navigationRef, setNavigationRef] = useState<any>(null);
 
@@ -34,7 +46,9 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
   }, [user]);
 
   const refreshSubscriptionStatus = async () => {
-    if (!user) return;
+    if (!user) {
+      return;
+    }
 
     try {
       setLoading(true);
@@ -43,7 +57,7 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
       const effectiveIsPremium = (user.isAdmin ?? false) || status.isPremium;
       setIsPremium(effectiveIsPremium);
     } catch (error) {
-      console.error('Error fetching subscription status:', error);
+      console.error("Error fetching subscription status:", error);
       setIsPremium(!!user?.isAdmin);
     } finally {
       setLoading(false);
@@ -52,26 +66,29 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   const openUpgradeScreen = () => {
     if (navigationRef) {
-      navigationRef.navigate('PremiumUpgrade');
+      navigationRef.navigate("PremiumUpgrade");
     }
   };
 
-  const checkPremiumFeature = (featureName: string, showPrompt: boolean = true): boolean => {
+  const checkPremiumFeature = (
+    featureName: string,
+    showPrompt: boolean = true,
+  ): boolean => {
     if (isPremium) {
       return true;
     }
 
     if (showPrompt) {
       Alert.alert(
-        '✨ Premium Feature',
+        "✨ Premium Feature",
         `"${featureName}" is a premium feature. Upgrade to Premium for unlimited access!`,
         [
           {
-            text: 'Maybe Later',
-            style: 'cancel',
+            text: "Maybe Later",
+            style: "cancel",
           },
           {
-            text: 'Upgrade Now',
+            text: "Upgrade Now",
             onPress: openUpgradeScreen,
           },
         ],
@@ -101,7 +118,7 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
 export const usePremium = (): PremiumContextType => {
   const context = useContext(PremiumContext);
   if (!context) {
-    throw new Error('usePremium must be used within a PremiumProvider');
+    throw new Error("usePremium must be used within a PremiumProvider");
   }
   return context;
 };

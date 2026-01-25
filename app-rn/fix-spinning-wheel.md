@@ -1,9 +1,11 @@
 # Fix: App Stuck on Spinning Wheel
 
 ## 🔄 Problem
+
 App installs but gets stuck on loading spinner/splash screen.
 
 ## 🔍 Common Causes
+
 1. Metro bundler not running or on wrong port
 2. Device can't connect to Metro (network issue)
 3. JavaScript bundle failed to load
@@ -16,6 +18,7 @@ App installs but gets stuck on loading spinner/splash screen.
 Metro is now running on http://localhost:8081
 
 **On your device:**
+
 1. Shake the device to open Dev Menu
 2. Tap "Settings"
 3. Tap "Debug server host & port"
@@ -34,15 +37,18 @@ Look for the IP on your local network (usually 192.168.x.x or 10.0.x.x)
 ### **Fix 3: Reload the App**
 
 **Method 1: Dev Menu**
+
 - Shake device
 - Tap "Reload"
 
 **Method 2: Terminal**
+
 ```powershell
 # Press 'r' in the Metro terminal to reload
 ```
 
 **Method 3: Reinstall**
+
 ```powershell
 # In the app-rn directory
 npx expo run:android
@@ -51,11 +57,13 @@ npx expo run:android
 ### **Fix 4: Check Metro Logs**
 
 Watch the Metro terminal for errors. You should see:
+
 ```
 Waiting on http://localhost:8081
 ```
 
 When device connects, you'll see:
+
 ```
  BUNDLE  ./index.js
 ```
@@ -81,23 +89,29 @@ adb reverse tcp:8081 tcp:8081
 ## 🎯 Step-by-Step Solution
 
 ### **Step 1: Get Your Computer's IP**
+
 ```powershell
 ipconfig
 ```
+
 Note the IPv4 address (e.g., 192.168.1.100)
 
 ### **Step 2: Configure Device**
+
 1. Shake device → Dev Menu
 2. Settings → Debug server host
 3. Enter: `192.168.1.100:8081` (use YOUR IP)
 4. Save
 
 ### **Step 3: Reload**
+
 1. Go back to Dev Menu
 2. Tap "Reload"
 
 ### **Step 4: Watch Metro**
+
 You should see in Metro terminal:
+
 ```
  BUNDLE  ./index.js
  BUNDLE  [android, dev] ./index.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ 100.0% (1136/1136)
@@ -121,13 +135,16 @@ adb shell input text "RR"  # Double-tap R to reload
 ## 🐛 Still Not Working?
 
 ### **Check Metro is Actually Running**
+
 ```powershell
 # Should show Metro on port 8081
 netstat -ano | findstr :8081
 ```
 
 ### **Check Device Can Reach Computer**
+
 On device, open browser and go to:
+
 ```
 http://YOUR_COMPUTER_IP:8081/status
 ```
@@ -135,6 +152,7 @@ http://YOUR_COMPUTER_IP:8081/status
 Should show: `packager-status:running`
 
 ### **Nuclear Option: Clean Everything**
+
 ```powershell
 # Kill all Metro instances
 Get-Process -Name "node" | Stop-Process -Force
@@ -154,11 +172,13 @@ npx expo run:android
 When working correctly:
 
 1. **Metro terminal shows:**
+
    ```
    Waiting on http://localhost:8081
    ```
 
 2. **Device connects:**
+
    ```
    BUNDLE  ./index.js
    ```

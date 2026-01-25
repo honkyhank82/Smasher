@@ -1,6 +1,10 @@
-import * as Location from 'expo-location';
-import api from './api';
-import { LocationShare, LocationShareRequest, LocationShareUpdate } from '../types/locationShare';
+import * as Location from "expo-location";
+import api from "./api";
+import {
+  LocationShare,
+  LocationShareRequest,
+  LocationShareUpdate,
+} from "../types/locationShare";
 
 class LocationShareService {
   private activeShares: Map<string, ReturnType<typeof setTimeout>> = new Map();
@@ -17,7 +21,7 @@ class LocationShareService {
       });
 
       // Create share on backend
-      const response = await api.post('/location-share/start', {
+      const response = await api.post("/location-share/start", {
         sharedWithUserId: request.sharedWithUserId,
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
@@ -34,7 +38,7 @@ class LocationShareService {
 
       return share;
     } catch (error) {
-      console.error('Failed to start location sharing:', error);
+      console.error("Failed to start location sharing:", error);
       throw error;
     }
   }
@@ -47,7 +51,7 @@ class LocationShareService {
       await api.post(`/location-share/${shareId}/stop`);
       this.cleanup(shareId);
     } catch (error) {
-      console.error('Failed to stop location sharing:', error);
+      console.error("Failed to stop location sharing:", error);
       throw error;
     }
   }
@@ -57,10 +61,10 @@ class LocationShareService {
    */
   async getActiveShares(): Promise<LocationShare[]> {
     try {
-      const response = await api.get('/location-share/active');
+      const response = await api.get("/location-share/active");
       return response.data;
     } catch (error) {
-      console.error('Failed to get active shares:', error);
+      console.error("Failed to get active shares:", error);
       throw error;
     }
   }
@@ -70,10 +74,10 @@ class LocationShareService {
    */
   async getMyShares(): Promise<LocationShare[]> {
     try {
-      const response = await api.get('/location-share/my-shares');
+      const response = await api.get("/location-share/my-shares");
       return response.data;
     } catch (error) {
-      console.error('Failed to get my shares:', error);
+      console.error("Failed to get my shares:", error);
       throw error;
     }
   }
@@ -86,7 +90,7 @@ class LocationShareService {
       const response = await api.get(`/location-share/${shareId}`);
       return response.data;
     } catch (error) {
-      console.error('Failed to get share:', error);
+      console.error("Failed to get share:", error);
       throw error;
     }
   }
@@ -98,8 +102,8 @@ class LocationShareService {
     try {
       // Request foreground permissions
       const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        throw new Error('Location permission not granted');
+      if (status !== "granted") {
+        throw new Error("Location permission not granted");
       }
 
       // Start watching location
@@ -115,10 +119,10 @@ class LocationShareService {
             latitude: location.coords.latitude,
             longitude: location.coords.longitude,
           });
-        }
+        },
       );
     } catch (error) {
-      console.error('Failed to start location tracking:', error);
+      console.error("Failed to start location tracking:", error);
       throw error;
     }
   }
@@ -126,14 +130,17 @@ class LocationShareService {
   /**
    * Update location on backend
    */
-  private async updateLocation(shareId: string, update: LocationShareUpdate): Promise<void> {
+  private async updateLocation(
+    shareId: string,
+    update: LocationShareUpdate,
+  ): Promise<void> {
     try {
       await api.put(`/location-share/${shareId}/location`, {
         latitude: update.latitude,
         longitude: update.longitude,
       });
     } catch (error) {
-      console.error('Failed to update location:', error);
+      console.error("Failed to update location:", error);
       // Don't throw - continue tracking
     }
   }
@@ -142,9 +149,12 @@ class LocationShareService {
    * Set timer to auto-expire share
    */
   private setExpiryTimer(shareId: string, durationMinutes: number): void {
-    const timer = setTimeout(async () => {
-      await this.stopSharing(shareId);
-    }, durationMinutes * 60 * 1000);
+    const timer = setTimeout(
+      async () => {
+        await this.stopSharing(shareId);
+      },
+      durationMinutes * 60 * 1000,
+    );
 
     this.activeShares.set(shareId, timer);
   }

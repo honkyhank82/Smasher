@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,10 +8,10 @@ import {
   Switch,
   Alert,
   ActivityIndicator,
-} from 'react-native';
-import { theme } from '../config/theme';
-import api from '../services/api';
-import { USE_MOCK_DATA, MOCK_PRIVACY_SETTINGS } from '../utils/mockData';
+} from "react-native";
+import { theme } from "../config/theme";
+import api from "../services/api";
+import { USE_MOCK_DATA, MOCK_PRIVACY_SETTINGS } from "../utils/mockData";
 
 export const PrivacySettingsScreen = ({ navigation }: any) => {
   const [loading, setLoading] = useState(true);
@@ -31,30 +31,30 @@ export const PrivacySettingsScreen = ({ navigation }: any) => {
 
   const loadPrivacySettings = async () => {
     try {
-      console.log('🔍 Loading privacy settings...');
-      
+      console.log("🔍 Loading privacy settings...");
+
       // Use mock data if enabled
       if (USE_MOCK_DATA) {
-        console.log('📦 Using mock data for privacy settings');
-        await new Promise(resolve => setTimeout(resolve, 500));
+        console.log("📦 Using mock data for privacy settings");
+        await new Promise((resolve) => setTimeout(resolve, 500));
         setSettings(MOCK_PRIVACY_SETTINGS);
-        console.log('✅ Mock privacy settings loaded:', MOCK_PRIVACY_SETTINGS);
+        console.log("✅ Mock privacy settings loaded:", MOCK_PRIVACY_SETTINGS);
         return;
       }
-      
-      const response = await api.get('/users/privacy-settings');
-      console.log('✅ Privacy settings loaded:', response.data);
+
+      const response = await api.get("/users/privacy-settings");
+      console.log("✅ Privacy settings loaded:", response.data);
       setSettings(response.data);
     } catch (error: any) {
-      console.error('❌ Failed to load privacy settings:', {
+      console.error("❌ Failed to load privacy settings:", {
         message: error.message,
         status: error.response?.status,
         data: error.response?.data,
       });
       Alert.alert(
-        'Error Loading Settings',
+        "Error Loading Settings",
         `Failed to load privacy settings: ${error.response?.data?.message || error.message}`,
-        [{ text: 'OK' }]
+        [{ text: "OK" }],
       );
     } finally {
       setLoading(false);
@@ -67,13 +67,13 @@ export const PrivacySettingsScreen = ({ navigation }: any) => {
 
     setSaving(true);
     try {
-      console.log('🔄 Updating privacy setting:', key, '=', value);
-      await api.patch('/users/privacy-settings', {
+      console.log("🔄 Updating privacy setting:", key, "=", value);
+      await api.patch("/users/privacy-settings", {
         [key]: value,
       });
-      console.log('✅ Privacy setting updated successfully');
+      console.log("✅ Privacy setting updated successfully");
     } catch (error: any) {
-      console.error('❌ Failed to update privacy setting:', {
+      console.error("❌ Failed to update privacy setting:", {
         key,
         value,
         message: error.message,
@@ -82,9 +82,9 @@ export const PrivacySettingsScreen = ({ navigation }: any) => {
       });
       setSettings(oldSettings);
       Alert.alert(
-        'Update Failed',
+        "Update Failed",
         `Failed to update setting: ${error.response?.data?.message || error.message}`,
-        [{ text: 'OK' }]
+        [{ text: "OK" }],
       );
     } finally {
       setSaving(false);
@@ -126,8 +126,13 @@ export const PrivacySettingsScreen = ({ navigation }: any) => {
             </View>
             <Switch
               value={settings.showOnlineStatus}
-              onValueChange={(value) => updateSetting('showOnlineStatus', value)}
-              trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+              onValueChange={(value) =>
+                updateSetting("showOnlineStatus", value)
+              }
+              trackColor={{
+                false: theme.colors.border,
+                true: theme.colors.primary,
+              }}
               disabled={saving}
             />
           </View>
@@ -141,8 +146,11 @@ export const PrivacySettingsScreen = ({ navigation }: any) => {
             </View>
             <Switch
               value={settings.showLastSeen}
-              onValueChange={(value) => updateSetting('showLastSeen', value)}
-              trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+              onValueChange={(value) => updateSetting("showLastSeen", value)}
+              trackColor={{
+                false: theme.colors.border,
+                true: theme.colors.primary,
+              }}
               disabled={saving}
             />
           </View>
@@ -156,8 +164,11 @@ export const PrivacySettingsScreen = ({ navigation }: any) => {
             </View>
             <Switch
               value={settings.showDistance}
-              onValueChange={(value) => updateSetting('showDistance', value)}
-              trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+              onValueChange={(value) => updateSetting("showDistance", value)}
+              trackColor={{
+                false: theme.colors.border,
+                true: theme.colors.primary,
+              }}
               disabled={saving}
             />
           </View>
@@ -175,8 +186,13 @@ export const PrivacySettingsScreen = ({ navigation }: any) => {
             </View>
             <Switch
               value={settings.allowProfileViewing}
-              onValueChange={(value) => updateSetting('allowProfileViewing', value)}
-              trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+              onValueChange={(value) =>
+                updateSetting("allowProfileViewing", value)
+              }
+              trackColor={{
+                false: theme.colors.border,
+                true: theme.colors.primary,
+              }}
               disabled={saving}
             />
           </View>
@@ -190,8 +206,13 @@ export const PrivacySettingsScreen = ({ navigation }: any) => {
             </View>
             <Switch
               value={settings.discoverableInSearch}
-              onValueChange={(value) => updateSetting('discoverableInSearch', value)}
-              trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+              onValueChange={(value) =>
+                updateSetting("discoverableInSearch", value)
+              }
+              trackColor={{
+                false: theme.colors.border,
+                true: theme.colors.primary,
+              }}
               disabled={saving}
             />
           </View>
@@ -209,8 +230,13 @@ export const PrivacySettingsScreen = ({ navigation }: any) => {
             </View>
             <Switch
               value={settings.showReadReceipts}
-              onValueChange={(value) => updateSetting('showReadReceipts', value)}
-              trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+              onValueChange={(value) =>
+                updateSetting("showReadReceipts", value)
+              }
+              trackColor={{
+                false: theme.colors.border,
+                true: theme.colors.primary,
+              }}
               disabled={saving}
             />
           </View>
@@ -228,13 +254,13 @@ const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
     backgroundColor: theme.colors.background,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: theme.spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
@@ -245,7 +271,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: theme.fontSize.lg,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
   },
   content: {
@@ -262,16 +288,16 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: theme.fontSize.sm,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.textSecondary,
     marginBottom: theme.spacing.md,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
     letterSpacing: 1,
   },
   settingRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     backgroundColor: theme.colors.surface,
     padding: theme.spacing.md,
     borderRadius: theme.borderRadius.md,
@@ -286,7 +312,7 @@ const styles = StyleSheet.create({
   settingLabel: {
     fontSize: theme.fontSize.md,
     color: theme.colors.text,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: theme.spacing.xs,
   },
   settingDescription: {

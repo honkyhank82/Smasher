@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -9,37 +9,42 @@ import {
   Image,
   Alert,
   ActivityIndicator,
-} from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import { theme } from '../config/theme';
-import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
+} from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import { theme } from "../config/theme";
+import { useAuth } from "../context/AuthContext";
+import api from "../services/api";
 
 interface CreateProfileScreenProps {
   navigation: any;
 }
 
-export const CreateProfileScreen = ({ navigation }: CreateProfileScreenProps) => {
+export const CreateProfileScreen = ({
+  navigation,
+}: CreateProfileScreenProps) => {
   const { refreshUser } = useAuth();
-  const [displayName, setDisplayName] = useState('');
-  const [bio, setBio] = useState('');
+  const [displayName, setDisplayName] = useState("");
+  const [bio, setBio] = useState("");
   const [showAge, setShowAge] = useState(true);
-  const [heightFeet, setHeightFeet] = useState('');
-  const [heightInches, setHeightInches] = useState('');
-  const [weightLbs, setWeightLbs] = useState('');
-  const [ethnicity, setEthnicity] = useState('');
-  const [bodyType, setBodyType] = useState('');
-  const [sexualPosition, setSexualPosition] = useState('');
-  const [relationshipStatus, setRelationshipStatus] = useState('');
-  const [lookingFor, setLookingFor] = useState('');
+  const [heightFeet, setHeightFeet] = useState("");
+  const [heightInches, setHeightInches] = useState("");
+  const [weightLbs, setWeightLbs] = useState("");
+  const [ethnicity, setEthnicity] = useState("");
+  const [bodyType, setBodyType] = useState("");
+  const [sexualPosition, setSexualPosition] = useState("");
+  const [relationshipStatus, setRelationshipStatus] = useState("");
+  const [lookingFor, setLookingFor] = useState("");
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handlePickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    
-    if (status !== 'granted') {
-      Alert.alert('Permission Required', 'Please grant photo library access to upload images.');
+
+    if (status !== "granted") {
+      Alert.alert(
+        "Permission Required",
+        "Please grant photo library access to upload images.",
+      );
       return;
     }
 
@@ -59,66 +64,72 @@ export const CreateProfileScreen = ({ navigation }: CreateProfileScreenProps) =>
 
   const uploadProfilePicture = async (imageUri: string): Promise<string> => {
     try {
-      console.log('📤 Step 1: Getting signed URL from server...');
+      console.log("📤 Step 1: Getting signed URL from server...");
       // Get signed upload URL from backend
-      const { data } = await api.post('/media/signed-upload', {
+      const { data } = await api.post("/media/signed-upload", {
         fileName: `profile_${Date.now()}.jpg`,
-        fileType: 'image/jpeg',
+        fileType: "image/jpeg",
       });
-      console.log('✅ Step 1 complete: Got signed URL');
+      console.log("✅ Step 1 complete: Got signed URL");
 
-      console.log('📤 Step 2: Reading image from device...');
+      console.log("📤 Step 2: Reading image from device...");
       // Upload to Cloudflare R2 using signed URL with timeout
       const imageResponse = await fetch(imageUri);
       if (!imageResponse.ok) {
-        throw new Error('Failed to read image from device');
+        throw new Error("Failed to read image from device");
       }
       const imageBlob = await imageResponse.blob();
-      console.log(`✅ Step 2 complete: Image size = ${imageBlob.size} bytes (${(imageBlob.size / 1024 / 1024).toFixed(2)} MB)`);
+      console.log(
+        `✅ Step 2 complete: Image size = ${imageBlob.size} bytes (${(imageBlob.size / 1024 / 1024).toFixed(2)} MB)`,
+      );
 
-      console.log('📤 Step 3: Uploading to Cloudflare R2...');
+      console.log("📤 Step 3: Uploading to Cloudflare R2...");
       const uploadResponse = await Promise.race([
         fetch(data.uploadUrl, {
-          method: 'PUT',
+          method: "PUT",
           body: imageBlob,
           headers: {
-            'Content-Type': 'image/jpeg',
+            "Content-Type": "image/jpeg",
           },
         }),
         new Promise<Response>((_, reject) =>
-          setTimeout(() => reject(new Error('Upload timeout')), 60000)
+          setTimeout(() => reject(new Error("Upload timeout")), 60000),
         ),
       ]);
 
       if (!uploadResponse.ok) {
-        console.error(`❌ Upload failed with status ${uploadResponse.status}: ${uploadResponse.statusText}`);
-        throw new Error(`Upload failed with status ${uploadResponse.status}: ${uploadResponse.statusText}`);
+        console.error(
+          `❌ Upload failed with status ${uploadResponse.status}: ${uploadResponse.statusText}`,
+        );
+        throw new Error(
+          `Upload failed with status ${uploadResponse.status}: ${uploadResponse.statusText}`,
+        );
       }
-      console.log('✅ Step 3 complete: Upload successful!');
+      console.log("✅ Step 3 complete: Upload successful!");
 
       return data.fileKey; // Return the file key for backend storage
     } catch (error: any) {
-      console.error('❌ Upload error:', error);
-      console.error('Error details:', {
+      console.error("❌ Upload error:", error);
+      console.error("Error details:", {
         message: error.message,
         status: error.response?.status,
         statusText: error.response?.statusText,
       });
-      
-      const errorMsg = error.message?.includes('413')
-        ? 'Image file is too large. Please try a different photo or reduce quality.'
-        : error.message?.includes('Network request failed')
-        ? 'Network connection failed. Please check your internet connection.'
-        : error.message?.includes('timeout')
-        ? 'Upload timed out. Please try again with a smaller image.'
-        : error.message || 'Failed to upload profile picture';
+
+      const errorMsg = error.message?.includes("413")
+        ? "Image file is too large. Please try a different photo or reduce quality."
+        : error.message?.includes("Network request failed")
+          ? "Network connection failed. Please check your internet connection."
+          : error.message?.includes("timeout")
+            ? "Upload timed out. Please try again with a smaller image."
+            : error.message || "Failed to upload profile picture";
       throw new Error(errorMsg);
     }
   };
 
   const handleCreateProfile = async () => {
     if (!displayName.trim()) {
-      Alert.alert('Error', 'Please enter a display name');
+      Alert.alert("Error", "Please enter a display name");
       return;
     }
 
@@ -133,7 +144,7 @@ export const CreateProfileScreen = ({ navigation }: CreateProfileScreenProps) =>
       const weightLbsNum = weightLbs ? parseInt(weightLbs, 10) : null;
 
       // Create profile first
-      await api.patch('/profiles/me', {
+      await api.patch("/profiles/me", {
         displayName: displayName.trim(),
         bio: bio.trim(),
         showAge,
@@ -150,16 +161,16 @@ export const CreateProfileScreen = ({ navigation }: CreateProfileScreenProps) =>
       if (profilePicture) {
         try {
           const pictureKey = await uploadProfilePicture(profilePicture);
-          await api.post('/media/set-profile-picture', {
+          await api.post("/media/set-profile-picture", {
             fileKey: pictureKey,
           });
         } catch (uploadError: any) {
-          console.error('Profile picture upload failed:', uploadError);
+          console.error("Profile picture upload failed:", uploadError);
           // Continue anyway - profile picture is optional
           Alert.alert(
-            'Profile Created',
-            'Your profile was created but the picture upload failed. You can add it later.',
-            [{ text: 'OK', onPress: async () => await refreshUser() }]
+            "Profile Created",
+            "Your profile was created but the picture upload failed. You can add it later.",
+            [{ text: "OK", onPress: async () => await refreshUser() }],
           );
           return;
         }
@@ -167,23 +178,23 @@ export const CreateProfileScreen = ({ navigation }: CreateProfileScreenProps) =>
 
       // Refresh user data to update hasProfile flag
       await refreshUser();
-      Alert.alert('Success', 'Profile created successfully!');
+      Alert.alert("Success", "Profile created successfully!");
     } catch (error: any) {
-      console.error('Profile creation failed:', error);
-      
+      console.error("Profile creation failed:", error);
+
       // Handle validation errors (array of messages)
-      let errorMessage = 'Failed to create profile';
+      let errorMessage = "Failed to create profile";
       if (error.response?.data?.message) {
         if (Array.isArray(error.response.data.message)) {
-          errorMessage = error.response.data.message.join('\n');
+          errorMessage = error.response.data.message.join("\n");
         } else {
           errorMessage = error.response.data.message;
         }
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
-      Alert.alert('Error', errorMessage);
+
+      Alert.alert("Error", errorMessage);
     } finally {
       setLoading(false);
     }
@@ -202,7 +213,9 @@ export const CreateProfileScreen = ({ navigation }: CreateProfileScreenProps) =>
         ) : (
           <View style={styles.imagePlaceholder}>
             <Text style={styles.imagePlaceholderText}>+</Text>
-            <Text style={styles.imagePlaceholderLabel}>Add Photo (Optional)</Text>
+            <Text style={styles.imagePlaceholderLabel}>
+              Add Photo (Optional)
+            </Text>
           </View>
         )}
       </TouchableOpacity>
@@ -239,7 +252,7 @@ export const CreateProfileScreen = ({ navigation }: CreateProfileScreenProps) =>
             style={styles.toggleButton}
             onPress={() => setShowAge(!showAge)}
           >
-            <Text style={styles.toggleText}>{showAge ? 'On' : 'Off'}</Text>
+            <Text style={styles.toggleText}>{showAge ? "On" : "Off"}</Text>
           </TouchableOpacity>
         </View>
 
@@ -358,12 +371,12 @@ const styles = StyleSheet.create({
     padding: theme.spacing.lg,
   },
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: theme.spacing.xl,
   },
   title: {
     fontSize: theme.fontSize.xl,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
     marginBottom: theme.spacing.xs,
   },
@@ -372,7 +385,7 @@ const styles = StyleSheet.create({
     color: theme.colors.textSecondary,
   },
   imageContainer: {
-    alignSelf: 'center',
+    alignSelf: "center",
     marginBottom: theme.spacing.xl,
   },
   profileImage: {
@@ -389,9 +402,9 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
     borderWidth: 2,
     borderColor: theme.colors.border,
-    borderStyle: 'dashed',
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderStyle: "dashed",
+    alignItems: "center",
+    justifyContent: "center",
   },
   imagePlaceholderText: {
     fontSize: 48,
@@ -409,7 +422,7 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.md,
     color: theme.colors.text,
     marginBottom: theme.spacing.sm,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   input: {
     backgroundColor: theme.colors.surface,
@@ -422,8 +435,8 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.md,
   },
   heightRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: theme.spacing.md,
   },
   heightInput: {
@@ -437,12 +450,12 @@ const styles = StyleSheet.create({
   },
   bioInput: {
     height: 100,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
   },
   charCount: {
     fontSize: theme.fontSize.xs,
     color: theme.colors.textSecondary,
-    textAlign: 'right',
+    textAlign: "right",
     marginTop: -theme.spacing.sm,
     marginBottom: theme.spacing.md,
   },
@@ -450,7 +463,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
     borderRadius: theme.borderRadius.md,
     padding: theme.spacing.md,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: theme.spacing.md,
   },
   buttonDisabled: {
@@ -459,12 +472,12 @@ const styles = StyleSheet.create({
   buttonText: {
     color: theme.colors.text,
     fontSize: theme.fontSize.md,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   disclaimer: {
     color: theme.colors.textSecondary,
     fontSize: theme.fontSize.xs,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 18,
   },
 });
